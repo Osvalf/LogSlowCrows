@@ -144,10 +144,13 @@ class Stats:
 
 class SABETHA(Boss):
     
+    current = None
+    
     def __init__(self, log):
         super().__init__(log)
         SABETHA.mvp = self.get_mvp()
         SABETHA.wing = 1
+        SABETHA.current = self
         all_bosses.append(self)
         
     def get_dmg_split_sab(self,i_player):
