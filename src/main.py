@@ -1,5 +1,11 @@
-from models.log_class import*       
+from models.log_class import*
+from const import*
 
-log = Log('https://dps.report/oiDx-20240101-233539_sab')
+if __name__ == "__main__":
+    
+    log = Log('https://dps.report/oiDx-20240101-233539_sab')
 
-print(f"\n{SABETHA.mvp}\n")
+    print(f"Message du mvp sur Sabetha:\n{SABETHA.mvp}\n")
+
+    print(f"Liste de tous les boss instanciés : {all_bosses}")
+
