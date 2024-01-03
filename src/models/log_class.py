@@ -256,7 +256,7 @@ class SABETHA(Boss):
             case _:
                 canon_pos = []
         for e in pos_player:
-            for canon in canon_pos:
+            for cannon in canon_pos:
                 if (e[0] - cannon[0])**2 + (e[1] - cannon[1])**2 <= detect_radius**2:
                     return True
         return False
@@ -372,7 +372,7 @@ class MO(Boss):
     wing = 4
     
     def __init__(self, log: Log):
-        super().__init__(log, n)
+        super().__init__(log)
         MO.mvp = self.get_mvp()
         MO.current = self
 
