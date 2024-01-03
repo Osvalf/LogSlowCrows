@@ -1,0 +1,30 @@
+BIG = 10**20
+all_bosses = []
+
+pos_sab = [376.7,364.4]
+pos_cannon1 = [346.9,706.7]
+pos_cannon2 = [35.9,336.8]
+pos_cannon3 = [403.3,36.0]
+pos_cannon4 = [713.9,403.1]
+
+boss_dict = {
+    15438 : "vg",
+    15429 : "gors",
+    15375 : "sab",
+    16123 : "sloth",
+    16115 : "matt",
+    16253 : "esc",
+    16235 : "kc",
+    16246 : "xera",
+    17194 : "cairn",
+    17172 : "mo",
+    17188 : "sam",
+    17154 : "dei",
+    19767 : "sh",
+    19450 : "dhuum",
+    43974 : "ca",
+    21105 : "twins",
+    20934 : "qadim",
+    22006 : "adina",
+    21964 : "sabir",
+    22000 : "qpeer"}
