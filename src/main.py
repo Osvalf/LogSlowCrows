@@ -3,7 +3,7 @@ from const import*
 
 if __name__ == "__main__":
     
-    log = Log('https://dps.report/oiDx-20240101-233539_sab')
+    log = Log('https://dps.report/viV3-20231229-233308_sab')
 
     print("\n",SABETHA.current.get_mvp(),"\n") # Afficher le msg MVP sur sabetha
     
