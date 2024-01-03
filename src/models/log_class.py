@@ -221,9 +221,22 @@ class GORS(Boss):
         GORS.wing = 1
         GORS.current = self
         all_bosses.append(self)
+        
+    def get_dmg_split(self, i_player: int):
+        jlog = self.log.jcontent
+        dmg = 0
+        dmg_split_1 = jlog['phases'][3]['dpsStatsTargets'][i_player]
+        dmg_split_2 = jlog['phases'][6]['dpsStatsTargets'][i_player]
+        for i in range(len(dmg_split_1)):
+            dmg += dmg_split_1[i][0] + dmg_split_2[i][0]
+        return dmg
     
     def get_mvp(self):
-        return f"MVP de {self.name}"
+        total_dmg_split = Stats.get_tot_value(self.log, self.get_dmg_split)
+        i, v = Stats.get_min_value(self.log, self.get_dmg_split, exclude=[self.is_support])
+        v = v / total_dmg_split * 100
+        msg = f" * *[**MVP** : {self.get_player_name(i)} avec seulement {v:.1f}% des degats sur split en pur dps]*"
+        return msg
 
 ################################ SABETHA ################################
 
@@ -238,7 +251,7 @@ class SABETHA(Boss):
         SABETHA.current = self
         all_bosses.append(self)
         
-    def get_dmg_split_sab(self,i_player: int):
+    def get_dmg_split(self,i_player: int):
         jlog = self.log.jcontent
         dmg = 0
         dmg_kernan = jlog['phases'][2]['dpsStatsTargets'][i_player][0][0]
@@ -270,10 +283,10 @@ class SABETHA(Boss):
         return False
     
     def get_mvp(self):
-        total_dmg_split = Stats.get_tot_value(self.log, self.get_dmg_split_sab)
-        i, v = Stats.get_min_value(self.log, self.get_dmg_split_sab, exclude=[self.is_support,self.is_cannon])
+        total_dmg_split = Stats.get_tot_value(self.log, self.get_dmg_split)
+        i, v = Stats.get_min_value(self.log, self.get_dmg_split, exclude=[self.is_support,self.is_cannon])
         v = v / total_dmg_split * 100
-        msg = f" * *[**MVP** : {self.get_player_name(i)} avec {v:.1f}% des degats sur split en pur dps]*"
+        msg = f" * *[**MVP** : {self.get_player_name(i)} avec seulement {v:.1f}% des degats sur split en pur dps]*"
         return msg
 
 ################################ SLOTH ################################
