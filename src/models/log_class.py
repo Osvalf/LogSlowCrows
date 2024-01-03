@@ -38,52 +38,63 @@ class BossFactory:
         boss_name = boss_dict[boss_id]
         match boss_name:
             case "vg":
-                vg = VG(log)
+                vg = VG(log, "VG")
             case "gors":
-                gors = GORS(log)
+                gors = GORS(log, "GORS")
             case "sab":
-                sab = SABETHA(log)
+                sab = SABETHA(log, "SABETHA")
             case "sloth":
-                sloth = SLOTH(log)
+                sloth = SLOTH(log, "SLOTH")
             case "matt":
-                matt = MATTHIAS(log)
+                matt = MATTHIAS(log, "MATTHIAS")
             case "esc":
-                esc = ESCORT(log)
+                esc = ESCORT(log, "ESCORT")
             case "kc":
-                kc = KC(log)
+                kc = KC(log, "KC")
             case "xera":
-                xera = XERA(log)
+                xera = XERA(log, "XERA")
             case "cairn":
-                cairn = CAIRN(log)
+                cairn = CAIRN(log, "CAIRN")
             case "mo":
-                mo = MO(log)
+                mo = MO(log, "MO")
             case "sam":
-                sam = SAMAROG(log)
+                sam = SAMAROG(log, "SAMAROG")
             case "dei":
-                dei = DEIMOS(log)
+                dei = DEIMOS(log, "DEIMOS")
             case "sh":
-                sh = SH(log)
+                sh = SH(log, "SH")
             case "dhumm":
-                dhuum = DHUUM(log)
+                dhuum = DHUUM(log, "DHUUM")
             case "ca":
-                ca = CA(log)
+                ca = CA(log, "CA")
             case "twins":
-                twins = LARGOS(log)
+                twins = LARGOS(log, "LARGOS")
             case "qadim":
-                qadim = Q1(log)
+                qadim = Q1(log, "QUOIDIMM")
             case "adina":
-                adina = ADINA(log)
+                adina = ADINA(log, "ADINA")
             case "sabir":
-                sabir = SABIR(log)
+                sabir = SABIR(log, "SABIR")
             case "qpeer":
-                qpeer = QTP(log)
+                qpeer = QTP(log, "QTP")
             case _:
                 raise ValueError("Unknown Boss") 
 
 class Boss:  
-    def __init__(self, log: Log):
+    def __init__(self, log: Log, name: str):
         self.log = log
+        self.cm = self.is_cm()
+        self.logName = self.get_logName()
+        self.name = name
         
+    ################################ Fonction pour attribus Boss ################################
+    
+    def is_cm(self):
+        return self.log.pjcontent['isCM']
+    
+    def get_logName(self):
+        return self.log.pjcontent['fightName']       
+            
     ################################ Fonctions vérification ################################
         
     def is_quick(self, i_player: int):
@@ -188,12 +199,15 @@ class VG(Boss):
     
     current = None
     
-    def __init__(self, log: Log):
-        super().__init__(log)
+    def __init__(self, log: Log, name: str):
+        super().__init__(log, name)
         VG.mvp = self.get_mvp()
         VG.wing = 1
         VG.current = self
         all_bosses.append(self)
+        
+    def get_mvp(self):
+        return f"MVP de {self.name}"
 
 ################################ GORS ################################
 
@@ -201,12 +215,15 @@ class GORS(Boss):
     
     current = None
     
-    def __init__(self, log: Log):
-        super().__init__(log)
+    def __init__(self, log: Log, name: str):
+        super().__init__(log, name)
         GORS.mvp = self.get_mvp()
         GORS.wing = 1
         GORS.current = self
         all_bosses.append(self)
+    
+    def get_mvp(self):
+        return f"MVP de {self.name}"
 
 ################################ SABETHA ################################
 
@@ -214,8 +231,8 @@ class SABETHA(Boss):
     
     current = None
     
-    def __init__(self, log: Log):
-        super().__init__(log)
+    def __init__(self, log: Log, name: str):
+        super().__init__(log, name)
         SABETHA.mvp = self.get_mvp()
         SABETHA.wing = 1
         SABETHA.current = self
@@ -250,7 +267,6 @@ class SABETHA(Boss):
             for e in pos_player:
                 if((e[0] - cannon[0])**2 + (e[1] - cannon[1])**2 <= detect_radius**2):
                     return True
-        
         return False
     
     def get_mvp(self):
@@ -266,12 +282,15 @@ class SLOTH(Boss):
     
     current = None
     
-    def __init__(self, log: Log):
-        super().__init__(log)
+    def __init__(self, log: Log, name: str):
+        super().__init__(log, name)
         SLOTH.mvp = self.get_mvp()
-        SLOTH.wing = 1
+        SLOTH.wing = 2
         SLOTH.current = self
         all_bosses.append(self)
+
+    def get_mvp(self):
+        return f"MVP de {self.name}"
 
 ################################ MATTHIAS ################################
 
@@ -279,12 +298,15 @@ class MATTHIAS(Boss):
     
     current = None
     
-    def __init__(self, log: Log):
-        super().__init__(log)
+    def __init__(self, log: Log, name: str):
+        super().__init__(log, name)
         MATTHIAS.mvp = self.get_mvp()
-        MATTHIAS.wing = 1
+        MATTHIAS.wing = 2
         MATTHIAS.current = self
         all_bosses.append(self)
+
+    def get_mvp(self):
+        return f"MVP de {self.name}"
 
 ################################ ESCORT ################################
 
@@ -292,12 +314,15 @@ class ESCORT(Boss):
     
     current = None
     
-    def __init__(self, log: Log):
-        super().__init__(log)
+    def __init__(self, log: Log, name: str):
+        super().__init__(log, name)
         ESCORT.mvp = self.get_mvp()
-        ESCORT.wing = 1
+        ESCORT.wing = 3
         ESCORT.current = self
         all_bosses.append(self)
+
+    def get_mvp(self):
+        return f"MVP de {self.name}"
 
 ################################ KC ################################
 
@@ -305,12 +330,15 @@ class KC(Boss):
     
     current = None
     
-    def __init__(self, log: Log):
-        super().__init__(log)
+    def __init__(self, log: Log, name: str):
+        super().__init__(log, name)
         KC.mvp = self.get_mvp()
-        KC.wing = 1
+        KC.wing = 3
         KC.current = self
         all_bosses.append(self)
+
+    def get_mvp(self):
+        return f"MVP de {self.name}"
 
 ################################ XERA ################################
 
@@ -318,12 +346,15 @@ class XERA(Boss):
     
     current = None
     
-    def __init__(self, log: Log):
-        super().__init__(log)
+    def __init__(self, log: Log, name: str):
+        super().__init__(log, name)
         XERA.mvp = self.get_mvp()
-        XERA.wing = 1
+        XERA.wing = 3
         XERA.current = self
         all_bosses.append(self)
+
+    def get_mvp(self):
+        return f"MVP de {self.name}"
 
 ################################ CAIRN ################################
 
@@ -331,12 +362,15 @@ class CAIRN(Boss):
     
     current = None
     
-    def __init__(self, log: Log):
-        super().__init__(log)
+    def __init__(self, log: Log, name: str):
+        super().__init__(log, name)
         CAIRN.mvp = self.get_mvp()
-        CAIRN.wing = 1
+        CAIRN.wing = 4
         CAIRN.current = self
         all_bosses.append(self)
+
+    def get_mvp(self):
+        return f"MVP de {self.name}"
 
 ################################ MO ################################
 
@@ -344,12 +378,15 @@ class MO(Boss):
     
     current = None
     
-    def __init__(self, log: Log):
-        super().__init__(log)
+    def __init__(self, log: Log, name: str):
+        super().__init__(log, name)
         MO.mvp = self.get_mvp()
-        MO.wing = 1
+        MO.wing = 4
         MO.current = self
         all_bosses.append(self)
+
+    def get_mvp(self):
+        return f"MVP de {self.name}"
 
 ################################ SAMAROG ################################
 
@@ -357,12 +394,15 @@ class SAMAROG(Boss):
     
     current = None
     
-    def __init__(self, log: Log):
-        super().__init__(log)
+    def __init__(self, log: Log, name: str):
+        super().__init__(log, name)
         SAMAROG.mvp = self.get_mvp()
-        SAMAROG.wing = 1
+        SAMAROG.wing = 4
         SAMAROG.current = self
         all_bosses.append(self)
+
+    def get_mvp(self):
+        return f"MVP de {self.name}"
 
 ################################ DEIMOS ################################
 
@@ -370,12 +410,15 @@ class DEIMOS(Boss):
     
     current = None
     
-    def __init__(self, log: Log):
-        super().__init__(log)
+    def __init__(self, log: Log, name: str):
+        super().__init__(log, name)
         DEIMOS.mvp = self.get_mvp()
-        DEIMOS.wing = 1
+        DEIMOS.wing = 4
         DEIMOS.current = self
         all_bosses.append(self)
+
+    def get_mvp(self):
+        return f"MVP de {self.name}"
 
 ################################ SH ################################
 
@@ -383,12 +426,15 @@ class SH(Boss):
     
     current = None
     
-    def __init__(self, log: Log):
-        super().__init__(log)
+    def __init__(self, log: Log, name: str):
+        super().__init__(log, name)
         SH.mvp = self.get_mvp()
-        SH.wing = 1
+        SH.wing = 5
         SH.current = self
         all_bosses.append(self)
+
+    def get_mvp(self):
+        return f"MVP de {self.name}"
 
 ################################ DHUUM ################################
 
@@ -396,12 +442,15 @@ class DHUUM(Boss):
     
     current = None
     
-    def __init__(self, log: Log):
-        super().__init__(log)
+    def __init__(self, log: Log, name: str):
+        super().__init__(log, name)
         DHUUM.mvp = self.get_mvp()
-        DHUUM.wing = 1
+        DHUUM.wing = 5
         DHUUM.current = self
         all_bosses.append(self)
+
+    def get_mvp(self):
+        return f"MVP de {self.name}"
 
 ################################ CA ################################
 
@@ -409,12 +458,15 @@ class CA(Boss):
     
     current = None
     
-    def __init__(self, log: Log):
-        super().__init__(log)
+    def __init__(self, log: Log, name: str):
+        super().__init__(log, name)
         CA.mvp = self.get_mvp()
-        CA.wing = 1
+        CA.wing = 6
         CA.current = self
         all_bosses.append(self)
+
+    def get_mvp(self):
+        return f"MVP de {self.name}"
 
 ################################ LARGOS ################################
 
@@ -422,12 +474,15 @@ class LARGOS(Boss):
     
     current = None
     
-    def __init__(self, log: Log):
-        super().__init__(log)
+    def __init__(self, log: Log, name: str):
+        super().__init__(log, name)
         LARGOS.mvp = self.get_mvp()
-        LARGOS.wing = 1
+        LARGOS.wing = 6
         LARGOS.current = self
         all_bosses.append(self)
+
+    def get_mvp(self):
+        return f"MVP de {self.name}"
 
 ################################ QADIM ################################
 
@@ -435,12 +490,15 @@ class Q1(Boss):
     
     current = None
     
-    def __init__(self, log: Log):
-        super().__init__(log)
+    def __init__(self, log: Log, name: str):
+        super().__init__(log, name)
         Q1.mvp = self.get_mvp()
-        Q1.wing = 1
+        Q1.wing = 6
         Q1.current = self
         all_bosses.append(self)
+
+    def get_mvp(self):
+        return f"MVP de {self.name}"
 
 ################################ ADINA ################################
 
@@ -448,12 +506,15 @@ class ADINA(Boss):
     
     current = None
     
-    def __init__(self, log: Log):
-        super().__init__(log)
+    def __init__(self, log: Log, name: str):
+        super().__init__(log, name)
         ADINA.mvp = self.get_mvp()
-        ADINA.wing = 1
+        ADINA.wing = 7
         ADINA.current = self
         all_bosses.append(self)
+
+    def get_mvp(self):
+        return f"MVP de {self.name}"
 
 ################################ SABIR ################################
 
@@ -461,12 +522,15 @@ class SABIR(Boss):
     
     current = None
     
-    def __init__(self, log: Log):
-        super().__init__(log)
+    def __init__(self, log: Log, name: str):
+        super().__init__(log, name)
         SABIR.mvp = self.get_mvp()
-        SABIR.wing = 1
+        SABIR.wing = 7
         SABIR.current = self
         all_bosses.append(self)
+
+    def get_mvp(self):
+        return f"MVP de {self.name}"
 
 ################################ QTP ################################
 
@@ -474,9 +538,12 @@ class QTP(Boss):
     
     current = None
     
-    def __init__(self, log: Log):
-        super().__init__(log)
+    def __init__(self, log: Log, name: str):
+        super().__init__(log, name)
         QTP.mvp = self.get_mvp()
-        QTP.wing = 1
+        QTP.wing = 7
         QTP.current = self
         all_bosses.append(self)
+
+    def get_mvp(self):
+        return f"MVP de {self.name}"
