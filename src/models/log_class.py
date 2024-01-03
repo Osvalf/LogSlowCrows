@@ -12,10 +12,8 @@ class Log:
         BossFactory.create_boss(self)
 
     def get_html(self):        # url convertie en string contenant les infos en javascript
-        self.wingman = False
-        if("wingman" in self.url):
-            self.wingman = True
-        if(self.wingman==True and ("logContent" not in self.url)):
+        self.wingman = "wingman" in self.url
+        if(self.wingman and ("logContent" not in self.url)):
             self.url = self.url.replace("log","logContent")
         req = Request(url=self.url, headers={'User-Agent': 'Mozilla/5.0'})
         html = urlopen(req).read()
@@ -36,56 +34,61 @@ class BossFactory:
     def create_boss(log : Log):
         boss_id = log.jcontent['triggerID']
         boss_name = boss_dict[boss_id]
+        boss = None
         match boss_name:
             case "vg":
-                vg = VG(log, "VG")
+                boss = VG(log)
             case "gors":
-                gors = GORS(log, "GORS")
+                boss = GORS(log)
             case "sab":
-                sab = SABETHA(log, "SABETHA")
+                boss = SABETHA(log)
             case "sloth":
-                sloth = SLOTH(log, "SLOTH")
+                boss = SLOTH(log)
             case "matt":
-                matt = MATTHIAS(log, "MATTHIAS")
+                boss = MATTHIAS(log)
             case "esc":
-                esc = ESCORT(log, "ESCORT")
+                boss = ESCORT(log)
             case "kc":
-                kc = KC(log, "KC")
+                boss = KC(log)
             case "xera":
-                xera = XERA(log, "XERA")
+                boss = XERA(log)
             case "cairn":
-                cairn = CAIRN(log, "CAIRN")
+                boss = CAIRN(log)
             case "mo":
-                mo = MO(log, "MO")
+                boss = MO(log)
             case "sam":
-                sam = SAMAROG(log, "SAMAROG")
+                boss = SAMAROG(log)
             case "dei":
-                dei = DEIMOS(log, "DEIMOS")
+                boss = DEIMOS(log)
             case "sh":
-                sh = SH(log, "SH")
+                boss = SH(log)
             case "dhumm":
-                dhuum = DHUUM(log, "DHUUM")
+                boss = DHUUM(log)
             case "ca":
-                ca = CA(log, "CA")
+                boss = CA(log)
             case "twins":
-                twins = LARGOS(log, "LARGOS")
+                boss = LARGOS(log)
             case "qadim":
-                qadim = Q1(log, "QUOIDIMM")
+                boss = Q1(log)
             case "adina":
-                adina = ADINA(log, "ADINA")
+                boss = ADINA(log)
             case "sabir":
-                sabir = SABIR(log, "SABIR")
+                boss = SABIR(log)
             case "qpeer":
-                qpeer = QTP(log, "QTP")
+                boss = QTP(log)
             case _:
                 raise ValueError("Unknown Boss") 
+        all_bosses.append(boss)
 
 class Boss:  
-    def __init__(self, log: Log, name: str):
+
+    name = None
+    wing = 0
+
+    def __init__(self, log: Log):
         self.log = log
         self.cm = self.is_cm()
         self.logName = self.get_logName()
-        self.name = name
         
     ################################ Fonction pour attribus Boss ################################
     
@@ -98,29 +101,20 @@ class Boss:
     ################################ Fonctions vérification ################################
         
     def is_quick(self, i_player: int):
-        jlog = self.log.jcontent
-        if(jlog['phases'][0]['boonGenGroupStats'][i_player]['data'][2][0]>=35
-            or jlog['phases'][0]['boonGenGroupStats'][i_player]['data'][2][1]>=35):
-            return True
-        return False
+        player_quick_contrib = self.log.jcontent['phases'][0]['boonGenGroupStats'][i_player]['data'][2]
+        return player_quick_contrib[0]>=35 or player_quick_contrib[1]>=35
 
     def is_alac(self, i_player: int):
-        jlog = self.log.jcontent
-        if(jlog['phases'][0]['boonGenGroupStats'][i_player]['data'][3][0]>=35
-            or jlog['phases'][0]['boonGenGroupStats'][i_player]['data'][3][1]>=35):
-            return True
-        return False
+        player_alac_contrib = self.log.jcontent['phases'][0]['boonGenGroupStats'][i_player]['data'][3]
+        return player_alac_contrib[0]>=35 or player_alac_contrib[1]>=35
     
     def is_support(self, i_player: int):
-        if(self.is_quick(i_player) or self.is_alac(i_player)):
-            return True
-        return False
+        return self.is_quick(i_player) or self.is_alac(i_player)
     
     ################################ DATA JOUEUR ################################
     
     def get_player_name(self, i_player: int):
-        jlog = self.log.jcontent
-        return jlog['players'][i_player]['name']
+        return self.log.jcontent['players'][i_player]['name']
     
     def get_pos_player(self, i_player: int):
         return self.log.pjcontent['players'][i_player]['combatReplayData']['positions']
@@ -130,46 +124,38 @@ class Stats:
     def get_max_value(log : Log,
                       fnc: classmethod, 
                       exclude: list[classmethod] = []):
-        
-        jlog = log.jcontent
+
         i_max = None
         value_max = 0
-        nb_players = len(jlog['players'])
-        excluding = len(exclude)>0        
+        nb_players = len(log.jcontent['players'])
         for i in range(nb_players):
-            filtre = False
-            value = fnc(i)
-            if(excluding):
-                for c in exclude:
-                    if(c(log,i)):
-                        filtre = True
-                        break           
-            if(not filtre and value > value_max):
-                value_max = value
-                i_max = i
+            for filtre in exclude:
+                if filtre(i):
+                    break
+            else:
+                value = fnc(i)
+                if value > value_max:
+                    value_max = value
+                    i_max = i
         return i_max, value_max
     
     @staticmethod
     def get_min_value(log : Log,
                       fnc: classmethod, 
                       exclude: list[classmethod] = []):
-        
-        jlog = log.jcontent
+
         i_min = None
         value_min = BIG
-        nb_players = len(jlog['players'])
-        excluding = len(exclude)>0   
+        nb_players = len(log.jcontent['players'])
         for i in range(nb_players):
-            filtre = False
-            value = fnc(i)
-            if(excluding):
-                for c in exclude:
-                    if(c(i)):
-                        filtre = True
-                        break      
-            if(not filtre and value < value_min):
-                value_min = value
-                i_min = i
+            for filtre in exclude:
+                if filtre(i):
+                    break
+            else:
+                value = fnc(i)
+                if value < value_min:
+                    value_min = value
+                    i_min = i
         return i_min, value_min
 
     @staticmethod
@@ -177,20 +163,13 @@ class Stats:
                       fnc: classmethod, 
                       exclude: list[classmethod] = []):
                 
-        jlog = log.jcontent
         value_tot = 0
-        nb_players = len(jlog['players'])
-        excluding = len(exclude)>0        
+        nb_players = len(log.jcontent['players'])
         for i in range(nb_players):
-            filtre = False
-            value = fnc(i) 
-            if(excluding):
-                for c in exclude:
-                    if(c(i)):
-                        filtre = True
-                        break      
-            if(not filtre):
-                value_tot += value
+            for filtre in exclude:
+                if filtre(i):
+                    break
+            value_tot += fnc(i)
         return value_tot
     
 ################################ VG ################################
@@ -198,13 +177,13 @@ class Stats:
 class VG(Boss):
     
     current = None
+    name = "VG"
+    wing = 1
     
-    def __init__(self, log: Log, name: str):
-        super().__init__(log, name)
+    def __init__(self, log: Log):
+        super().__init__(log)
         VG.mvp = self.get_mvp()
-        VG.wing = 1
         VG.current = self
-        all_bosses.append(self)
         
     def get_mvp(self):
         return f"MVP de {self.name}"
@@ -214,13 +193,13 @@ class VG(Boss):
 class GORS(Boss):
     
     current = None
+    name = "GORS"
+    wing = 1
     
-    def __init__(self, log: Log, name: str):
-        super().__init__(log, name)
+    def __init__(self, log: Log):
+        super().__init__(log)
         GORS.mvp = self.get_mvp()
-        GORS.wing = 1
         GORS.current = self
-        all_bosses.append(self)
         
     def get_dmg_split(self, i_player: int):
         jlog = self.log.jcontent
@@ -235,21 +214,20 @@ class GORS(Boss):
         total_dmg_split = Stats.get_tot_value(self.log, self.get_dmg_split)
         i, v = Stats.get_min_value(self.log, self.get_dmg_split, exclude=[self.is_support])
         v = v / total_dmg_split * 100
-        msg = f" * *[**MVP** : {self.get_player_name(i)} avec seulement {v:.1f}% des degats sur split en pur dps]*"
-        return msg
+        return f" * *[**MVP** : {self.get_player_name(i)} avec seulement {v:.1f}% des degats sur split en pur dps]*"
 
 ################################ SABETHA ################################
 
 class SABETHA(Boss):
     
     current = None
+    name = "SABETHA"
+    wing = 1
     
-    def __init__(self, log: Log, name: str):
-        super().__init__(log, name)
+    def __init__(self, log: Log):
+        super().__init__(log)
         SABETHA.mvp = self.get_mvp()
-        SABETHA.wing = 1
         SABETHA.current = self
-        all_bosses.append(self)
         
     def get_dmg_split(self,i_player: int):
         jlog = self.log.jcontent
@@ -260,25 +238,26 @@ class SABETHA(Boss):
         dmg += dmg_kernan + dmg_mornifle + dmg_karde
         return dmg
     
-    def is_cannon(self, 
-                  i_player: int, 
-                  n: int=0):
+    def is_cannon(self, i_player: int, n: int=0):
         
         detect_radius = 45
-        pjlog = self.log.pjcontent
         pos_player = self.get_pos_player(i_player)
-        if(n==0):
-            for e in pos_player:
-                c1 = (e[0] - pos_cannon1[0])**2 + (e[1] - pos_cannon1[1])**2 <= detect_radius**2
-                c2 = (e[0] - pos_cannon2[0])**2 + (e[1] - pos_cannon2[1])**2 <= detect_radius**2
-                c3 = (e[0] - pos_cannon3[0])**2 + (e[1] - pos_cannon3[1])**2 <= detect_radius**2
-                c4 = (e[0] - pos_cannon4[0])**2 + (e[1] - pos_cannon4[1])**2 <= detect_radius**2
-                if(c1 or c2 or c3 or c4):
-                    return True
-        else:
-            cannon = eval(f"pos_cannon{n}")
-            for e in pos_player:
-                if((e[0] - cannon[0])**2 + (e[1] - cannon[1])**2 <= detect_radius**2):
+        match n:
+            case 0: 
+                canon_pos = [pos_cannon1, pos_cannon2, pos_cannon3, pos_cannon4]
+            case 1:
+                canon_pos = [pos_cannon1]
+            case 2:
+                canon_pos = [pos_cannon2]
+            case 3:
+                canon_pos = [pos_cannon3]
+            case 4:
+                canon_pos = [pos_cannon4]
+            case _:
+                canon_pos = []
+        for e in pos_player:
+            for canon in canon_pos:
+                if (e[0] - cannon[0])**2 + (e[1] - cannon[1])**2 <= detect_radius**2:
                     return True
         return False
     
@@ -286,21 +265,20 @@ class SABETHA(Boss):
         total_dmg_split = Stats.get_tot_value(self.log, self.get_dmg_split)
         i, v = Stats.get_min_value(self.log, self.get_dmg_split, exclude=[self.is_support,self.is_cannon])
         v = v / total_dmg_split * 100
-        msg = f" * *[**MVP** : {self.get_player_name(i)} avec seulement {v:.1f}% des degats sur split en pur dps]*"
-        return msg
+        return f" * *[**MVP** : {self.get_player_name(i)} avec seulement {v:.1f}% des degats sur split en pur dps]*"
 
 ################################ SLOTH ################################
 
 class SLOTH(Boss):
     
     current = None
+    name = "SLOTH"
+    wing = 2
     
-    def __init__(self, log: Log, name: str):
-        super().__init__(log, name)
+    def __init__(self, log: Log):
+        super().__init__(log)
         SLOTH.mvp = self.get_mvp()
-        SLOTH.wing = 2
         SLOTH.current = self
-        all_bosses.append(self)
 
     def get_mvp(self):
         return f"MVP de {self.name}"
@@ -310,13 +288,13 @@ class SLOTH(Boss):
 class MATTHIAS(Boss):
     
     current = None
+    name = "MATTHIAS"
+    wing = 2
     
-    def __init__(self, log: Log, name: str):
-        super().__init__(log, name)
+    def __init__(self, log: Log):
+        super().__init__(log)
         MATTHIAS.mvp = self.get_mvp()
-        MATTHIAS.wing = 2
         MATTHIAS.current = self
-        all_bosses.append(self)
 
     def get_mvp(self):
         return f"MVP de {self.name}"
@@ -326,13 +304,13 @@ class MATTHIAS(Boss):
 class ESCORT(Boss):
     
     current = None
+    name = "ESCORT"
+    wing = 3
     
-    def __init__(self, log: Log, name: str):
-        super().__init__(log, name)
+    def __init__(self, log: Log):
+        super().__init__(log)
         ESCORT.mvp = self.get_mvp()
-        ESCORT.wing = 3
         ESCORT.current = self
-        all_bosses.append(self)
 
     def get_mvp(self):
         return f"MVP de {self.name}"
@@ -342,13 +320,13 @@ class ESCORT(Boss):
 class KC(Boss):
     
     current = None
+    name = "KC"
+    wing = 3
     
-    def __init__(self, log: Log, name: str):
-        super().__init__(log, name)
+    def __init__(self, log: Log):
+        super().__init__(log)
         KC.mvp = self.get_mvp()
-        KC.wing = 3
         KC.current = self
-        all_bosses.append(self)
 
     def get_mvp(self):
         return f"MVP de {self.name}"
@@ -358,13 +336,13 @@ class KC(Boss):
 class XERA(Boss):
     
     current = None
-    
-    def __init__(self, log: Log, name: str):
-        super().__init__(log, name)
+    name = "XERA"
+    wing = 3
+
+    def __init__(self, log: Log):
+        super().__init__(log)
         XERA.mvp = self.get_mvp()
-        XERA.wing = 3
         XERA.current = self
-        all_bosses.append(self)
 
     def get_mvp(self):
         return f"MVP de {self.name}"
@@ -374,13 +352,13 @@ class XERA(Boss):
 class CAIRN(Boss):
     
     current = None
+    name = "CAIRN"
+    wing = 4
     
-    def __init__(self, log: Log, name: str):
-        super().__init__(log, name)
+    def __init__(self, log: Log):
+        super().__init__(log)
         CAIRN.mvp = self.get_mvp()
-        CAIRN.wing = 4
         CAIRN.current = self
-        all_bosses.append(self)
 
     def get_mvp(self):
         return f"MVP de {self.name}"
@@ -390,13 +368,13 @@ class CAIRN(Boss):
 class MO(Boss):
     
     current = None
+    name = "MO"
+    wing = 4
     
-    def __init__(self, log: Log, name: str):
-        super().__init__(log, name)
+    def __init__(self, log: Log):
+        super().__init__(log, n)
         MO.mvp = self.get_mvp()
-        MO.wing = 4
         MO.current = self
-        all_bosses.append(self)
 
     def get_mvp(self):
         return f"MVP de {self.name}"
@@ -406,13 +384,13 @@ class MO(Boss):
 class SAMAROG(Boss):
     
     current = None
+    name = "SAMAROG"
+    wing = 4
     
-    def __init__(self, log: Log, name: str):
-        super().__init__(log, name)
+    def __init__(self, log: Log):
+        super().__init__(log)
         SAMAROG.mvp = self.get_mvp()
-        SAMAROG.wing = 4
         SAMAROG.current = self
-        all_bosses.append(self)
 
     def get_mvp(self):
         return f"MVP de {self.name}"
@@ -422,13 +400,13 @@ class SAMAROG(Boss):
 class DEIMOS(Boss):
     
     current = None
+    name = "DEIMOS"
+    wing = 4
     
-    def __init__(self, log: Log, name: str):
-        super().__init__(log, name)
+    def __init__(self, log: Log):
+        super().__init__(log)
         DEIMOS.mvp = self.get_mvp()
-        DEIMOS.wing = 4
         DEIMOS.current = self
-        all_bosses.append(self)
 
     def get_mvp(self):
         return f"MVP de {self.name}"
@@ -438,13 +416,13 @@ class DEIMOS(Boss):
 class SH(Boss):
     
     current = None
+    name = "SH"
+    wing = 5
     
-    def __init__(self, log: Log, name: str):
-        super().__init__(log, name)
+    def __init__(self, log: Log):
+        super().__init__(log)
         SH.mvp = self.get_mvp()
-        SH.wing = 5
         SH.current = self
-        all_bosses.append(self)
 
     def get_mvp(self):
         return f"MVP de {self.name}"
@@ -454,13 +432,13 @@ class SH(Boss):
 class DHUUM(Boss):
     
     current = None
+    name = "DHUUM"
+    wing = 5
     
-    def __init__(self, log: Log, name: str):
-        super().__init__(log, name)
+    def __init__(self, log: Log):
+        super().__init__(log)
         DHUUM.mvp = self.get_mvp()
-        DHUUM.wing = 5
         DHUUM.current = self
-        all_bosses.append(self)
 
     def get_mvp(self):
         return f"MVP de {self.name}"
@@ -470,13 +448,13 @@ class DHUUM(Boss):
 class CA(Boss):
     
     current = None
-    
-    def __init__(self, log: Log, name: str):
-        super().__init__(log, name)
+    name = "CA"
+    wing = 6
+
+    def __init__(self, log: Log):
+        super().__init__(log)
         CA.mvp = self.get_mvp()
-        CA.wing = 6
         CA.current = self
-        all_bosses.append(self)
 
     def get_mvp(self):
         return f"MVP de {self.name}"
@@ -486,13 +464,13 @@ class CA(Boss):
 class LARGOS(Boss):
     
     current = None
+    name = "LARGOS"
+    wing = 6
     
-    def __init__(self, log: Log, name: str):
-        super().__init__(log, name)
+    def __init__(self, log: Log):
+        super().__init__(log)
         LARGOS.mvp = self.get_mvp()
-        LARGOS.wing = 6
         LARGOS.current = self
-        all_bosses.append(self)
 
     def get_mvp(self):
         return f"MVP de {self.name}"
@@ -502,13 +480,13 @@ class LARGOS(Boss):
 class Q1(Boss):
     
     current = None
-    
-    def __init__(self, log: Log, name: str):
-        super().__init__(log, name)
+    name = "QUOIDIMM"
+    wing = 6
+
+    def __init__(self, log: Log):
+        super().__init__(log)
         Q1.mvp = self.get_mvp()
-        Q1.wing = 6
         Q1.current = self
-        all_bosses.append(self)
 
     def get_mvp(self):
         return f"MVP de {self.name}"
@@ -518,13 +496,13 @@ class Q1(Boss):
 class ADINA(Boss):
     
     current = None
+    name = "ADINA"
+    wing = 7
     
-    def __init__(self, log: Log, name: str):
-        super().__init__(log, name)
+    def __init__(self, log: Log):
+        super().__init__(log)
         ADINA.mvp = self.get_mvp()
-        ADINA.wing = 7
         ADINA.current = self
-        all_bosses.append(self)
 
     def get_mvp(self):
         return f"MVP de {self.name}"
@@ -534,13 +512,13 @@ class ADINA(Boss):
 class SABIR(Boss):
     
     current = None
+    name = "SABIR"
+    wing = 7
     
-    def __init__(self, log: Log, name: str):
-        super().__init__(log, name)
+    def __init__(self, log: Log):
+        super().__init__(log)
         SABIR.mvp = self.get_mvp()
-        SABIR.wing = 7
         SABIR.current = self
-        all_bosses.append(self)
 
     def get_mvp(self):
         return f"MVP de {self.name}"
@@ -550,13 +528,13 @@ class SABIR(Boss):
 class QTP(Boss):
     
     current = None
+    name = "QTP"
+    wing = 7
     
-    def __init__(self, log: Log, name: str):
-        super().__init__(log, name)
+    def __init__(self, log: Log):
+        super().__init__(log)
         QTP.mvp = self.get_mvp()
-        QTP.wing = 7
         QTP.current = self
-        all_bosses.append(self)
 
     def get_mvp(self):
         return f"MVP de {self.name}"
