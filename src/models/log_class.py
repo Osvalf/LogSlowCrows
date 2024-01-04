@@ -89,6 +89,7 @@ class Boss:
         self.log = log
         self.cm = self.is_cm()
         self.logName = self.get_logName()
+        self.mechanics = self.get_mechanics()
         
     ################################ Fonction pour attribus Boss ################################
     
@@ -96,9 +97,16 @@ class Boss:
         return self.log.pjcontent['isCM']
     
     def get_logName(self):
-        return self.log.pjcontent['fightName']       
+        return self.log.pjcontent['fightName']
+    
+    def get_mechanics(self):
+        mechs = []
+        for i in self.log.jcontent['mechanicMap']:
+            if i['playerMech']:
+                mechs.append(i)
+        return mechs
             
-    ################################ Fonctions vérification ################################
+    ################################ CONDITIONS ################################
         
     def is_quick(self, i_player: int):
         player_quick_contrib = self.log.jcontent['phases'][0]['boonGenGroupStats'][i_player]['data'][2]
@@ -110,6 +118,15 @@ class Boss:
     
     def is_support(self, i_player: int):
         return self.is_quick(i_player) or self.is_alac(i_player)
+    
+    def is_tank(self, i_player: int):
+        return self.log.pjcontent['players'][i_player]['toughness']>0
+    
+    def is_heal(self, i_player: int):
+        return self.log.pjcontent['players'][i_player]['healing']>0
+    
+    def is_dead(self, i_player: int):
+        return self.log.pjcontent['plyaers'][i_player]['defenses'][0]['deadCount']>0
     
     ################################ DATA JOUEUR ################################
     
@@ -127,6 +144,7 @@ class Stats:
 
         i_max = None
         value_max = 0
+        value_tot = 0
         nb_players = len(log.jcontent['players'])
         for i in range(nb_players):
             for filtre in exclude:
@@ -134,10 +152,20 @@ class Stats:
                     break
             else:
                 value = fnc(i)
+                value_tot += value
                 if value > value_max:
                     value_max = value
                     i_max = i
-        return i_max, value_max
+        i_maxs = []
+        for i in range(nb_players):
+            for filtre in exclude:
+                if filtre(i):
+                    break
+            else:
+                value = fnc(i)
+                if value == value_max:
+                    i_maxs.append(i)
+        return i_maxs, value_max, value_tot
     
     @staticmethod
     def get_min_value(log : Log,
@@ -146,6 +174,7 @@ class Stats:
 
         i_min = None
         value_min = BIG
+        value_tot = 0
         nb_players = len(log.jcontent['players'])
         for i in range(nb_players):
             for filtre in exclude:
@@ -153,10 +182,20 @@ class Stats:
                     break
             else:
                 value = fnc(i)
+                value_tot += value
                 if value < value_min:
                     value_min = value
                     i_min = i
-        return i_min, value_min
+        i_mins = []
+        for i in range(nb_players):
+            for filtre in exclude:
+                if filtre(i):
+                    break
+            else:
+                value = fnc(i)
+                if value == value_min:
+                    i_mins.append(i)
+        return i_mins, value_min, value_tot
 
     @staticmethod
     def get_tot_value(log : Log,
@@ -185,8 +224,32 @@ class VG(Boss):
         VG.mvp = self.get_mvp()
         VG.current = self
         
+    ################################ MVP / LVP ################################   
+        
     def get_mvp(self):
-        return f"MVP de {self.name}"
+        p, v, t = Stats.get_max_value(self.log, self.get_bleu)
+        s = ', '.join(list(map(self.get_player_name, p)))
+        if len(p)>1:
+            return f" * *[**MVP** : {s} se sont tous les {len(p)} pris {v} bleues sur VG]*"
+        else:
+            return f" * *[**MVP** : {s} s'est pris {v} bleues sur VG]*"
+    
+    ################################ CONDITIONS ################################
+    
+    
+    
+    ################################ DATA MECHAS ################################
+    
+    def get_bleu(self, i_player: int):
+        bleu = 0
+        mechs_list = [mech['name'] for mech in self.mechanics]
+        if "Green Guard TP" in mechs_list:
+            i_tp = mechs_list.index("Green Guard TP")
+            bleu += self.log.jcontent['phases'][0]['mechanicStats'][i_player][i_tp][0]
+        if "Boss TP" in mechs_list:
+            i_tp = mechs_list.index("Boss TP")
+            bleu += self.log.jcontent['phases'][0]['mechanicStats'][i_player][i_tp][0]
+        return bleu
 
 ################################ GORS ################################
 
@@ -201,6 +264,20 @@ class GORS(Boss):
         GORS.mvp = self.get_mvp()
         GORS.current = self
         
+    ################################ MVP / LVP ################################
+    
+    def get_mvp(self):
+        p, v, t = Stats.get_min_value(self.log, self.get_dmg_split, exclude=[self.is_support])
+        s = ', '.join(list(map(self.get_player_name, p)))
+        v = v / t * 100
+        return f" * *[**MVP** : {s} avec seulement {v:.1f}% des degats sur split en pur dps]*"
+    
+    ################################ CONDITIONS ################################
+    
+    
+    
+    ################################ DATA MECHAS ################################
+        
     def get_dmg_split(self, i_player: int):
         jlog = self.log.jcontent
         dmg = 0
@@ -210,11 +287,7 @@ class GORS(Boss):
             dmg += dmg_split_1[i][0] + dmg_split_2[i][0]
         return dmg
     
-    def get_mvp(self):
-        total_dmg_split = Stats.get_tot_value(self.log, self.get_dmg_split)
-        i, v = Stats.get_min_value(self.log, self.get_dmg_split, exclude=[self.is_support])
-        v = v / total_dmg_split * 100
-        return f" * *[**MVP** : {self.get_player_name(i)} avec seulement {v:.1f}% des degats sur split en pur dps]*"
+    
 
 ################################ SABETHA ################################
 
@@ -228,15 +301,17 @@ class SABETHA(Boss):
         super().__init__(log)
         SABETHA.mvp = self.get_mvp()
         SABETHA.current = self
-        
-    def get_dmg_split(self,i_player: int):
-        jlog = self.log.jcontent
-        dmg = 0
-        dmg_kernan = jlog['phases'][2]['dpsStatsTargets'][i_player][0][0]
-        dmg_mornifle = jlog['phases'][5]['dpsStatsTargets'][i_player][0][0]
-        dmg_karde = jlog['phases'][7]['dpsStatsTargets'][i_player][0][0]
-        dmg += dmg_kernan + dmg_mornifle + dmg_karde
-        return dmg
+    
+    ################################ MVP / LVP ################################
+    
+    def get_mvp(self):
+        total_dmg_split = Stats.get_tot_value(self.log, self.get_dmg_split)
+        p, v, t = Stats.get_min_value(self.log, self.get_dmg_split, exclude=[self.is_support,self.is_cannon])
+        v = v / t * 100
+        s = ', '.join(list(map(self.get_player_name, p)))
+        return f" * *[**MVP** : {s} avec seulement {v:.1f}% des degats sur split en pur dps]*"
+    
+    ################################ CONDITIONS ################################
     
     def is_cannon(self, i_player: int, n: int=0):
         
@@ -261,11 +336,16 @@ class SABETHA(Boss):
                     return True
         return False
     
-    def get_mvp(self):
-        total_dmg_split = Stats.get_tot_value(self.log, self.get_dmg_split)
-        i, v = Stats.get_min_value(self.log, self.get_dmg_split, exclude=[self.is_support,self.is_cannon])
-        v = v / total_dmg_split * 100
-        return f" * *[**MVP** : {self.get_player_name(i)} avec seulement {v:.1f}% des degats sur split en pur dps]*"
+    ################################ DATA MECHAS ################################
+        
+    def get_dmg_split(self,i_player: int):
+        jlog = self.log.jcontent
+        dmg = 0
+        dmg_kernan = jlog['phases'][2]['dpsStatsTargets'][i_player][0][0]
+        dmg_mornifle = jlog['phases'][5]['dpsStatsTargets'][i_player][0][0]
+        dmg_karde = jlog['phases'][7]['dpsStatsTargets'][i_player][0][0]
+        dmg += dmg_kernan + dmg_mornifle + dmg_karde
+        return dmg  
 
 ################################ SLOTH ################################
 
@@ -279,9 +359,19 @@ class SLOTH(Boss):
         super().__init__(log)
         SLOTH.mvp = self.get_mvp()
         SLOTH.current = self
-
+        
+    ################################ MVP / LVP ################################
+    
     def get_mvp(self):
         return f"MVP de {self.name}"
+    
+    ################################ CONDITIONS ################################
+    
+    
+    
+    ################################ DATA MECHAS ################################
+    
+    
 
 ################################ MATTHIAS ################################
 
@@ -295,9 +385,25 @@ class MATTHIAS(Boss):
         super().__init__(log)
         MATTHIAS.mvp = self.get_mvp()
         MATTHIAS.current = self
-
+          
+    ################################ MVP / LVP ################################
+    
     def get_mvp(self):
         return f"MVP de {self.name}"
+    
+    ################################ CONDITIONS ################################
+    
+    def is_sac(self, i_player: int):
+        return self.get_nb_sac(i_player)>0
+    
+    ################################ DATA MECHAS ################################    
+    
+    def get_nb_sac(self, i_player: int):
+        mechs_list = [mech['name'] for mech in self.mechanics]
+        if "Sacrifice" in mechs_list:
+            i_sac = mechs_list.index('Sacrifice')
+            return self.log.jcontent['phases'][0]['mechanicStats'][i_player][i_sac][0]
+        return 0 
 
 ################################ ESCORT ################################
 
@@ -538,3 +644,15 @@ class QTP(Boss):
 
     def get_mvp(self):
         return f"MVP de {self.name}"
+
+
+    
+    ################################ MVP / LVP ################################
+    
+    
+    
+    ################################ CONDITIONS ################################
+    
+    
+    
+    ################################ DATA MECHAS ################################
