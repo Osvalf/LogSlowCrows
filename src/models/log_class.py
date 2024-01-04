@@ -136,6 +136,12 @@ class Boss:
     def get_pos_player(self, i_player: int):
         return self.log.pjcontent['players'][i_player]['combatReplayData']['positions']
     
+    def get_cc_boss(self, i_player: int):
+        return self.log.jcontent['phases'][0]['dpsStatsTargets'][i_player][0][3]
+    
+    def get_cc_total(self, i_player: int):
+        return self.log.jcontent['phases'][0]['dpsStats'][i_player][3]
+    
 class Stats:
     @staticmethod
     def get_max_value(log : Log,
@@ -147,12 +153,12 @@ class Stats:
         value_tot = 0
         nb_players = len(log.jcontent['players'])
         for i in range(nb_players):
+            value = fnc(i)
+            value_tot += value
             for filtre in exclude:
                 if filtre(i):
                     break
             else:
-                value = fnc(i)
-                value_tot += value
                 if value > value_max:
                     value_max = value
                     i_max = i
@@ -177,12 +183,12 @@ class Stats:
         value_tot = 0
         nb_players = len(log.jcontent['players'])
         for i in range(nb_players):
+            value = fnc(i)
+            value_tot += value
             for filtre in exclude:
                 if filtre(i):
                     break
             else:
-                value = fnc(i)
-                value_tot += value
                 if value < value_min:
                     value_min = value
                     i_min = i
@@ -215,14 +221,15 @@ class Stats:
 
 class VG(Boss):
     
-    current = None
+    last = None
     name = "VG"
     wing = 1
     
     def __init__(self, log: Log):
         super().__init__(log)
-        VG.mvp = self.get_mvp()
-        VG.current = self
+        self.mvp = self.get_mvp()
+        self.lvp = self.get_lvp()
+        VG.last = self
         
     ################################ MVP / LVP ################################   
         
@@ -230,11 +237,14 @@ class VG(Boss):
         p, v, t = Stats.get_max_value(self.log, self.get_bleu)
         s = ', '.join(list(map(self.get_player_name, p)))
         if len(p)>1:
-            return f" * *[**MVP** : {s} se sont tous les {len(p)} pris {v} bleues sur VG]*"
+            return f" * *[**MVP** : {s} se sont tous les {len(p)} pris **{v}** bleues sur VG]*"
         else:
-            return f" * *[**MVP** : {s} s'est pris {v} bleues sur VG]*"
+            return f" * *[**MVP** : {s} s'est pris **{v}** bleues sur VG]*"
     
-    ################################ CONDITIONS ################################
+    def get_lvp(self):
+        return f"LVP de {self.name}"
+
+    ################################ CONDITIONS ###############################
     
     
     
@@ -255,14 +265,15 @@ class VG(Boss):
 
 class GORS(Boss):
     
-    current = None
+    last = None
     name = "GORS"
     wing = 1
     
     def __init__(self, log: Log):
         super().__init__(log)
-        GORS.mvp = self.get_mvp()
-        GORS.current = self
+        self.mvp = self.get_mvp()
+        self.lvp = self.get_lvp()
+        GORS.last = self
         
     ################################ MVP / LVP ################################
     
@@ -270,9 +281,12 @@ class GORS(Boss):
         p, v, t = Stats.get_min_value(self.log, self.get_dmg_split, exclude=[self.is_support])
         s = ', '.join(list(map(self.get_player_name, p)))
         v = v / t * 100
-        return f" * *[**MVP** : {s} avec seulement {v:.1f}% des degats sur split en pur dps]*"
+        return f" * *[**MVP** : {s} avec seulement **{v:.1f}%** des degats sur split en DPS]*"
     
-    ################################ CONDITIONS ################################
+    def get_lvp(self):
+        return f"LVP de {self.name}"
+
+    ################################ CONDITIONS ###############################
     
     
     
@@ -293,14 +307,15 @@ class GORS(Boss):
 
 class SABETHA(Boss):
     
-    current = None
+    last = None
     name = "SABETHA"
     wing = 1
     
     def __init__(self, log: Log):
         super().__init__(log)
-        SABETHA.mvp = self.get_mvp()
-        SABETHA.current = self
+        self.mvp = self.get_mvp()
+        self.lvp = self.get_lvp()
+        SABETHA.last = self
     
     ################################ MVP / LVP ################################
     
@@ -309,9 +324,12 @@ class SABETHA(Boss):
         p, v, t = Stats.get_min_value(self.log, self.get_dmg_split, exclude=[self.is_support,self.is_cannon])
         v = v / t * 100
         s = ', '.join(list(map(self.get_player_name, p)))
-        return f" * *[**MVP** : {s} avec seulement {v:.1f}% des degats sur split en pur dps]*"
+        return f" * *[**MVP** : {s} avec seulement **{v:.1f}%** des degats sur split sans faire de canon]*"
     
-    ################################ CONDITIONS ################################
+    def get_lvp(self):
+        return f"LVP de {self.name}"
+
+    ################################ CONDITIONS ###############################
     
     def is_cannon(self, i_player: int, n: int=0):
         
@@ -351,47 +369,78 @@ class SABETHA(Boss):
 
 class SLOTH(Boss):
     
-    current = None
+    last = None
     name = "SLOTH"
     wing = 2
     
     def __init__(self, log: Log):
         super().__init__(log)
-        SLOTH.mvp = self.get_mvp()
-        SLOTH.current = self
+        self.mvp = self.get_mvp()
+        self.lvp = self.get_lvp()
+        SLOTH.last = self
         
     ################################ MVP / LVP ################################
     
     def get_mvp(self):
-        return f"MVP de {self.name}"
+        total_cc_boss = Stats.get_tot_value(self.log, self.get_cc_boss)
+        p, v, t = Stats.get_min_value(self.log, self.get_cc_boss, exclude=[self.is_shroom])
+        relativ_v = v / total_cc_boss * 100
+        s = ', '.join(list(map(self.get_player_name, p)))
+        if len(p)>1:
+            return f" * *[**MVP** : {s} qui ont fait seulement **{v:.0f}** de CC (**{relativ_v:.1f}%** du total) sans manger de shroom]*"
+        return f" * *[**MVP** : {s} qui a fait seulement **{v:.0f}** de CC (**{relativ_v:.1f}%** du total) sans manger de shroom]*"
     
-    ################################ CONDITIONS ################################
+    def get_lvp(self):
+        return f"LVP de {self.name}"
+
+    ################################ CONDITIONS ###############################
     
-    
+    def is_shroom(self, i_player: int):
+        mechs_list = [mech['name'] for mech in self.mechanics]
+        mech = "Slub"
+        if mech in mechs_list:
+            i_mech = mechs_list.index(mech)
+            return self.log.jcontent['phases'][0]['mechanicStats'][i_player][i_mech]>0
+        return False
     
     ################################ DATA MECHAS ################################
     
-    
+
 
 ################################ MATTHIAS ################################
 
 class MATTHIAS(Boss):
     
-    current = None
+    last = None
     name = "MATTHIAS"
     wing = 2
     
     def __init__(self, log: Log):
         super().__init__(log)
-        MATTHIAS.mvp = self.get_mvp()
-        MATTHIAS.current = self
+        self.mvp = self.get_mvp()
+        self.lvp = self.get_lvp()
+        MATTHIAS.last = self
           
     ################################ MVP / LVP ################################
     
     def get_mvp(self):
-        return f"MVP de {self.name}"
+        total_cc_boss = Stats.get_tot_value(self.log, self.get_cc_total)
+        p, v, t = Stats.get_min_value(self.log, self.get_cc_total, exclude=[self.is_sac])
+        relativ_v = v / total_cc_boss * 100
+        s = ', '.join(list(map(self.get_player_name, p)))
+        if v == 0:
+            if len(p)>1:
+                return f" * *[**MVP** : {s} qui n'ont même pas CC sans s'être sacrifié]*"
+            else:
+                return f" * *[**MVP** : {s} qui n'a même pas CC sans s'être sacrifié]*"
+        elif len(p)>1:
+            return f" * *[**MVP** : {s} qui ont fait seulement **{v:.0f}** de CC (**{relativ_v:.1f}%** du total) sans s'être sacrifié]*"
+        return f" * *[**MVP** : {s} qui a fait seulement **{v:.0f}** de CC (**{relativ_v:.1f}%** du total) sans s'être sacrifié]*"
     
-    ################################ CONDITIONS ################################
+    def get_lvp(self):
+        return f"LVP de {self.name}"
+
+    ################################ CONDITIONS ###############################
     
     def is_sac(self, i_player: int):
         return self.get_nb_sac(i_player)>0
@@ -400,215 +449,385 @@ class MATTHIAS(Boss):
     
     def get_nb_sac(self, i_player: int):
         mechs_list = [mech['name'] for mech in self.mechanics]
-        if "Sacrifice" in mechs_list:
-            i_sac = mechs_list.index('Sacrifice')
-            return self.log.jcontent['phases'][0]['mechanicStats'][i_player][i_sac][0]
+        mech = "Sacrifice"
+        if mech in mechs_list:
+            i_mech = mechs_list.index(mech)
+            return self.log.jcontent['phases'][0]['mechanicStats'][i_player][i_mech][0]
         return 0 
 
 ################################ ESCORT ################################
 
 class ESCORT(Boss):
     
-    current = None
+    last = None
     name = "ESCORT"
     wing = 3
     
     def __init__(self, log: Log):
         super().__init__(log)
-        ESCORT.mvp = self.get_mvp()
-        ESCORT.current = self
-
+        self.mvp = self.get_mvp()
+        self.lvp = self.get_lvp()
+        ESCORT.last = self 
+       
+    ################################ MVP / LVP ################################
+    
     def get_mvp(self):
         return f"MVP de {self.name}"
+    
+    def get_lvp(self):
+        return f"LVP de {self.name}"
+    
+    ################################ CONDITIONS ################################
+    
+    
+    
+    ################################ DATA MECHAS ################################
+
+
 
 ################################ KC ################################
 
 class KC(Boss):
     
-    current = None
+    last = None
     name = "KC"
     wing = 3
     
     def __init__(self, log: Log):
         super().__init__(log)
-        KC.mvp = self.get_mvp()
-        KC.current = self
-
+        self.mvp = self.get_mvp()
+        self.lvp = self.get_lvp()
+        KC.last = self  
+        
+    ################################ MVP / LVP ################################
+    
     def get_mvp(self):
         return f"MVP de {self.name}"
+    
+    def get_lvp(self):
+        return f"LVP de {self.name}"
+    
+    ################################ CONDITIONS ################################
+    
+    
+    
+    ################################ DATA MECHAS ################################
+
+
 
 ################################ XERA ################################
 
 class XERA(Boss):
     
-    current = None
+    last = None
     name = "XERA"
     wing = 3
 
     def __init__(self, log: Log):
         super().__init__(log)
-        XERA.mvp = self.get_mvp()
-        XERA.current = self
-
+        self.mvp = self.get_mvp()
+        self.lvp = self.get_lvp()
+        XERA.last = self  
+        
+    ################################ MVP / LVP ################################
+    
     def get_mvp(self):
         return f"MVP de {self.name}"
+    
+    def get_lvp(self):
+        return f"LVP de {self.name}"
+    
+    ################################ CONDITIONS ################################
+    
+    
+    
+    ################################ DATA MECHAS ################################
+
+    
 
 ################################ CAIRN ################################
 
 class CAIRN(Boss):
     
-    current = None
+    last = None
     name = "CAIRN"
     wing = 4
     
     def __init__(self, log: Log):
         super().__init__(log)
-        CAIRN.mvp = self.get_mvp()
-        CAIRN.current = self
-
+        self.mvp = self.get_mvp()
+        self.lvp = self.get_lvp()
+        CAIRN.last = self
+      
+    ################################ MVP / LVP ################################
+    
     def get_mvp(self):
         return f"MVP de {self.name}"
+    
+    def get_lvp(self):
+        return f"LVP de {self.name}"
+    
+    ################################ CONDITIONS ################################
+    
+    
+    
+    ################################ DATA MECHAS ################################
+
+    
 
 ################################ MO ################################
 
 class MO(Boss):
     
-    current = None
+    last = None
     name = "MO"
     wing = 4
     
     def __init__(self, log: Log):
         super().__init__(log)
-        MO.mvp = self.get_mvp()
-        MO.current = self
-
+        self.mvp = self.get_mvp()
+        self.lvp = self.get_lvp()
+        MO.last = self   
+        
+    ################################ MVP / LVP ################################
+    
     def get_mvp(self):
         return f"MVP de {self.name}"
+    
+    def get_lvp(self):
+        return f"LVP de {self.name}"
+    
+    ################################ CONDITIONS ################################
+    
+    
+    
+    ################################ DATA MECHAS ################################
+
+    
 
 ################################ SAMAROG ################################
 
 class SAMAROG(Boss):
     
-    current = None
+    last = None
     name = "SAMAROG"
     wing = 4
     
     def __init__(self, log: Log):
         super().__init__(log)
-        SAMAROG.mvp = self.get_mvp()
-        SAMAROG.current = self
-
+        self.mvp = self.get_mvp()
+        self.lvp = self.get_lvp()
+        SAMAROG.last = self
+    
+    ################################ MVP / LVP ################################
+    
     def get_mvp(self):
         return f"MVP de {self.name}"
+    
+    def get_lvp(self):
+        return f"LVP de {self.name}"
+    
+    ################################ CONDITIONS ################################
+    
+    
+    
+    ################################ DATA MECHAS ################################
+
+    
 
 ################################ DEIMOS ################################
 
 class DEIMOS(Boss):
     
-    current = None
+    last = None
     name = "DEIMOS"
     wing = 4
     
     def __init__(self, log: Log):
         super().__init__(log)
-        DEIMOS.mvp = self.get_mvp()
-        DEIMOS.current = self
+        self.mvp = self.get_mvp()
+        self.lvp = self.get_lvp()
+        DEIMOS.last = self
 
+    ################################ MVP / LVP ################################
+    
     def get_mvp(self):
         return f"MVP de {self.name}"
+    
+    def get_lvp(self):
+        return f"LVP de {self.name}"
+    
+    ################################ CONDITIONS ################################
+    
+    
+    
+    ################################ DATA MECHAS ################################
+
+    
 
 ################################ SH ################################
 
 class SH(Boss):
     
-    current = None
+    last = None
     name = "SH"
     wing = 5
     
     def __init__(self, log: Log):
         super().__init__(log)
-        SH.mvp = self.get_mvp()
-        SH.current = self
-
+        self.mvp = self.get_mvp()
+        self.lvp = self.get_lvp()
+        SH.last = self
+        
+    ################################ MVP / LVP ################################
+    
     def get_mvp(self):
         return f"MVP de {self.name}"
+    
+    def get_lvp(self):
+        return f"LVP de {self.name}"
+    
+    ################################ CONDITIONS ################################
+    
+    
+    
+    ################################ DATA MECHAS ################################
+
+    
 
 ################################ DHUUM ################################
 
 class DHUUM(Boss):
     
-    current = None
+    last = None
     name = "DHUUM"
     wing = 5
     
     def __init__(self, log: Log):
         super().__init__(log)
-        DHUUM.mvp = self.get_mvp()
-        DHUUM.current = self
-
+        self.mvp = self.get_mvp()
+        self.lvp = self.get_lvp()
+        DHUUM.last = self
+   
+    ################################ MVP / LVP ################################
+    
     def get_mvp(self):
         return f"MVP de {self.name}"
+    
+    def get_lvp(self):
+        return f"LVP de {self.name}"
+    
+    ################################ CONDITIONS ################################
+    
+    
+    
+    ################################ DATA MECHAS ################################
+
+    
 
 ################################ CA ################################
 
 class CA(Boss):
     
-    current = None
+    last = None
     name = "CA"
     wing = 6
 
     def __init__(self, log: Log):
         super().__init__(log)
-        CA.mvp = self.get_mvp()
-        CA.current = self
-
+        self.mvp = self.get_mvp()
+        self.lvp = self.get_lvp()
+        CA.last = self
+  
+    ################################ MVP / LVP ################################
+    
     def get_mvp(self):
         return f"MVP de {self.name}"
+    
+    def get_lvp(self):
+        return f"LVP de {self.name}"
+    
+    ################################ CONDITIONS ################################
+    
+    
+    
+    ################################ DATA MECHAS ################################
+
+    
 
 ################################ LARGOS ################################
 
 class LARGOS(Boss):
     
-    current = None
+    last = None
     name = "LARGOS"
     wing = 6
     
     def __init__(self, log: Log):
         super().__init__(log)
-        LARGOS.mvp = self.get_mvp()
-        LARGOS.current = self
+        self.mvp = self.get_mvp()
+        self.lvp = self.get_lvp()
+        LARGOS.last = self
 
+    ################################ MVP / LVP ################################
+    
     def get_mvp(self):
         return f"MVP de {self.name}"
+    
+    def get_lvp(self):
+        return f"LVP de {self.name}"
+    
+    ################################ CONDITIONS ################################
+    
+    
+    
+    ################################ DATA MECHAS ################################
+
+    
 
 ################################ QADIM ################################
 
 class Q1(Boss):
     
-    current = None
+    last = None
     name = "QUOIDIMM"
     wing = 6
 
     def __init__(self, log: Log):
         super().__init__(log)
-        Q1.mvp = self.get_mvp()
-        Q1.current = self
-
+        self.mvp = self.get_mvp()
+        self.lvp = self.get_lvp()
+        Q1.last = self
+        
+    ################################ MVP / LVP ################################
+    
     def get_mvp(self):
         return f"MVP de {self.name}"
+    
+    def get_lvp(self):
+        return f"LVP de {self.name}"
+    
+    ################################ CONDITIONS ################################
+    
+    
+    
+    ################################ DATA MECHAS ################################
+
+    
 
 ################################ ADINA ################################
 
 class ADINA(Boss):
     
-    current = None
+    last = None
     name = "ADINA"
     wing = 7
     
     def __init__(self, log: Log):
         super().__init__(log)
-        ADINA.mvp = self.get_mvp()
-        ADINA.current = self
+        self.mvp = self.get_mvp()
+        self.lvp = self.get_lvp()
+        ADINA.last = self
 
     def get_mvp(self):
         return f"MVP de {self.name}"
@@ -617,42 +836,58 @@ class ADINA(Boss):
 
 class SABIR(Boss):
     
-    current = None
+    last = None
     name = "SABIR"
     wing = 7
     
     def __init__(self, log: Log):
         super().__init__(log)
-        SABIR.mvp = self.get_mvp()
-        SABIR.current = self
+        self.mvp = self.get_mvp()
+        self.lvp = self.get_lvp()
+        SABIR.last = self
 
-    def get_mvp(self):
-        return f"MVP de {self.name}"
-
-################################ QTP ################################
-
-class QTP(Boss):
-    
-    current = None
-    name = "QTP"
-    wing = 7
-    
-    def __init__(self, log: Log):
-        super().__init__(log)
-        QTP.mvp = self.get_mvp()
-        QTP.current = self
-
-    def get_mvp(self):
-        return f"MVP de {self.name}"
-
-
-    
     ################################ MVP / LVP ################################
     
+    def get_mvp(self):
+        return f"MVP de {self.name}"
     
+    def get_lvp(self):
+        return f"LVP de {self.name}"
     
     ################################ CONDITIONS ################################
     
     
     
     ################################ DATA MECHAS ################################
+
+    
+
+################################ QTP ################################
+
+class QTP(Boss):
+    
+    last = None
+    name = "QTP"
+    wing = 7
+    
+    def __init__(self, log: Log):
+        super().__init__(log)
+        self.mvp = self.get_mvp()
+        self.lvp = self.get_lvp()
+        QTP.last = self
+ 
+    ################################ MVP / LVP ################################
+    
+    def get_mvp(self):
+        return f"MVP de {self.name}"
+    
+    def get_lvp(self):
+        return f"LVP de {self.name}"
+    
+    ################################ CONDITIONS ################################
+    
+    
+    
+    ################################ DATA MECHAS ################################
+
+
