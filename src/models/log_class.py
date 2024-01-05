@@ -63,7 +63,7 @@ class BossFactory:
                 boss = DEIMOS(log)
             case "sh":
                 boss = SH(log)
-            case "dhumm":
+            case "dhuum":
                 boss = DHUUM(log)
             case "ca":
                 boss = CA(log)
@@ -179,7 +179,7 @@ class Boss:
         p, v, t = Stats.get_max_value(self.log, self.get_cc_boss)
         s = ', '.join(list(map(self.get_player_name, p)))
         r = v / t * 100
-        return f" * *[**LVP** : {s} merci d'avoir fait **{v:.0f}** de CC soit **{r:.1f}%** de la squad]*"
+        return f" * *[**LVP** : {s} merci d'avoir fait **{v:.0f}** de **CC** (**{r:.1f}%** de la squad)]*"
     
     def get_bad_dps(self):
         i_sup, sup_max_dmg, _ = Stats.get_max_value(self.log, self.get_dmg_boss, exclude=[self.is_dps])
@@ -213,7 +213,7 @@ class Stats:
                       exclude: list[classmethod] = []):
 
         i_max = None
-        value_max = 0
+        value_max = -BIG
         value_tot = 0
         nb_players = len(log.jcontent['players'])
         for i in range(nb_players):
@@ -900,10 +900,10 @@ class SH(Boss):
     ################################ MVP / LVP ################################
     
     def get_mvp(self):
-        return f"MVP de {self.name}"
+        return self.get_mvp_cc()
     
     def get_lvp(self):
-        return f"LVP de {self.name}"
+        return self.get_lvp_cc()
     
     ################################ CONDITIONS ################################
     
@@ -930,6 +930,12 @@ class DHUUM(Boss):
     ################################ MVP / LVP ################################
     
     def get_mvp(self):
+        p, v, _ = Stats.get_max_value(self.log, self.get_cracks)
+        s = ', '.join(list(map(self.get_player_name, p)))
+        if len(p) == 1:
+            return f" * *[**MVP** : {s} s'est pris **{v} cracks**]*"
+        if len(p) > 1:
+            return f" * *[**MVP** : {s} se sont pris **{v} cracks**]*"
         return f"MVP de {self.name}"
     
     def get_lvp(self):
@@ -941,7 +947,13 @@ class DHUUM(Boss):
     
     ################################ DATA MECHAS ################################
 
-    
+    def get_cracks(self, i_player: int):
+        mechs_list = [mech['name'] for mech in self.mechanics]
+        mech = "Cracks"
+        if mech in mechs_list:
+            i_tear = mechs_list.index(mech)
+            return self.log.jcontent['phases'][0]['mechanicStats'][i_player][i_tear][0]
+        return 0    
 
 ################################ CA ################################
 

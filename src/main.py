@@ -2,7 +2,7 @@ from models.log_class import*
 
 if __name__ == "__main__":
     
-    log = Log('https://dps.report/4sb3-20240101-215127_dei')
+    log = Log('https://dps.report/uOiB-20240101-212748_dhuum')
 
     boss = all_bosses[-1] # Get le nom d'instance en fonction du log pour les tests
     print("\n")
