@@ -1,21 +1,27 @@
 from models.log_class import*
+import concurrent.futures
 
-if __name__ == "__main__":
+
+if __name__ == "__main__":    
+        
+    def createLog(url):
+        return Log(url)
     
-    log = Log('https://dps.report/Zt09-20240101-225638_qpeer')
+    input_urls = txt_file_to_list("src/input logs.txt")
     
-    boss = all_bosses[-1] # Get le nom d'instance en fonction du log pour les tests
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = [executor.submit(createLog, input_value) for input_value in input_urls]
+        concurrent.futures.wait(futures)
     
-    all_mvp = {x:all_mvp.count(x) for x in all_mvp}
-    all_lvp = {x:all_lvp.count(x) for x in all_lvp}
+    all_mvp_dic = {x:all_mvp.count(x) for x in all_mvp}
+    all_lvp_dic = {x:all_lvp.count(x) for x in all_lvp}
     
     print("\n")
+    
+    all_bosses.sort(key=lambda x: x.start_date, reverse=False)
 
-    print(boss.mvp)
-    print(boss.lvp)
+    print(all_mvp_dic)
+    print(all_lvp_dic)
     
-    print(all_mvp)
-    print(all_lvp)
-    
-    print(f"\nListe de tous les boss instanciés : {all_bosses}\n") # Afficher toutes les instances
+    #print(f"\nListe de tous les boss instanciés : {all_bosses}\n") # Afficher toutes les instances
     

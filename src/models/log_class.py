@@ -1,7 +1,6 @@
 from urllib.request import Request, urlopen
 import json
 import requests
-from const import*
 from func import*
 
 class Log:
@@ -92,6 +91,8 @@ class Boss:
         self.logName = self.get_logName()
         self.mechanics = self.get_mechanics()
         self.duration_ms = self.get_duration_ms() 
+        self.start_date = self.get_start_date()
+        self.end_date = self.get_end_date()
         
     ################################ Fonction pour attribus Boss ################################
     
@@ -110,6 +111,20 @@ class Boss:
     
     def get_duration_ms(self):
         return self.log.pjcontent['durationMS']
+    
+    def get_start_date(self):
+        s = self.log.pjcontent['timeStartStd']
+        date_format = "%Y-%m-%d %H:%M:%S %z"
+        start_date = datetime.strptime(s, date_format)
+        paris_timezone = timezone(timedelta(hours=1))
+        return start_date.astimezone(paris_timezone)
+    
+    def get_end_date(self):
+        s = self.log.pjcontent['timeEndStd']
+        date_format = "%Y-%m-%d %H:%M:%S %z"
+        start_date = datetime.strptime(s, date_format)
+        paris_timezone = timezone(timedelta(hours=1))
+        return start_date.astimezone(paris_timezone)
             
     ################################ CONDITIONS ################################
         
@@ -190,7 +205,7 @@ class Boss:
     
     def get_bad_dps(self):
         i_sup, sup_max_dmg, _ = Stats.get_max_value(self.log, self.get_dmg_boss, exclude=[self.is_dps])
-        i_dps, dps_min_dmg, tot_dmg = Stats.get_min_value(self.log, self.get_dmg_boss, exclude=[self.is_support])
+        i_dps, dps_min_dmg, tot_dmg = Stats.get_min_value(self.log, self.get_dmg_boss, exclude=[self.is_support, self.is_dead])
         if dps_min_dmg < sup_max_dmg:
             all_mvp.append(self.get_player_account(i_dps[0]))
             sup = self.get_player_name(i_sup[0])
@@ -538,7 +553,14 @@ class MATTHIAS(Boss):
         return f" * *[**MVP** : {s} qui a fait seulement **{v:.0f}** de **CC** (**{r:.1f}%** du total) sans s'être sacrifié]*"
     
     def get_lvp(self):
-        return self.get_lvp_cc()
+        p, v, t = Stats.get_max_value(self.log, self.get_cc_total)       
+        for e in p:
+            all_lvp.append(self.get_player_account(e))
+        r = v / t * 100
+        s = ', '.join(list(map(self.get_player_name, p)))
+        return f" * *[**LVP** : {s} merci d'avoir mis **{v:.0f}** de **CC** (**{r:.1f}%** de la squad)]*"
+            
+        
 
     ################################ CONDITIONS ###############################
     
