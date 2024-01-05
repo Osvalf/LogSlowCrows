@@ -78,7 +78,10 @@ xera_centre_radius = 140
 
 ################################ DATA SAMAROG ################################
 
-
+sama_top_left_corn = [278.0,645.2]
+sama_top_right_corn = [667.6,660.7]
+sama_bot_left_corn = [299.4,58.6]
+sama_bot_right_corn = [690.7,73.6]
 
 ################################ DATA DEIMOS ################################
 
