@@ -2,6 +2,7 @@ from urllib.request import Request, urlopen
 import json
 import requests
 from const import*
+from func import*
 
 class Log:
     def __init__(self, url: str):
@@ -126,21 +127,37 @@ class Boss:
         return self.log.pjcontent['players'][i_player]['healing']>0
     
     def is_dead(self, i_player: int):
-        return self.log.pjcontent['plyaers'][i_player]['defenses'][0]['deadCount']>0
+        return self.log.pjcontent['players'][i_player]['defenses'][0]['deadCount']>0
     
     ################################ DATA JOUEUR ################################
     
     def get_player_name(self, i_player: int):
         return self.log.jcontent['players'][i_player]['name']
     
-    def get_pos_player(self, i_player: int):
-        return self.log.pjcontent['players'][i_player]['combatReplayData']['positions']
+    def get_pos_player(self, i_player: int , start: int = 0, end: int = None): 
+        return self.log.pjcontent['players'][i_player]['combatReplayData']['positions'][start:end]
     
     def get_cc_boss(self, i_player: int):
         return self.log.jcontent['phases'][0]['dpsStatsTargets'][i_player][0][3]
     
     def get_cc_total(self, i_player: int):
         return self.log.jcontent['phases'][0]['dpsStats'][i_player][3]
+    
+    def get_player_id(self, name: str):
+        players = self.log.pjcontent['players']
+        for e in players:
+            if e['name'] == name:
+                return players.index(e)
+        return None
+    
+    ################################ DATA BOSS ################################
+    
+    def get_pos_boss(self, start: int = 0, end: int = None):
+        targets = self.log.pjcontent['targets']
+        for e in targets:
+            if e['id'] in boss_dict.keys():
+                return e['combatReplayData']['positions'][start:end]
+        raise ValueError('No Boss in targets')
     
 class Stats:
     @staticmethod
@@ -237,9 +254,9 @@ class VG(Boss):
         p, v, t = Stats.get_max_value(self.log, self.get_bleu)
         s = ', '.join(list(map(self.get_player_name, p)))
         if len(p)>1:
-            return f" * *[**MVP** : {s} se sont tous les {len(p)} pris **{v}** bleues sur VG]*"
+            return f" * *[**MVP** : {s} se sont tous les {len(p)} pris **{v}** **bleues**]*"
         else:
-            return f" * *[**MVP** : {s} s'est pris **{v}** bleues sur VG]*"
+            return f" * *[**MVP** : {s} s'est pris **{v}** **bleues**]*"
     
     def get_lvp(self):
         return f"LVP de {self.name}"
@@ -280,8 +297,8 @@ class GORS(Boss):
     def get_mvp(self):
         p, v, t = Stats.get_min_value(self.log, self.get_dmg_split, exclude=[self.is_support])
         s = ', '.join(list(map(self.get_player_name, p)))
-        v = v / t * 100
-        return f" * *[**MVP** : {s} avec seulement **{v:.1f}%** des degats sur split en DPS]*"
+        r = v / t * 100
+        return f" * *[**MVP** : {s} avec seulement **{r:.1f}%** des degats sur **split** en DPS]*"
     
     def get_lvp(self):
         return f"LVP de {self.name}"
@@ -324,7 +341,7 @@ class SABETHA(Boss):
         p, v, t = Stats.get_min_value(self.log, self.get_dmg_split, exclude=[self.is_support,self.is_cannon])
         v = v / t * 100
         s = ', '.join(list(map(self.get_player_name, p)))
-        return f" * *[**MVP** : {s} avec seulement **{v:.1f}%** des degats sur split sans faire de canon]*"
+        return f" * *[**MVP** : {s} avec seulement **{v:.1f}%** des degats sur **split** sans faire de **canon**]*"
     
     def get_lvp(self):
         return f"LVP de {self.name}"
@@ -337,20 +354,20 @@ class SABETHA(Boss):
         pos_player = self.get_pos_player(i_player)
         match n:
             case 0: 
-                canon_pos = [pos_cannon1, pos_cannon2, pos_cannon3, pos_cannon4]
+                canon_pos = [pos_canon1, pos_canon2, pos_canon3, pos_canon4]
             case 1:
-                canon_pos = [pos_cannon1]
+                canon_pos = [pos_canon1]
             case 2:
-                canon_pos = [pos_cannon2]
+                canon_pos = [pos_canon2]
             case 3:
-                canon_pos = [pos_cannon3]
+                canon_pos = [pos_canon3]
             case 4:
-                canon_pos = [pos_cannon4]
+                canon_pos = [pos_canon4]
             case _:
                 canon_pos = []
         for e in pos_player:
-            for cannon in canon_pos:
-                if (e[0] - cannon[0])**2 + (e[1] - cannon[1])**2 <= detect_radius**2:
+            for canon in canon_pos:
+                if get_dist(e, canon) <= detect_radius:
                     return True
         return False
     
@@ -384,11 +401,11 @@ class SLOTH(Boss):
     def get_mvp(self):
         total_cc_boss = Stats.get_tot_value(self.log, self.get_cc_boss)
         p, v, t = Stats.get_min_value(self.log, self.get_cc_boss, exclude=[self.is_shroom])
-        relativ_v = v / total_cc_boss * 100
+        r = v / total_cc_boss * 100
         s = ', '.join(list(map(self.get_player_name, p)))
         if len(p)>1:
-            return f" * *[**MVP** : {s} qui ont fait seulement **{v:.0f}** de CC (**{relativ_v:.1f}%** du total) sans manger de shroom]*"
-        return f" * *[**MVP** : {s} qui a fait seulement **{v:.0f}** de CC (**{relativ_v:.1f}%** du total) sans manger de shroom]*"
+            return f" * *[**MVP** : {s} qui ont fait seulement **{v:.0f}** de **CC** (**{r:.1f}%** du total) sans manger de **shroom**]*"
+        return f" * *[**MVP** : {s} qui a fait seulement **{v:.0f}** de **CC** (**{r:.1f}%** du total) sans manger de **shroom**]*"
     
     def get_lvp(self):
         return f"LVP de {self.name}"
@@ -426,16 +443,16 @@ class MATTHIAS(Boss):
     def get_mvp(self):
         total_cc_boss = Stats.get_tot_value(self.log, self.get_cc_total)
         p, v, t = Stats.get_min_value(self.log, self.get_cc_total, exclude=[self.is_sac])
-        relativ_v = v / total_cc_boss * 100
+        r = v / total_cc_boss * 100
         s = ', '.join(list(map(self.get_player_name, p)))
         if v == 0:
             if len(p)>1:
-                return f" * *[**MVP** : {s} qui n'ont même pas CC sans s'être sacrifié]*"
+                return f" * *[**MVP** : {s} qui n'ont même pas **CC** sans s'être **sacrifié**]*"
             else:
-                return f" * *[**MVP** : {s} qui n'a même pas CC sans s'être sacrifié]*"
+                return f" * *[**MVP** : {s} qui n'a même pas **CC** sans s'être **sacrifié**]*"
         elif len(p)>1:
-            return f" * *[**MVP** : {s} qui ont fait seulement **{v:.0f}** de CC (**{relativ_v:.1f}%** du total) sans s'être sacrifié]*"
-        return f" * *[**MVP** : {s} qui a fait seulement **{v:.0f}** de CC (**{relativ_v:.1f}%** du total) sans s'être sacrifié]*"
+            return f" * *[**MVP** : {s} qui ont fait seulement **{v:.0f}** de **CC** (**{r:.1f}%** du total) sans s'être sacrifié]*"
+        return f" * *[**MVP** : {s} qui a fait seulement **{v:.0f}** de **CC** (**{r:.1f}%** du total) sans s'être sacrifié]*"
     
     def get_lvp(self):
         return f"LVP de {self.name}"
@@ -472,17 +489,48 @@ class ESCORT(Boss):
     ################################ MVP / LVP ################################
     
     def get_mvp(self):
+        p = self.get_mined_players()
+        s = ', '.join(list(map(self.get_player_name, p)))
+        if len(p)>0:
+            if len(p)==1:
+                return f" * *[**MVP** : {s} qui a bien **profité** de l'escort en prenant une **mine**]*"
+            else:
+                return f" * *[**MVP** : {s} qui ont bien **profité** de l'escort en prenant une **mine**]*"
         return f"MVP de {self.name}"
     
     def get_lvp(self):
-        return f"LVP de {self.name}"
+        p, v, t = Stats.get_max_value(self.log, self.get_glenna_call)
+        s = ', '.join(list(map(self.get_player_name, p)))
+        return f" * *[**LVP** : {s}, merci d'avoir **call** glenna **{v}** fois]*"
     
     ################################ CONDITIONS ################################
     
-    
+    def is_mined(self, i_player: int):
+        mechs_list = [mech['name'] for mech in self.mechanics]
+        mech = "Mine Detonation Hit"
+        if mech in mechs_list:
+            i_mech = mechs_list.index(mech)
+            return self.log.jcontent['phases'][0]['mechanicStats'][i_player][i_mech][0]>0
+        return False
     
     ################################ DATA MECHAS ################################
-
+    
+    def get_mined_players(self):
+        p = []
+        nb_players = len(self.log.jcontent['players'])
+        for i in range(nb_players):
+            if self.is_mined(i):
+                p.append(i)
+        return p
+    
+    def get_glenna_call(self, i_player: int):
+        mechs_list = [mech['name'] for mech in self.mechanics]
+        mech = "Over Here! Cast"
+        if mech in mechs_list:
+            i_mech = mechs_list.index(mech)
+            return self.log.jcontent['phases'][0]['mechanicStats'][i_player][i_mech][0]
+        return 0
+            
 
 
 ################################ KC ################################
@@ -502,7 +550,12 @@ class KC(Boss):
     ################################ MVP / LVP ################################
     
     def get_mvp(self):
-        return f"MVP de {self.name}"
+        p, v, t = Stats.get_min_value(self.log, self.get_good_orb)
+        s = ', '.join(list(map(self.get_player_name, p)))
+        if len(p)==1:
+            return f" * *[**MVP** : {s} qui n'a collecté que **{v}** orbes sur tout le fight]*"
+        else:
+            return f" * *[**MVP** : {s} qui n'ont collecté que **{v}** orbes sur tout le fight]*"
     
     def get_lvp(self):
         return f"LVP de {self.name}"
@@ -513,7 +566,11 @@ class KC(Boss):
     
     ################################ DATA MECHAS ################################
 
-
+    def get_good_orb(self, i_player: int):
+        mechs_list = [mech['name'] for mech in self.mechanics]
+        i_r = mechs_list.index('Good Red Orb')
+        i_w = mechs_list.index('Good White Orb')
+        return self.log.jcontent['phases'][0]['mechanicStats'][i_player][i_r][0] + self.log.jcontent['phases'][0]['mechanicStats'][i_player][i_w][0]
 
 ################################ XERA ################################
 
@@ -532,10 +589,41 @@ class XERA(Boss):
     ################################ MVP / LVP ################################
     
     def get_mvp(self):
-        return f"MVP de {self.name}"
+        fdp = self.get_fdp()
+        s = ', '.join(list(map(self.get_player_name, fdp)))
+        if len(fdp) == 1:
+            return f" * *[**MVP** : {s} oui ce **fdp** a vraiment skip un **mini-jeu**]*"
+        elif len(fdp) > 0:
+            return f" * *[**MVP** : {s} oui ces **fdp** ont vraiment skip un **mini-jeu**]*"
+        glide = self.get_gliding_death()
+        s = ', '.join(list(map(self.get_player_name, glide)))
+        if len(glide) == 1:
+            return f" * *[**MVP** : {s} ce champion **mort** pendant le **glide**]*"
+        elif len(glide) > 0:
+            return f" * *[**MVP** : {s} ces champions **morts** pendant le **glide**]*"
+        p, v, t = Stats.get_min_value(self.log, self.get_cc_boss)
+        s = ', '.join(list(map(self.get_player_name, p)))
+        r = v / t * 100
+        if v == 0:
+            if len(p) == 1:
+                return f" * *[**MVP** : {s} n'a pas mis de **CC**]*"
+            else:
+                return f" * *[**MVP** : {s} n'ont pas mis de **CC**]*"
+        else:
+            if len(p) == 1:
+                return f" * *[**MVP** : {s} n'a mis que **{v:.0f}** de **CC** (**{r:.1f}%** de la squad)]*"
+            else:
+                return f" * *[**MVP** : {s} n'ont mis que **{v:.0f}** de **CC** (**{r:.1f}%** de la squad)]*" 
     
     def get_lvp(self):
-        return f"LVP de {self.name}"
+        p, v, t = Stats.get_max_value(self.log, self.get_tp_back)
+        s = ', '.join(list(map(self.get_player_name, p)))
+        if v == 2:
+            return f" * *[**LVP** : {s} merci d'avoir tanké **2** mini-jeu sans les skip]*"
+        p, v, t = Stats.get_max_value(self.log, self.get_cc_boss)
+        s = ', '.join(list(map(self.get_player_name, p)))
+        r = v / t * 100
+        return f" * *[**LVP** : {s} merci d'avoir fait **{v:.0f}** de CC soit **{r:.1f}%** de la squad]*"
     
     ################################ CONDITIONS ################################
     
@@ -543,7 +631,47 @@ class XERA(Boss):
     
     ################################ DATA MECHAS ################################
 
+    def get_tp_out(self, i_player: int):
+        mechs_list = [mech['name'] for mech in self.mechanics]
+        i_tp = mechs_list.index('TP')
+        return self.log.jcontent['phases'][0]['mechanicStats'][i_player][i_tp][0]
     
+    def get_tp_back(self, i_player: int):
+        mechs_list = [mech['name'] for mech in self.mechanics]
+        i_tp = mechs_list.index('TP back')
+        return self.log.jcontent['phases'][0]['mechanicStats'][i_player][i_tp][0]
+    
+    def get_fdp(self): # fdp = skip mini jeu XERA
+        mecha_data = self.log.pjcontent['mechanics']
+        tp_data = None
+        for e in mecha_data:
+            if e['name'] == "TP Out":
+                tp_data = e['mechanicsData']
+                break
+        fdp = []
+        delta = 10000
+        i_delta = time_to_index(delta)
+        for e in tp_data:
+            i_player = self.get_player_id(e['actor'])
+            time = e['time']+1000 # 1s de delais pour etre sur
+            i_time = time_to_index(time)
+            pos_player = self.get_pos_player(i_player, i_time, i_time + i_delta)
+            for p in pos_player:
+                if get_dist(p, xera_centre) <= xera_centre_radius:
+                    fdp.append(i_player)
+                    break
+        return fdp
+    
+    def get_gliding_death(self):
+        dead = []
+        for i in range(10):
+            if self.is_dead(i):
+                if self.log.pjcontent['players'][i]['defenses'][5]['deadCount'] > 0:
+                    dead.append(i)
+        return dead
+    
+    
+        
 
 ################################ CAIRN ################################
 
