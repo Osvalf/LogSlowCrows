@@ -9,6 +9,9 @@ if __name__ == "__main__":
     
     input_urls = txt_file_to_list("src/input logs.txt")
     
+    #Pour tester séparément
+    #input_urls = ["https://dps.report/oV8b-20231223-211804_vg"]
+    
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [executor.submit(createLog, input_value) for input_value in input_urls]
         concurrent.futures.wait(futures)
@@ -20,8 +23,15 @@ if __name__ == "__main__":
     
     all_bosses.sort(key=lambda x: x.start_date, reverse=False)
 
+    print("Scores des MVP :")
     print(all_mvp_dic)
+    print("\n")
+    print("Scores des LVP :")
     print(all_lvp_dic)
+    print("\n")
     
-    #print(f"\nListe de tous les boss instanciés : {all_bosses}\n") # Afficher toutes les instances
+    print("Boss instanciés :")
+    for e in all_bosses:
+        print(f"{e.name}",end=" ")
+    #print(f"\nListe de tous les objets boss instanciés : {all_bosses}\n") # Afficher toutes les instances
     
