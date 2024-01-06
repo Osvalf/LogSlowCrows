@@ -130,7 +130,7 @@ class Boss:
         
     def is_quick(self, i_player: int):
         player_quick_contrib = self.log.jcontent['phases'][0]['boonGenGroupStats'][i_player]['data'][2]
-        return player_quick_contrib[0]>=10 or player_quick_contrib[1]>=10
+        return player_quick_contrib[0]>=35 or player_quick_contrib[1]>=35
 
     def is_alac(self, i_player: int):
         player_alac_contrib = self.log.jcontent['phases'][0]['boonGenGroupStats'][i_player]['data'][3]
