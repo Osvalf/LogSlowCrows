@@ -24,10 +24,9 @@ if __name__ == "__main__":
     all_bosses.sort(key=lambda x: x.start_date, reverse=False)
     
     # Fonction reward si pas de test
-    if len(input_urls) >= 19:
-        reward = get_message_reward(all_bosses, all_mvp_dic, all_lvp_dic)
-        for s in reward:
-            print(s)
+    reward = get_message_reward(all_bosses, all_mvp_dic, all_lvp_dic)
+    for s in reward:
+        print(s)
             
     print("\n")
     

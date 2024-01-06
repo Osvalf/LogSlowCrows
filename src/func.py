@@ -41,7 +41,7 @@ def txt_file_to_list(filepath: str):
             boss_names.remove(input_lines[i].split("_")[1])
             
     try:
-        assert(len(input_urls)>=19)
+        assert(len(input_urls)>0)
     except:
         print(f"Tu as mis seulement {len(input_urls)} logs valides sur les 19\n")
         print("Voici ceux qu'il manque :\n")
@@ -77,8 +77,12 @@ def get_message_reward(logs: list, dict_mvp: dict, dict_lvp: dict):
                 w6.append(e)
             case 7:
                 w7.append(e)
-                
-    wings = [w1, w2, w3, w4, w5, w6, w7]
+    
+    temp_wings = [w1,w2,w3,w4,w5,w6,w7]     
+    wings = []
+    for e in temp_wings:
+        if len(e)!=0:
+            wings.append(e)
     wings.sort(key=lambda x: x[0].start_date, reverse=False)
     reward_date = wings[0][0].start_date.strftime("%d/%m/%Y")
     reward_duration = disp_time(wings[-1][-1].end_date - wings[0][0].start_date)
