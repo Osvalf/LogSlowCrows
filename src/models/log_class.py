@@ -715,17 +715,17 @@ class XERA(Boss):
         for e in fdp:
             all_mvp.append(self.get_player_account(e))
         if len(fdp) == 1:
-            return f" * *[**MVP** : {s} oui ce **fdp** a vraiment skip un **mini-jeu**]*"
+            return f" * *[**MVP** : oui {s} a vraiment **skip** un **mini-jeu**]*"
         elif len(fdp) > 0:
-            return f" * *[**MVP** : {s} oui ces **fdp** ont vraiment skip un **mini-jeu**]*"
+            return f" * *[**MVP** : oui {s} ont vraiment **skip** un **mini-jeu**]*"
         glide = self.get_gliding_death()
         s = ', '.join(list(map(self.get_player_name, glide)))
         for e in glide:
             all_mvp.append(self.get_player_account(e))
         if len(glide) == 1:
-            return f" * *[**MVP** : {s} ce champion **mort** pendant le **glide**]*"
+            return f" * *[**MVP** : {s} champion **mort** pendant le **glide**]*"
         elif len(glide) > 0:
-            return f" * *[**MVP** : {s} ces champions **morts** pendant le **glide**]*"
+            return f" * *[**MVP** : {s} champions **morts** pendant le **glide**]*"
         return self.get_mvp_cc() 
     
     def get_lvp(self):
@@ -1151,9 +1151,9 @@ class Q1(Boss):
         p = self.get_fdp()
         s = ', '.join(list(map(self.get_player_name, p)))
         if len(p) == 1:
-            return f" * *[**MVP** : {s} oui ce **fdp** n'est pas allé taper le **pyre**]*"
+            return f" * *[**MVP** : {s} n'est pas allé taper le **pyre**]*"
         if len(p) > 1:
-            return f" * *[**MVP** : {s} oui ces **fdp** ne sont pas allé taper le **pyre**]*"
+            return f" * *[**MVP** : {s} ne sont pas allé taper le **pyre**]*"
         s = self.get_bad_dps()
         if s != None:
             return s
@@ -1299,9 +1299,14 @@ class QTP(Boss):
     ################################ MVP / LVP ################################
     
     def get_mvp(self):
-        s = self.get_bad_dps()
-        if s != None:
-            return s
+        i_sup, sup_max_dmg, _ = Stats.get_max_value(self.log, self.get_dmg_boss, exclude=[self.is_dps])
+        i_dps, dps_min_dmg, tot_dmg = Stats.get_min_value(self.log, self.get_dmg_boss, exclude=[self.is_support, self.is_dead, self.is_pylon])
+        if dps_min_dmg < sup_max_dmg:
+            all_mvp.append(self.get_player_account(i_dps[0]))
+            sup = self.get_player_name(i_sup[0])
+            s = ', '.join(list(map(self.get_player_name, i_dps)))
+            r = (1 - dps_min_dmg / sup_max_dmg) * 100 
+            return f" * *[**MVP** : {s} qui en **DPS** n'a fait que **{dps_min_dmg / self.duration_ms :.1f}kdps** soit **{r:.1f}%** de moins que {sup} qui joue **support** on le rappelle]*"
         return f"MVP de {self.name}"
     
     def get_lvp(self):
@@ -1309,8 +1314,13 @@ class QTP(Boss):
     
     ################################ CONDITIONS ################################
     
-    
+    def is_pylon(self, i_player: int):
+        return self.get_orb_caught(i_player) > 1
     
     ################################ DATA MECHAS ################################
 
-
+    def get_orb_caught(self, i_player: int):
+        mechs_list = [mech['name'] for mech in self.mechanics]
+        mech = "Critical Mass"
+        i_orb = mechs_list.index(mech)
+        return self.log.jcontent['phases'][0]['mechanicStats'][i_player][i_orb][0]
