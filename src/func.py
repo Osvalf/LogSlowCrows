@@ -52,4 +52,73 @@ def txt_file_to_list(filepath: str):
     if escort != None:
         input_urls.append(escort)
     return input_urls
- 
+
+def get_message_reward(logs: list, dict_mvp: dict, dict_lvp: dict):
+    score_max_mvp = max(dict_mvp.values())
+    score_max_lvp = max(dict_lvp.values())    
+    mvps = [k for k, v in dict_mvp.items() if v == score_max_mvp]
+    lvps = [k for k, v in dict_lvp.items() if v == score_max_lvp]
+    
+    w1, w2, w3, w4, w5, w6, w7 = [], [], [], [], [], [], []
+    for e in logs:
+        wing = e.wing
+        match wing:
+            case 1:
+                w1.append(e)
+            case 2:
+                w2.append(e)
+            case 3:
+                w3.append(e)
+            case 4:
+                w4.append(e)
+            case 5:
+                w5.append(e)
+            case 6:
+                w6.append(e)
+            case 7:
+                w7.append(e)
+                
+    wings = [w1, w2, w3, w4, w5, w6, w7]
+    wings.sort(key=lambda x: x[0].start_date, reverse=False)
+    reward_date = wings[0][0].start_date.strftime("%d/%m/%Y")
+    reward_duration = disp_time(wings[-1][-1].end_date - wings[0][0].start_date)
+    reward = f"# Reward du {reward_date}\n"
+    escort = False
+    split_message = []
+    for i in wings:
+        current_wing_n = i[0].wing
+        current_wing_duration = disp_time(i[-1].end_date - i[0].start_date)
+        match current_wing_n:
+            case 1:
+                reward += f"## W1 - *{current_wing_duration}* (sans pre-VG)\n"
+            case 3:
+                for e in i:
+                    if e.name == "ESCORT":
+                        escort = True
+                        break
+                if escort:
+                    reward += f"## W3 - *{current_wing_duration}*\n"
+                else:
+                    reward += f"## W3 - *{current_wing_duration}* (sans escort)\n"
+            case 7:
+                reward += f"## W7 - *{current_wing_duration}* (sans gate)\n"
+            case _:
+                reward += f"## W{current_wing_n} - *{current_wing_duration}*\n"
+        for j in i:
+            current_boss_name = j.name
+            current_boss_duration = disp_time(timedelta(seconds=j.duration_ms / 1000))
+            current_boss_url = j.log.url
+            reward += f"* {current_boss_duration} : **[{current_boss_name}]({current_boss_url})**\n"
+            if j.mvp != f"MVP de {current_boss_name}":
+                reward += j.mvp + "\n"
+            if j.lvp != f"LVP de {current_boss_name}":
+                reward += j.lvp + "\n"
+        reward += "\n"
+        if len(reward) >= 1500:
+            split_message.append(reward)
+            reward = ""
+    reward += f"# GRAND MVP : {', '.join(mvps)} avec {score_max_mvp} titres\n"
+    reward += f"# GRAND LVP : {', '.join(lvps)} avec {score_max_lvp} titres\n"
+    reward += f"# Temps total : {reward_duration}"
+    split_message.append(reward)   
+    return split_message

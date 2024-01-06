@@ -22,16 +22,14 @@ if __name__ == "__main__":
     print("\n")
     
     all_bosses.sort(key=lambda x: x.start_date, reverse=False)
-
-    print("Scores des MVP :")
-    print(all_mvp_dic)
-    print("\n")
-    print("Scores des LVP :")
-    print(all_lvp_dic)
+    
+    # Fonction reward si pas de test
+    if len(input_urls) >= 19:
+        reward = get_message_reward(all_bosses, all_mvp_dic, all_lvp_dic)
+        for s in reward:
+            print(s)
+        
     print("\n")
     
-    print("Boss instanciés :")
-    for e in all_bosses:
-        print(f"{e.name}",end=" ")
     #print(f"\nListe de tous les objets boss instanciés : {all_bosses}\n") # Afficher toutes les instances
     

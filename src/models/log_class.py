@@ -499,6 +499,10 @@ class SLOTH(Boss):
             all_mvp.append(self.get_player_account(e))
         r = v / t * 100
         s = ', '.join(list(map(self.get_player_name, p)))
+        if v == 0:
+            if len(p)>1:
+                return f" * *[**MVP** : {s} qui n'ont même pas **CC** sans manger de **shroom**]*"
+            return f" * *[**MVP** : {s} qui n'a même pas **CC** sans manger de **shroom**]*"
         if len(p)>1:
             return f" * *[**MVP** : {s} qui ont fait seulement **{v:.0f}** de **CC** (**{r:.1f}%** du total) sans manger de **shroom**]*"
         return f" * *[**MVP** : {s} qui a fait seulement **{v:.0f}** de **CC** (**{r:.1f}%** du total) sans manger de **shroom**]*"
