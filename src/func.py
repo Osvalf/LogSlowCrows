@@ -128,7 +128,7 @@ def get_message_reward(logs: list, dict_mvp: dict, dict_lvp: dict, titre="Reward
         if len(reward) >= 1300:
             split_message.append(reward)
             reward = ""
-    if len(all_bosses) > 1:
+    if len(all_bosses) > 1 and len(all_mvp) > 1 and len(all_lvp) > 1:
         reward += f"# [GRAND MVP : {', '.join(mvps)} avec {score_max_mvp} titres]\n"
         reward += f"# [GRAND LVP : {', '.join(lvps)} avec {score_max_lvp} titres]\n"
         reward += f"# Temps total : {reward_duration}"
