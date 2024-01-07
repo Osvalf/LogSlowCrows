@@ -40,25 +40,26 @@ def txt_file_to_list(filepath: str, reward=False):
                 input_urls.append(input_lines[i])
             boss_names.remove(input_lines[i].split("_")[1])
     
-    if reward: 
-        try:
-            assert(len(input_urls)>=19)
-        except:
-            print(f"Tu as mis seulement {len(input_urls)} logs valides sur les 19\n")
-            print("Voici ceux qu'il manque :\n")
-            for e in boss_names:
-                print(f" - {e.upper()}")
-            sys.exit("\nVoilà rajoute les maintenant o7\n")
+    if reward and len(input_urls) < 19: 
+        print(f"Tu as mis seulement {len(input_urls)} logs valides sur les 19\n")
+        print("Voici ceux qu'il manque :\n")
+        for e in boss_names:
+            print(f" - {e.upper()}")
+        sys.exit("\nVoilà rajoute les maintenant o7\n")
         
-    if escort != None:
+    if escort:
         input_urls.append(escort)
     return input_urls
 
 def get_message_reward(logs: list, dict_mvp: dict, dict_lvp: dict, titre="Reward"):
-    score_max_mvp = max(dict_mvp.values())
-    score_max_lvp = max(dict_lvp.values())    
-    mvps = [k for k, v in dict_mvp.items() if v == score_max_mvp]
-    lvps = [k for k, v in dict_lvp.items() if v == score_max_lvp]
+    mvp_scores = dict_mvp.values()
+    lvp_scores = dict_lvp.values()
+    if len(mvp_scores) > 1:
+        score_max_mvp = max(dict_mvp.values())
+        mvps = [k for k, v in dict_mvp.items() if v == score_max_mvp]
+    if len(lvp_scores) > 1:
+        score_max_lvp = max(dict_lvp.values()) 
+        lvps = [k for k, v in dict_lvp.items() if v == score_max_lvp]
     
     w1, w2, w3, w4, w5, w6, w7 = [], [], [], [], [], [], []
     for e in logs:
@@ -82,12 +83,17 @@ def get_message_reward(logs: list, dict_mvp: dict, dict_lvp: dict, titre="Reward
     temp_wings = [w1,w2,w3,w4,w5,w6,w7]     
     wings = []
     for e in temp_wings:
-        if len(e)!=0:
+        if e:
             wings.append(e)
     wings.sort(key=lambda x: x[0].start_date, reverse=False)
-    reward_date = wings[0][0].start_date.strftime("%d/%m/%Y")
-    reward_duration = disp_time(wings[-1][-1].end_date - wings[0][0].start_date)
-    reward = f"# {titre} du {reward_date}\n"
+    first_log = all_bosses[0]
+    last_log = all_bosses[-1]
+    reward_date = first_log.start_date.strftime("%d/%m/%Y")
+    reward_duration = disp_time(last_log.end_date - first_log.start_date)
+    if len(all_bosses)>1:
+        reward = f"# {titre} du {reward_date}\n"
+    else:
+        reward = ""
     escort = False
     split_message = []
     for i in wings:
@@ -119,11 +125,15 @@ def get_message_reward(logs: list, dict_mvp: dict, dict_lvp: dict, titre="Reward
             if j.lvp != f"LVP de {current_boss_name}":
                 reward += j.lvp + "\n"
         reward += "\n"
-        if len(reward) >= 1500:
+        if len(reward) >= 1300:
             split_message.append(reward)
             reward = ""
-    reward += f"# [GRAND MVP : {', '.join(mvps)} avec {score_max_mvp} titres]\n"
-    reward += f"# [GRAND LVP : {', '.join(lvps)} avec {score_max_lvp} titres]\n"
-    reward += f"# Temps total : {reward_duration}"
-    split_message.append(reward)   
+    if len(all_bosses) > 1:
+        reward += f"# [GRAND MVP : {', '.join(mvps)} avec {score_max_mvp} titres]\n"
+        reward += f"# [GRAND LVP : {', '.join(lvps)} avec {score_max_lvp} titres]\n"
+        reward += f"# Temps total : {reward_duration}"
+    split_message.append(reward)
+    '''all_bosses.clear()
+    all_mvp.clear()
+    all_lvp.clear() '''  
     return split_message

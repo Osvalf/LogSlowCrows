@@ -3,17 +3,13 @@ import concurrent.futures
 
 
 if __name__ == "__main__":    
-        
-    def createLog(url):
-        return Log(url)
     
     input_urls = txt_file_to_list("src/input logs.txt")
-    
     #Pour tester séparément
     #input_urls = ["https://dps.report/v75x-20231224-000217_qpeer"]
     
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [executor.submit(createLog, input_value) for input_value in input_urls]
+        futures = [executor.submit(Log, input_value) for input_value in input_urls]
         concurrent.futures.wait(futures)
     
     all_mvp_dic = {x:all_mvp.count(x) for x in all_mvp}

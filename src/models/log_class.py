@@ -246,10 +246,10 @@ class Stats:
                       fnc: classmethod, 
                       exclude: list[classmethod] = []):
 
-        i_max = None
-        value_max = -BIG
+        value_max = -1
         value_tot = 0
         nb_players = 10
+        i_maxs = []
         for i in range(nb_players):
             value = fnc(i)
             value_tot += value
@@ -259,15 +259,8 @@ class Stats:
             else:
                 if value > value_max:
                     value_max = value
-                    i_max = i
-        i_maxs = []
-        for i in range(nb_players):
-            for filtre in exclude:
-                if filtre(i):
-                    break
-            else:
-                value = fnc(i)
-                if value == value_max:
+                    i_maxs = [i]
+                elif value == value_max:
                     i_maxs.append(i)
         return i_maxs, value_max, value_tot
     
@@ -276,10 +269,10 @@ class Stats:
                       fnc: classmethod, 
                       exclude: list[classmethod] = []):
 
-        i_min = None
         value_min = BIG
         value_tot = 0
         nb_players = 10
+        i_mins = []
         for i in range(nb_players):
             value = fnc(i)
             value_tot += value
@@ -289,15 +282,8 @@ class Stats:
             else:
                 if value < value_min:
                     value_min = value
-                    i_min = i
-        i_mins = []
-        for i in range(nb_players):
-            for filtre in exclude:
-                if filtre(i):
-                    break
-            else:
-                value = fnc(i)
-                if value == value_min:
+                    i_mins = [i]
+                elif value == value_min:
                     i_mins.append(i)
         return i_mins, value_min, value_tot
 
@@ -600,7 +586,7 @@ class ESCORT(Boss):
     def get_mvp(self):
         p = self.get_mined_players()
         s = ', '.join(list(map(self.get_player_name, p)))
-        if len(p)>0:
+        if p:
             for e in p:
                 all_mvp.append(self.get_player_account(e))
             if len(p)==1:
@@ -716,7 +702,7 @@ class XERA(Boss):
             all_mvp.append(self.get_player_account(e))
         if len(fdp) == 1:
             return f" * *[**MVP** : oui {s} a vraiment **skip** un **mini-jeu**]*"
-        elif len(fdp) > 0:
+        elif fdp:
             return f" * *[**MVP** : oui {s} ont vraiment **skip** un **mini-jeu**]*"
         glide = self.get_gliding_death()
         s = ', '.join(list(map(self.get_player_name, glide)))
@@ -724,7 +710,7 @@ class XERA(Boss):
             all_mvp.append(self.get_player_account(e))
         if len(glide) == 1:
             return f" * *[**MVP** : {s} champion **mort** pendant le **glide**]*"
-        elif len(glide) > 0:
+        elif glide:
             return f" * *[**MVP** : {s} champions **morts** pendant le **glide**]*"
         return self.get_mvp_cc() 
     
@@ -800,7 +786,7 @@ class CAIRN(Boss):
     
     def get_mvp(self):
         s = self.get_bad_dps()
-        if s != None:
+        if s:
             return s   
         return f"MVP de {self.name}"
     
@@ -833,7 +819,7 @@ class MO(Boss):
     
     def get_mvp(self):
         s = self.get_bad_dps()
-        if s != None:
+        if s:
             return s   
         return f"MVP de {self.name}"
     
@@ -947,7 +933,7 @@ class DEIMOS(Boss):
         for e in p:
             all_lvp.append(self.get_player_account(e))
         s = ', '.join(list(map(self.get_player_name, p)))
-        if len(p) > 0:
+        if p:
             return f" * *[**LVP** : {s} merci d'avoir ramassé **{v} tears**]*"
         return f"LVP de {self.name}"
     
@@ -1066,7 +1052,7 @@ class CA(Boss):
     
     def get_mvp(self):
         s = self.get_bad_dps()
-        if s != None:
+        if s:
             return s
         return f"MVP de {self.name}"
     
@@ -1155,7 +1141,7 @@ class Q1(Boss):
         if len(p) > 1:
             return f" * *[**MVP** : {s} ne sont pas allé taper le **pyre**]*"
         s = self.get_bad_dps()
-        if s != None:
+        if s:
             return s
         p, v, _ = Stats.get_max_value(self.log, self.get_wave, exclude=[self.is_quick])
         s = ', '.join(list(map(self.get_player_name, p)))
