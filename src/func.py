@@ -23,7 +23,7 @@ def disp_time(td: timedelta):
         time = f"{days}d{hours:02}h{minutes:02}m{seconds:02}s"
     return time
 
-def txt_file_to_list(filepath: str):
+def txt_file_to_list(filepath: str, reward=False):
     with open(filepath, 'r') as file:
         lines = file.readlines()
 
@@ -39,21 +39,22 @@ def txt_file_to_list(filepath: str):
             else:
                 input_urls.append(input_lines[i])
             boss_names.remove(input_lines[i].split("_")[1])
-            
-    try:
-        assert(len(input_urls)>0)
-    except:
-        print(f"Tu as mis seulement {len(input_urls)} logs valides sur les 19\n")
-        print("Voici ceux qu'il manque :\n")
-        for e in boss_names:
-            print(f" - {e.upper()}")
-        sys.exit("\nVoilà rajoute les maintenant o7\n")
+    
+    if reward: 
+        try:
+            assert(len(input_urls)>=19)
+        except:
+            print(f"Tu as mis seulement {len(input_urls)} logs valides sur les 19\n")
+            print("Voici ceux qu'il manque :\n")
+            for e in boss_names:
+                print(f" - {e.upper()}")
+            sys.exit("\nVoilà rajoute les maintenant o7\n")
         
     if escort != None:
         input_urls.append(escort)
     return input_urls
 
-def get_message_reward(logs: list, dict_mvp: dict, dict_lvp: dict):
+def get_message_reward(logs: list, dict_mvp: dict, dict_lvp: dict, titre="Reward"):
     score_max_mvp = max(dict_mvp.values())
     score_max_lvp = max(dict_lvp.values())    
     mvps = [k for k, v in dict_mvp.items() if v == score_max_mvp]
@@ -86,7 +87,7 @@ def get_message_reward(logs: list, dict_mvp: dict, dict_lvp: dict):
     wings.sort(key=lambda x: x[0].start_date, reverse=False)
     reward_date = wings[0][0].start_date.strftime("%d/%m/%Y")
     reward_duration = disp_time(wings[-1][-1].end_date - wings[0][0].start_date)
-    reward = f"# Reward du {reward_date}\n"
+    reward = f"# {titre} du {reward_date}\n"
     escort = False
     split_message = []
     for i in wings:

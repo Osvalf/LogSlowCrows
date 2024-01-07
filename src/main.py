@@ -24,7 +24,7 @@ if __name__ == "__main__":
     all_bosses.sort(key=lambda x: x.start_date, reverse=False)
     
     # Fonction reward si pas de test
-    reward = get_message_reward(all_bosses, all_mvp_dic, all_lvp_dic)
+    reward = get_message_reward(all_bosses, all_mvp_dic, all_lvp_dic, titre="FC W1-4")
     for s in reward:
         print(s)
             
