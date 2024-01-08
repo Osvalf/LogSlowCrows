@@ -52,6 +52,9 @@ def txt_file_to_list(filepath: str, reward=False):
     return input_urls
 
 def get_message_reward(logs: list, dict_mvp: dict, dict_lvp: dict, titre="Run"):
+    if not logs:
+        print("No boss found")
+        return []
     mvp_scores = dict_mvp.values()
     lvp_scores = dict_lvp.values()
     if len(mvp_scores) > 1:
@@ -122,6 +125,10 @@ def get_message_reward(logs: list, dict_mvp: dict, dict_lvp: dict, titre="Run"):
             current_boss_duration = disp_time(timedelta(seconds=j.duration_ms / 1000))
             current_boss_url = j.log.url
             reward += f"* {current_boss_duration} : **[{current_boss_name}]({current_boss_url})**\n"
+            if j.wingman_time:
+                med = disp_time(timedelta(seconds=j.wingman_time[0] / 1000))
+                top = disp_time(timedelta(seconds=j.wingman_time[1] / 1000))
+                reward += f"\t:wingman: med. {med} top. {top}\n"
             if j.mvp != f"MVP de {current_boss_name}":
                 reward += j.mvp + "\n"
             if j.lvp != f"LVP de {current_boss_name}":

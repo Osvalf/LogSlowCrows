@@ -70,6 +70,7 @@ class Boss:
 
     name = None
     wing = 0
+    boss_id = -1
 
     def __init__(self, log: Log):
         self.log = log
@@ -79,6 +80,7 @@ class Boss:
         self.duration_ms = self.get_duration_ms() 
         self.start_date = self.get_start_date()
         self.end_date = self.get_end_date()
+        self.wingman_time = self.get_wingman_time()
         
     ################################ Fonction pour attribus Boss ################################
     
@@ -111,6 +113,24 @@ class Boss:
         start_date = datetime.strptime(s, date_format)
         paris_timezone = timezone(timedelta(hours=1))
         return start_date.astimezone(paris_timezone)
+
+    def get_wingman_time(self):
+        # return None
+        w_boss_id = self.boss_id * (-1) ** self.cm
+        url = f"https://gw2wingman.nevermindcreations.de/api/boss?era=latest&bossID={w_boss_id}"
+        r = requests.get(url)
+        if not r.ok:
+            print("wingman faled")
+            print(r.status_code)
+            print(r.content)
+            return None
+        data = r.json()
+        if data.get("error"):
+            print("wingman failed")
+            print(data["error"])
+            return None
+        return [data["duration_med"], data["duration_top"]]
+
             
     ################################ CONDITIONS ################################
         
@@ -294,6 +314,7 @@ class VG(Boss):
     last = None
     name = "VG"
     wing = 1
+    boss_id = 15438
     
     def __init__(self, log: Log):
         super().__init__(log)
@@ -342,6 +363,7 @@ class GORS(Boss):
     last = None
     name = "GORS"
     wing = 1
+    boss_id = 15429
     
     def __init__(self, log: Log):
         super().__init__(log)
@@ -389,6 +411,7 @@ class SABETHA(Boss):
     last = None
     name = "SABETHA"
     wing = 1
+    boss_id = 15375
     
     def __init__(self, log: Log):
         super().__init__(log)
@@ -456,6 +479,7 @@ class SLOTH(Boss):
     last = None
     name = "SLOTH"
     wing = 2
+    boss_id = 16123
     
     def __init__(self, log: Log):
         super().__init__(log)
@@ -503,6 +527,7 @@ class MATTHIAS(Boss):
     last = None
     name = "MATTHIAS"
     wing = 2
+    boss_id = 16115
     
     def __init__(self, log: Log):
         super().__init__(log)
@@ -560,6 +585,7 @@ class ESCORT(Boss):
     last = None
     name = "ESCORT"
     wing = 3
+    boss_id = 16253
     
     def __init__(self, log: Log):
         super().__init__(log)
@@ -625,6 +651,7 @@ class KC(Boss):
     last = None
     name = "KC"
     wing = 3
+    boss_id = 16235
     
     def __init__(self, log: Log):
         super().__init__(log)
@@ -672,6 +699,7 @@ class XERA(Boss):
     last = None
     name = "XERA"
     wing = 3
+    boss_id = 16246
 
     def __init__(self, log: Log):
         super().__init__(log)
@@ -761,6 +789,7 @@ class CAIRN(Boss):
     last = None
     name = "CAIRN"
     wing = 4
+    boss_id = 17194
     
     def __init__(self, log: Log):
         super().__init__(log)
@@ -794,6 +823,7 @@ class MO(Boss):
     last = None
     name = "MO"
     wing = 4
+    boss_id = 17172
     
     def __init__(self, log: Log):
         super().__init__(log)
@@ -827,6 +857,7 @@ class SAMAROG(Boss):
     last = None
     name = "SAMAROG"
     wing = 4
+    boss_id = 17188
     
     def __init__(self, log: Log):
         super().__init__(log)
@@ -892,6 +923,7 @@ class DEIMOS(Boss):
     last = None
     name = "DEIMOS"
     wing = 4
+    boss_id = 17154
     
     def __init__(self, log: Log):
         super().__init__(log)
@@ -952,6 +984,7 @@ class SH(Boss):
     last = None
     name = "SH"
     wing = 5
+    boss_id = 19767
     
     def __init__(self, log: Log):
         super().__init__(log)
@@ -982,6 +1015,7 @@ class DHUUM(Boss):
     last = None
     name = "DHUUM"
     wing = 5
+    boss_id = 19450
     
     def __init__(self, log: Log):
         super().__init__(log)
@@ -1027,6 +1061,7 @@ class CA(Boss):
     last = None
     name = "CA"
     wing = 6
+    boss_id = 43974
 
     def __init__(self, log: Log):
         super().__init__(log)
@@ -1060,7 +1095,8 @@ class LARGOS(Boss):
     last = None
     name = "LARGOS"
     wing = 6
-    
+    boss_id = 21105
+
     def __init__(self, log: Log):
         super().__init__(log)
         self.mvp = self.get_mvp()
@@ -1110,6 +1146,7 @@ class Q1(Boss):
     last = None
     name = "QUOIDIMM"
     wing = 6
+    boss_id = 20934
 
     def __init__(self, log: Log):
         super().__init__(log)
@@ -1185,6 +1222,7 @@ class ADINA(Boss):
     last = None
     name = "ADINA"
     wing = 7
+    boss_id = 22006
     
     def __init__(self, log: Log):
         super().__init__(log)
@@ -1231,6 +1269,7 @@ class SABIR(Boss):
     last = None
     name = "SABIR"
     wing = 7
+    boss_id = 21964
     
     def __init__(self, log: Log):
         super().__init__(log)
@@ -1261,7 +1300,8 @@ class QTP(Boss):
     last = None
     name = "QTP"
     wing = 7
-    
+    boss_id = 22000
+
     def __init__(self, log: Log):
         super().__init__(log)
         self.mvp = self.get_mvp()
