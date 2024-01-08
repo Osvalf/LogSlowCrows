@@ -1,12 +1,10 @@
 from models.log_class import*
 import concurrent.futures
 
-
-if __name__ == "__main__":    
-    
+def main() -> None:
     input_urls = txt_file_to_list("src/input logs.txt")
     #Pour tester séparément
-    #input_urls = ["https://dps.report/v75x-20231224-000217_qpeer"]
+    #input_urls = ["https://dps.report/oiDx-20240101-233539_sab"]
     
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [executor.submit(Log, input_value) for input_value in input_urls]
@@ -27,4 +25,8 @@ if __name__ == "__main__":
     print("\n")
     
     #print(f"\nListe de tous les objets boss instanciés : {all_bosses}\n") # Afficher toutes les instances
+
+if __name__ == "__main__":    
+    main()
+    
     

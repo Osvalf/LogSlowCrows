@@ -51,7 +51,7 @@ def txt_file_to_list(filepath: str, reward=False):
         input_urls.append(escort)
     return input_urls
 
-def get_message_reward(logs: list, dict_mvp: dict, dict_lvp: dict, titre="Reward"):
+def get_message_reward(logs: list, dict_mvp: dict, dict_lvp: dict, titre="Run"):
     mvp_scores = dict_mvp.values()
     lvp_scores = dict_lvp.values()
     if len(mvp_scores) > 1:
@@ -117,6 +117,8 @@ def get_message_reward(logs: list, dict_mvp: dict, dict_lvp: dict, titre="Reward
                 reward += f"## W{current_wing_n} - *{current_wing_duration}*\n"
         for j in i:
             current_boss_name = j.name
+            if j.cm:
+                current_boss_name += " CM"
             current_boss_duration = disp_time(timedelta(seconds=j.duration_ms / 1000))
             current_boss_url = j.log.url
             reward += f"* {current_boss_duration} : **[{current_boss_name}]({current_boss_url})**\n"
@@ -128,12 +130,12 @@ def get_message_reward(logs: list, dict_mvp: dict, dict_lvp: dict, titre="Reward
         if len(reward) >= 1300:
             split_message.append(reward)
             reward = ""
-    if len(all_bosses) > 1 and len(all_mvp) > 1 and len(all_lvp) > 1:
+    if len(all_bosses) > 1 and len(all_mvp) > 1 and len(all_lvp) > 1 and len(wings) > 1:
         reward += f"# [GRAND MVP : {', '.join(mvps)} avec {score_max_mvp} titres]\n"
         reward += f"# [GRAND LVP : {', '.join(lvps)} avec {score_max_lvp} titres]\n"
         reward += f"# Temps total : {reward_duration}"
     split_message.append(reward)
-    '''all_bosses.clear()
+    all_bosses.clear()
     all_mvp.clear()
-    all_lvp.clear() '''  
+    all_lvp.clear()
     return split_message

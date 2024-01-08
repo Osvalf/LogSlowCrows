@@ -32,54 +32,40 @@ class Log:
 class BossFactory:
     @staticmethod
     def create_boss(log : Log):
-        boss_id = log.jcontent['triggerID']
-        boss_name = boss_dict[boss_id]
         boss = None
-        match boss_name:
-            case "vg":
-                boss = VG(log)
-            case "gors":
-                boss = GORS(log)
-            case "sab":
-                boss = SABETHA(log)
-            case "sloth":
-                boss = SLOTH(log)
-            case "matt":
-                boss = MATTHIAS(log)
-            case "esc":
-                boss = ESCORT(log)
-            case "kc":
-                boss = KC(log)
-            case "xera":
-                boss = XERA(log)
-            case "cairn":
-                boss = CAIRN(log)
-            case "mo":
-                boss = MO(log)
-            case "sam":
-                boss = SAMAROG(log)
-            case "dei":
-                boss = DEIMOS(log)
-            case "sh":
-                boss = SH(log)
-            case "dhuum":
-                boss = DHUUM(log)
-            case "ca":
-                boss = CA(log)
-            case "twins":
-                boss = LARGOS(log)
-            case "qadim":
-                boss = Q1(log)
-            case "adina":
-                boss = ADINA(log)
-            case "sabir":
-                boss = SABIR(log)
-            case "qpeer":
-                boss = QTP(log)
-            case _:
-                raise ValueError("Unknown Boss") 
-        all_bosses.append(boss)
-
+        factory = {"vg": VG,
+                   "gors": GORS,
+                   "sab": SABETHA,   
+                                   
+                   "sloth": SLOTH,
+                   "matt": MATTHIAS,    
+                                  
+                   "esc": ESCORT,
+                   "kc": KC,
+                   "xera": XERA,
+                   
+                   "cairn": CAIRN,
+                   "mo": MO,
+                   "sam": SAMAROG,
+                   "dei": DEIMOS,   
+                                   
+                   "sh": SH,
+                   "dhuum": DHUUM,   
+                                   
+                   "ca": CA,
+                   "twins": LARGOS,
+                   "qadim": Q1,      
+                   
+                   "adina": ADINA,
+                   "sabir": SABIR,
+                   "qpeer": QTP}
+        
+        boss_id = log.jcontent['triggerID']
+        if boss_id in boss_dict.keys():
+            boss_name = boss_dict[boss_id]
+            boss = factory[boss_name](log)
+            all_bosses.append(boss)       
+        
 class Boss:  
 
     name = None
