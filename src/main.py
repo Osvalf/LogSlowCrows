@@ -1,12 +1,12 @@
 from models.log_class import*
 import concurrent.futures
-import time
+from time import perf_counter
 
 
 def main() -> None:
     input_urls = txt_file_to_list("src/input logs.txt")
     #Pour tester séparément
-    input_urls = ["https://dps.report/oiDx-20240101-233539_sab"]
+    #input_urls = ["https://dps.report/oiDx-20240101-233539_sab"]
     
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [executor.submit(Log, input_value) for input_value in input_urls]
@@ -30,8 +30,9 @@ def main() -> None:
 
 if __name__ == "__main__":
     print("Starting")
-    start_time = time.time()    
+    start_time = perf_counter()   
     main()
-    print(f"--- {time.time() - start_time:.3f} seconds ---\n")
+    end_time = perf_counter()
+    print(f"--- {end_time - start_time:.3f} seconds ---\n")
     
     

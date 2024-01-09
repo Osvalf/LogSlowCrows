@@ -60,11 +60,9 @@ class BossFactory:
                    "sabir": SABIR,
                    "qpeer": QTP}
         
-        boss_id = log.jcontent['triggerID']
-        if boss_id in boss_dict.keys():
-            boss_name = boss_dict[boss_id]
-            boss = factory[boss_name](log)
-            all_bosses.append(boss)       
+        boss_name = boss_dict.get(log.jcontent['triggerID'])
+        if boss_name:
+            all_bosses.append(factory[boss_name](log))      
         
 class Boss:  
 
