@@ -332,10 +332,10 @@ class VG(Boss):
                 return f" * *[**MVP** : {s} se sont tous les {len(p)} pris **{v}** **bleues**]*"
             else:
                 return f" * *[**MVP** : {s} s'est pris **{v}** **bleues**]*"
-        return f"MVP de {self.name}"
+        return 
     
     def get_lvp(self):
-        return f"LVP de {self.name}"
+        return 
 
     ################################ CONDITIONS ###############################
     
@@ -603,7 +603,7 @@ class ESCORT(Boss):
                 return f" * *[**MVP** : {s} qui a bien **profité** de l'escort en prenant une **mine**]*"
             else:
                 return f" * *[**MVP** : {s} qui ont bien **profité** de l'escort en prenant une **mine**]*"
-        return f"MVP de {self.name}"
+        return 
     
     def get_lvp(self):
         p, v, t = Stats.get_max_value(self.log, self.get_glenna_call)
@@ -662,9 +662,9 @@ class KC(Boss):
     def get_mvp(self):
         p, v, t = Stats.get_min_value(self.log, self.get_good_orb)
         s = ', '.join(list(map(self.get_player_name, p)))
+        for e in p:
+            all_mvp.append(self.get_player_account(e))
         if v == 0:
-            for e in p:
-                all_mvp.append(self.get_player_account(e))
             if len(p)==1:
                 return f" * *[**MVP** : {s} qui n'a pas collecté d'**orbe** sur tout le fight]*"
             else:
@@ -676,7 +676,7 @@ class KC(Boss):
                 return f" * *[**MVP** : {s} qui n'ont collecté que **{v}** orbes sur tout le fight]*"
     
     def get_lvp(self):
-        return f"LVP de {self.name}"
+        return 
     
     ################################ CONDITIONS ################################
     
@@ -801,7 +801,7 @@ class CAIRN(Boss):
         s = self.get_bad_dps()
         if s:
             return s   
-        return f"MVP de {self.name}"
+        return 
     
     def get_lvp(self):
         return self.get_lvp_dps()
@@ -835,7 +835,7 @@ class MO(Boss):
         s = self.get_bad_dps()
         if s:
             return s   
-        return f"MVP de {self.name}"
+        return 
     
     def get_lvp(self):
         return self.get_lvp_dps()
@@ -942,7 +942,7 @@ class DEIMOS(Boss):
             if len(p) > 1:
                 s = ', '.join(list(map(self.get_player_name, p)))
                 return f" * *[**MVP** : {s} merci à ces **champions** d'avoir tous les {len(p)} trigger **{v} black**]*"
-        return f"MVP de {self.name}"
+        return 
     
     def get_lvp(self):
         p, v, _ = Stats.get_max_value(self.log, self.get_tears)
@@ -951,7 +951,7 @@ class DEIMOS(Boss):
         s = ', '.join(list(map(self.get_player_name, p)))
         if p:
             return f" * *[**LVP** : {s} merci d'avoir ramassé **{v} tears**]*"
-        return f"LVP de {self.name}"
+        return 
     
     ################################ CONDITIONS ################################
     
@@ -1033,10 +1033,10 @@ class DHUUM(Boss):
                 return f" * *[**MVP** : {s} s'est pris **{v} cracks**]*"
             if len(p) > 1:
                 return f" * *[**MVP** : {s} se sont pris **{v} cracks**]*"
-        return f"MVP de {self.name}"
+        return 
     
     def get_lvp(self):
-        return f"LVP de {self.name}"
+        return 
     
     ################################ CONDITIONS ################################
     
@@ -1073,7 +1073,7 @@ class CA(Boss):
         s = self.get_bad_dps()
         if s:
             return s
-        return f"MVP de {self.name}"
+        return 
     
     def get_lvp(self):
         return self.get_lvp_dps()
@@ -1113,7 +1113,7 @@ class LARGOS(Boss):
                 return f" * *[**MVP** : {s} s'est pris **{v} dash**]*"
             if len(p) > 1:
                 return f" * *[**MVP** : {s} se sont pris **{v} dash**]*"
-        return f"MVP de {self.name}"
+        return 
     
     def get_lvp(self):
         p, v, t = Stats.get_max_value(self.log, self.get_cc_total)
@@ -1171,10 +1171,10 @@ class Q1(Boss):
                 return f" * *[**MVP** : {s} s'est pris **{v} shockwave**]*"
             if len(p) > 1:
                 return f" * *[**MVP** : {s} se sont pris **{v} shockwave**]*"
-        return f"MVP de {self.name}"
+        return 
     
     def get_lvp(self):
-        return f"LVP de {self.name}"
+        return 
     
     ################################ CONDITIONS ################################
     
@@ -1317,7 +1317,7 @@ class QTP(Boss):
             s = ', '.join(list(map(self.get_player_name, i_dps)))
             r = (1 - dps_min_dmg / sup_max_dmg) * 100 
             return f" * *[**MVP** : {s} qui en **DPS** n'a fait que **{dps_min_dmg / self.duration_ms :.1f}kdps** soit **{r:.1f}%** de moins que {sup} qui joue **support** on le rappelle]*"
-        return f"MVP de {self.name}"
+        return 
     
     def get_lvp(self):
         return self.get_lvp_dps()
