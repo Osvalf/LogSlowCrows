@@ -128,7 +128,7 @@ def get_message_reward(logs: list, dict_mvp: dict, dict_lvp: dict, titre="Run"):
             if j.wingman_time:
                 med = disp_time(timedelta(seconds=j.wingman_time[0] / 1000))
                 top = disp_time(timedelta(seconds=j.wingman_time[1] / 1000))
-                reward += f"\t:wingman: med. {med} top. {top}\n"
+                #reward += f"\t:*[wingman: med. {med} top. {top}]*\n"
             if j.mvp:
                 reward += j.mvp + "\n"
             if j.lvp:
