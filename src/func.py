@@ -124,7 +124,8 @@ def get_message_reward(logs: list, dict_mvp: dict, dict_lvp: dict, titre="Run"):
                 current_boss_name += " CM"
             current_boss_duration = disp_time(timedelta(seconds=j.duration_ms / 1000))
             current_boss_url = j.log.url
-            reward += f"* {current_boss_duration} : **[{current_boss_name}]({current_boss_url})**\n"
+            current_boss_percentil = j.wingman_percentile
+            reward += f"* **[{current_boss_name}]({current_boss_url})** **{current_boss_duration} ({current_boss_percentil}{emote_wingman})**\n"
             if j.wingman_time:
                 med = disp_time(timedelta(seconds=j.wingman_time[0] / 1000))
                 top = disp_time(timedelta(seconds=j.wingman_time[1] / 1000))
