@@ -1,6 +1,7 @@
 from urllib.request import Request, urlopen
 import json
 import requests
+import numpy as np
 from func import*
 
 class Log:
@@ -76,6 +77,7 @@ class Boss:
         self.end_date = self.get_end_date()
         self.player_list = self.get_player_list()
         self.wingman_time = self.get_wingman_time()
+        self.wingman_percentile = self.get_wingman_percentile()
         
     ################################ Fonction pour attribus Boss ################################
     
@@ -133,6 +135,22 @@ class Boss:
             if e['group'] < 50 and not self.is_buyer(i):
                 real_players.append(i)
         return real_players
+    
+    def get_wingman_percentile(self):
+        time = self.duration_ms
+        name = boss_dict.get(self.boss_id)
+                
+        nm_times = np.sort(np.array(list(nm_dict[name]))*60*1000)[::-1]
+        cm_times = np.sort(np.array(list(cm_dict[name]))*60*1000)[::-1]
+        
+        if self.cm:
+            times = cm_times
+        else:
+            times = nm_times
+        times = np.sort(np.append(times, time))[::-1]
+        i = np.where(times==time)[0][0]
+
+        return f"{i/(len(times)-1)*100:.1f}%"
             
     ################################ CONDITIONS ################################
         

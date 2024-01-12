@@ -1,3 +1,5 @@
+import pickle
+
 BIG = 10**20
 all_bosses = []
 all_mvp = []
@@ -24,6 +26,14 @@ boss_dict = {
     22006 : "adina",
     21964 : "sabir",
     22000 : "qpeer"}
+
+with open('wingman_updater/all_times_nm.pickle', 'rb') as f:  # Python 3: open(..., 'rb')
+    nm_dict = pickle.load(f)
+    
+with open('wingman_updater/all_times_cm.pickle', 'rb') as f:  # Python 3: open(..., 'rb')
+    cm_dict = pickle.load(f)
+    
+emote_wingman = ":wingman:"
 
 ################################ DATA VG ################################
 
