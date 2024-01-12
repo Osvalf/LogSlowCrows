@@ -32,6 +32,7 @@ def main() -> None:
 if __name__ == "__main__":
     print("Starting")
     start_time = perf_counter()
+    
     main()
     end_time = perf_counter()
     print(f"--- {end_time - start_time:.3f} seconds ---\n")
