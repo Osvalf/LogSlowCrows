@@ -33,7 +33,7 @@ with open('wingman_updater/all_times_nm.pickle', 'rb') as f:  # Python 3: open(.
 with open('wingman_updater/all_times_cm.pickle', 'rb') as f:  # Python 3: open(..., 'rb')
     cm_dict = pickle.load(f)
     
-emote_wingman = ":wing:"
+emote_wingman = ":wingman:"
 
 ################################ DATA VG ################################
 

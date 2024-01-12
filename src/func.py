@@ -135,7 +135,7 @@ def get_message_reward(logs: list, dict_mvp: dict, dict_lvp: dict, titre="Run"):
             if j.lvp:
                 reward += j.lvp + "\n"
         reward += "\n"
-        if len(reward) >= 1150:
+        if len(reward) >= 1050:
             split_message.append(reward)
             reward = ""
     if len(all_bosses) > 1 and len(all_mvp) > 1 and len(all_lvp) > 1 and len(wings) > 1:

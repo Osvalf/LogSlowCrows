@@ -140,13 +140,11 @@ class Boss:
         time = self.duration_ms
         name = boss_dict.get(self.boss_id)
                 
-        nm_times = np.sort(np.array(list(nm_dict[name]))*60*1000)[::-1]
-        cm_times = np.sort(np.array(list(cm_dict[name]))*60*1000)[::-1]
-        
         if self.cm:
-            times = cm_times
+            times = np.sort(np.array(list(cm_dict[name]))*60*1000)[::-1]
         else:
-            times = nm_times
+            times = np.sort(np.array(list(nm_dict[name]))*60*1000)[::-1]
+            
         times = np.sort(np.append(times, time))[::-1]
         i = np.where(times==time)[0][0]
 
