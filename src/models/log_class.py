@@ -54,7 +54,9 @@ class BossFactory:
                    
                    "adina": ADINA,
                    "sabir": SABIR,
-                   "qpeer": QTP}
+                   "qpeer": QTP,
+                   
+                   "golem": GOLEM}
         
         boss_name = boss_dict.get(log.jcontent['triggerID'])
         if boss_name:
@@ -137,18 +139,24 @@ class Boss:
         return real_players
     
     def get_wingman_percentile(self):
-        time = self.duration_ms
-        name = boss_dict.get(self.boss_id)
+            time = self.duration_ms
+            name = boss_dict.get(self.boss_id)
+                    
+            if self.cm:
+                if cm_dict.get(name):
+                    times = np.sort(np.array(list(cm_dict[name]))*60*1000)[::-1]
+                else:
+                    return
+            else:
+                if nm_dict.get(name):
+                    times = np.sort(np.array(list(nm_dict[name]))*60*1000)[::-1]
+                else:
+                    return
                 
-        if self.cm:
-            times = np.sort(np.array(list(cm_dict[name]))*60*1000)[::-1]
-        else:
-            times = np.sort(np.array(list(nm_dict[name]))*60*1000)[::-1]
-            
-        times = np.sort(np.append(times, time))[::-1]
-        i = np.where(times==time)[0][0]
+            times = np.sort(np.append(times, time))[::-1]
+            i = np.where(times==time)[0][0]
 
-        return f"{i/(len(times)-1)*100:.1f}%"
+            return f"{i/(len(times)-1)*100:.1f}%"
             
     ################################ CONDITIONS ################################
         
@@ -177,15 +185,16 @@ class Boss:
     
     def is_buyer(self, i_player: int):
         i_death = None
-        mechanics = self.log.pjcontent['mechanics']
-        for i, e in enumerate(mechanics):
-            if e['name'] == "Dead":
-                i_death = i
-                break
-        if i_death is not None:
-            for e in mechanics[i_death]['mechanicsData']:
-                if e['time'] < 20000 and e['actor'] == self.get_player_name(i_player):
-                    return True
+        mechanics = self.log.pjcontent.get('mechanics')
+        if mechanics:
+            for i, e in enumerate(mechanics):
+                if e['name'] == "Dead":
+                    i_death = i
+                    break
+            if i_death is not None:
+                for e in mechanics[i_death]['mechanicsData']:
+                    if e['time'] < 20000 and e['actor'] == self.get_player_name(i_player):
+                        return True
         return False
     
     ################################ DATA JOUEUR ################################
@@ -306,6 +315,8 @@ class Stats:
                     i_maxs = [i]
                 elif value == value_max:
                     i_maxs.append(i)
+        if value_max == 0:
+            return [] , value_max , value_tot
         return i_maxs, value_max, value_tot
     
     @staticmethod
@@ -363,7 +374,7 @@ class VG(Boss):
     def get_mvp(self):
         p, v, t = Stats.get_max_value(self, self.get_bleu)
         s = ', '.join(list(map(self.get_player_name, p)))
-        if v != 0:
+        if p:
             for e in p:
                 all_mvp.append(self.get_player_account(e))
             if len(p)>1:
@@ -382,10 +393,9 @@ class VG(Boss):
     ################################ DATA MECHAS ################################
     
     def get_bleu(self, i_player: int):
-        bleu = 0
-        bleu += self.get_mech_value(i_player, "Green Guard TP")
-        bleu += self.get_mech_value(i_player, "Boss TP")
-        return bleu
+        bleu_split = self.get_mech_value(i_player, "Green Guard TP")
+        bleu_boss = self.get_mech_value(i_player, "Boss TP")
+        return bleu_boss + bleu_split
 
 ################################ GORS ################################
 
@@ -427,12 +437,11 @@ class GORS(Boss):
     ################################ DATA MECHAS ################################
         
     def get_dmg_split(self, i_player: int):
-        jlog = self.log.jcontent
         dmg = 0
-        dmg_split_1 = jlog['phases'][3]['dpsStatsTargets'][i_player]
-        dmg_split_2 = jlog['phases'][6]['dpsStatsTargets'][i_player]
-        for i in range(len(dmg_split_1)):
-            dmg += dmg_split_1[i][0] + dmg_split_2[i][0]
+        dmg_split_1 = self.log.jcontent['phases'][3]['dpsStatsTargets'][i_player]
+        dmg_split_2 = self.log.jcontent['phases'][6]['dpsStatsTargets'][i_player]
+        for add_split1, add_split2 in zip(dmg_split_1,dmg_split_2):
+            dmg += add_split1[0] + add_split2[0]
         return dmg
     
 ################################ SABETHA ################################
@@ -495,13 +504,10 @@ class SABETHA(Boss):
     ################################ DATA MECHAS ################################
         
     def get_dmg_split(self,i_player: int):
-        jlog = self.log.jcontent
-        dmg = 0
-        dmg_kernan = jlog['phases'][2]['dpsStatsTargets'][i_player][0][0]
-        dmg_mornifle = jlog['phases'][5]['dpsStatsTargets'][i_player][0][0]
-        dmg_karde = jlog['phases'][7]['dpsStatsTargets'][i_player][0][0]
-        dmg += dmg_kernan + dmg_mornifle + dmg_karde
-        return dmg  
+        dmg_kernan = self.log.jcontent['phases'][2]['dpsStatsTargets'][i_player][0][0]
+        dmg_mornifle = self.log.jcontent['phases'][5]['dpsStatsTargets'][i_player][0][0]
+        dmg_karde = self.log.jcontent['phases'][7]['dpsStatsTargets'][i_player][0][0]
+        return dmg_kernan + dmg_mornifle + dmg_karde  
 
 ################################ SLOTH ################################
 
@@ -592,7 +598,7 @@ class MATTHIAS(Boss):
     ################################ CONDITIONS ###############################
     
     def is_sac(self, i_player: int):
-        return self.get_nb_sac(i_player)>0
+        return self.get_nb_sac(i_player) > 0
     
     ################################ DATA MECHAS ################################    
     
@@ -770,9 +776,11 @@ class XERA(Boss):
         delta = 10000
         i_delta = time_to_index(delta)
         for e in tp_data:
-            i_player = self.get_player_id(e['actor'])
-            time = e['time']+1000 # 1s de delais pour etre sur
-            i_time = time_to_index(time)
+            tp_time = e['time']
+            player_name = e['actor']
+            i_player = self.get_player_id(player_name)
+            tp_time += 1000  # 1s de delais pour etre sur
+            i_time = time_to_index(tp_time)
             pos_player = self.get_pos_player(i_player, i_time, i_time + i_delta)
             for p in pos_player:
                 if get_dist(p, xera_centre) <= xera_centre_radius:
@@ -805,10 +813,7 @@ class CAIRN(Boss):
     ################################ MVP / LVP ################################
     
     def get_mvp(self):
-        s = self.get_bad_dps()
-        if s:
-            return s   
-        return 
+        return self.get_bad_dps()          
     
     def get_lvp(self):
         return self.get_lvp_dps()
@@ -887,20 +892,22 @@ class SAMAROG(Boss):
     ################################ CONDITIONS ################################
     
     def is_impaled(self, i_player: int):
-        last_pos = self.get_pos_player(i_player)[-1]
-        #TOP WALL condition
-        a, b, c = self.get_sama_cartesian(sama_top_left_corn, sama_top_right_corn)
-        top = a * last_pos[0] + b * last_pos[1] + c < 0
-        #BOT WALL condition
-        a, b, c = self.get_sama_cartesian(sama_bot_left_corn, sama_bot_right_corn)
-        bot = a * last_pos[0] + b * last_pos[1] + c > 0
-        #LEFT WALL condition
-        a, b, c = self.get_sama_cartesian(sama_top_left_corn, sama_bot_left_corn)
-        left = a * last_pos[0] + b * last_pos[1] + c > 0
-        #RIGHT WALL condition
-        a, b, c = self.get_sama_cartesian(sama_top_right_corn, sama_bot_right_corn)
-        right = a * last_pos[0] + b * last_pos[1] + c < 0
-        return top or bot or left or right
+        if self.is_dead(i_player):
+            last_pos = self.get_pos_player(i_player)[-1]
+            #TOP WALL condition
+            a, b, c = self.get_sama_cartesian(sama_top_left_corn, sama_top_right_corn)
+            top = a * last_pos[0] + b * last_pos[1] + c < 0
+            #BOT WALL condition
+            a, b, c = self.get_sama_cartesian(sama_bot_left_corn, sama_bot_right_corn)
+            bot = a * last_pos[0] + b * last_pos[1] + c > 0
+            #LEFT WALL condition
+            a, b, c = self.get_sama_cartesian(sama_top_left_corn, sama_bot_left_corn)
+            left = a * last_pos[0] + b * last_pos[1] + c > 0
+            #RIGHT WALL condition
+            a, b, c = self.get_sama_cartesian(sama_top_right_corn, sama_bot_right_corn)
+            right = a * last_pos[0] + b * last_pos[1] + c < 0
+            return top or bot or left or right
+        return False
     
     ################################ DATA MECHAS ################################
 
@@ -937,15 +944,14 @@ class DEIMOS(Boss):
     
     def get_mvp(self):
         p, v, _ = Stats.get_max_value(self, self.get_black_trigger)
-        if v != 0:
-            for e in p:
-                all_mvp.append(self.get_player_account(e))
-            if len(p) == 1:
-                s = ', '.join(list(map(self.get_player_name, p)))
-                return f" * *[**MVP** : {s} merci à ce **champion** d'avoir trigger **{v} black**]*"
-            if len(p) > 1:
-                s = ', '.join(list(map(self.get_player_name, p)))
-                return f" * *[**MVP** : {s} merci à ces **champions** d'avoir tous les {len(p)} trigger **{v} black**]*"
+        for e in p:
+            all_mvp.append(self.get_player_account(e))
+        if len(p) == 1:
+            s = ', '.join(list(map(self.get_player_name, p)))
+            return f" * *[**MVP** : {s} merci à ce **champion** d'avoir trigger **{v} black**]*"
+        if len(p) > 1:
+            s = ', '.join(list(map(self.get_player_name, p)))
+            return f" * *[**MVP** : {s} merci à ces **champions** d'avoir tous les {len(p)} trigger **{v} black**]*"
         return 
     
     def get_lvp(self):
@@ -1020,13 +1026,12 @@ class DHUUM(Boss):
     def get_mvp(self):
         p, v, _ = Stats.get_max_value(self, self.get_cracks)
         s = ', '.join(list(map(self.get_player_name, p)))
-        if v != 0:
-            for e in p:
-                all_mvp.append(self.get_player_account(e))
-            if len(p) == 1:
-                return f" * *[**MVP** : {s} s'est pris **{v} cracks**]*"
-            if len(p) > 1:
-                return f" * *[**MVP** : {s} se sont pris **{v} cracks**]*"
+        for e in p:
+            all_mvp.append(self.get_player_account(e))
+        if len(p) == 1:
+            return f" * *[**MVP** : {s} s'est pris **{v} cracks**]*"
+        if len(p) > 1:
+            return f" * *[**MVP** : {s} se sont pris **{v} cracks**]*"
         return 
     
     def get_lvp(self):
@@ -1092,13 +1097,12 @@ class LARGOS(Boss):
     def get_mvp(self):
         p, v, _ = Stats.get_max_value(self, self.get_dash, exclude=[self.is_heal, self.is_tank])
         s = ', '.join(list(map(self.get_player_name, p)))
-        if v != 0:
-            for e in p:
-                all_mvp.append(self.get_player_account(e))
-            if len(p) == 1:
-                return f" * *[**MVP** : {s} s'est pris **{v} dash**]*"
-            if len(p) > 1:
-                return f" * *[**MVP** : {s} se sont pris **{v} dash**]*"
+        for e in p:
+            all_mvp.append(self.get_player_account(e))
+        if len(p) == 1:
+            return f" * *[**MVP** : {s} s'est pris **{v} dash**]*"
+        if len(p) > 1:
+            return f" * *[**MVP** : {s} se sont pris **{v} dash**]*"
         return 
     
     def get_lvp(self):
@@ -1305,3 +1309,15 @@ class QTP(Boss):
 
     def get_orb_caught(self, i_player: int):
         return self.get_mech_value(i_player, "Critical Mass")
+    
+################################ GOLEM CHAT STANDARD ################################
+
+class GOLEM(Boss):
+    
+    last = None
+    name = "GOLEM CHAT STANDARD"
+    boss_id = 16199
+    
+    def __init__(self, log: Log):
+        super().__init__(log)
+        GOLEM.last = self

@@ -9,23 +9,31 @@ boss_dict = {
     15438 : "vg",
     15429 : "gors",
     15375 : "sab",
+    
     16123 : "sloth",
     16115 : "matt",
+    
     16253 : "esc",
     16235 : "kc",
     16246 : "xera",
+    
     17194 : "cairn",
     17172 : "mo",
     17188 : "sam",
     17154 : "dei",
+    
     19767 : "sh",
     19450 : "dhuum",
+    
     43974 : "ca",
     21105 : "twins",
     20934 : "qadim",
+    
     22006 : "adina",
     21964 : "sabir",
-    22000 : "qpeer"}
+    22000 : "qpeer",
+    
+    16199 : "golem"}
 
 with open('wingman_updater/all_times_nm.pickle', 'rb') as f:  # Python 3: open(..., 'rb')
     nm_dict = pickle.load(f)
@@ -33,7 +41,7 @@ with open('wingman_updater/all_times_nm.pickle', 'rb') as f:  # Python 3: open(.
 with open('wingman_updater/all_times_cm.pickle', 'rb') as f:  # Python 3: open(..., 'rb')
     cm_dict = pickle.load(f)
     
-emote_wingman = ":wingman:"
+emote_wingman = ":wing:"
 
 ################################ DATA VG ################################
 

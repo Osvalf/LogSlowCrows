@@ -1,13 +1,14 @@
 from models.log_class import*
 import concurrent.futures
 from time import perf_counter
+import matplotlib.pyplot as plt
 
 TITRE = "Run"
 
 def main() -> None:
     input_urls = txt_file_to_list("src/input logs.txt")
     #Pour tester séparément
-    #input_urls = ["https://dps.report/XQb8-20240110-214324_qpeer"]
+    #input_urls = ["https://dps.report/IgfZ-20240101-233109_gors"]
     
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [executor.submit(Log, input_value) for input_value in input_urls]
@@ -34,6 +35,7 @@ if __name__ == "__main__":
     start_time = perf_counter()  
     main()
     end_time = perf_counter()
+    plt.show()
     print(f"--- {end_time - start_time:.3f} seconds ---\n")
     
     
