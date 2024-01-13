@@ -182,7 +182,7 @@ class Boss:
             if e['name'] == "Dead":
                 i_death = i
                 break
-        if i_death != None:
+        if i_death is not None:
             for e in mechanics[i_death]['mechanicsData']:
                 if e['time'] < 20000 and e['actor'] == self.get_player_name(i_player):
                     return True
@@ -249,7 +249,7 @@ class Boss:
             s = ', '.join(list(map(self.get_player_name, i_dps)))
             r = (1 - dps_min_dmg / sup_max_dmg) * 100 
             return f" * *[**MVP** : {s} qui en **DPS** n'a fait que **{dps_min_dmg / self.duration_ms :.1f}kdps** soit **{r:.1f}%** de moins que {sup} qui joue **support** on le rappelle]*"
-        return None
+        return
     
     def get_lvp_dps(self):
         p, v, t = Stats.get_max_value(self, self.get_dmg_boss)
@@ -276,6 +276,14 @@ class Boss:
                 end = time_to_index(e['end'])
                 return start, end
         raise ValueError('{phase} not found')
+    
+    def get_mech_value(self, i_player: int, mech_name: str):
+        mechs_list = [mech['name'] for mech in self.mechanics]
+        if mech_name in mechs_list:
+            i_mech = mechs_list.index(mech_name)
+            return self.log.jcontent['phases'][0]['mechanicStats'][i_player][i_mech][0]
+        return 0
+            
     
 class Stats:
     @staticmethod
@@ -375,13 +383,8 @@ class VG(Boss):
     
     def get_bleu(self, i_player: int):
         bleu = 0
-        mechs_list = [mech['name'] for mech in self.mechanics]
-        if "Green Guard TP" in mechs_list:
-            i_tp = mechs_list.index("Green Guard TP")
-            bleu += self.log.jcontent['phases'][0]['mechanicStats'][i_player][i_tp][0]
-        if "Boss TP" in mechs_list:
-            i_tp = mechs_list.index("Boss TP")
-            bleu += self.log.jcontent['phases'][0]['mechanicStats'][i_player][i_tp][0]
+        bleu += self.get_mech_value(i_player, "Green Guard TP")
+        bleu += self.get_mech_value(i_player, "Boss TP")
         return bleu
 
 ################################ GORS ################################
@@ -537,12 +540,7 @@ class SLOTH(Boss):
     ################################ CONDITIONS ###############################
     
     def is_shroom(self, i_player: int):
-        mechs_list = [mech['name'] for mech in self.mechanics]
-        mech = "Slub"
-        if mech in mechs_list:
-            i_mech = mechs_list.index(mech)
-            return self.log.jcontent['phases'][0]['mechanicStats'][i_player][i_mech]>0
-        return False
+        return self.get_mech_value(i_player, "Slub") > 0
     
     ################################ DATA MECHAS ################################
     
@@ -599,12 +597,7 @@ class MATTHIAS(Boss):
     ################################ DATA MECHAS ################################    
     
     def get_nb_sac(self, i_player: int):
-        mechs_list = [mech['name'] for mech in self.mechanics]
-        mech = "Sacrifice"
-        if mech in mechs_list:
-            i_mech = mechs_list.index(mech)
-            return self.log.jcontent['phases'][0]['mechanicStats'][i_player][i_mech][0]
-        return 0 
+        return self.get_mech_value(i_player, "Sacrifice")
 
 ################################ ESCORT ################################
 
@@ -645,30 +638,19 @@ class ESCORT(Boss):
     ################################ CONDITIONS ################################
     
     def is_mined(self, i_player: int):
-        mechs_list = [mech['name'] for mech in self.mechanics]
-        mech = "Mine Detonation Hit"
-        if mech in mechs_list:
-            i_mech = mechs_list.index(mech)
-            return self.log.jcontent['phases'][0]['mechanicStats'][i_player][i_mech][0]>0
-        return False
+        return self.get_mech_value(i_player, "Mine Detonation Hit") > 0
     
     ################################ DATA MECHAS ################################
     
     def get_mined_players(self):
         p = []
-        nb_players = len(self.log.jcontent['players'])
-        for i in range(nb_players):
+        for i in self.player_list:
             if self.is_mined(i):
                 p.append(i)
         return p
     
     def get_glenna_call(self, i_player: int):
-        mechs_list = [mech['name'] for mech in self.mechanics]
-        mech = "Over Here! Cast"
-        if mech in mechs_list:
-            i_mech = mechs_list.index(mech)
-            return self.log.jcontent['phases'][0]['mechanicStats'][i_player][i_mech][0]
-        return 0
+        return self.get_mech_value(i_player, "Over Here! Cast")
             
 
 
@@ -715,10 +697,9 @@ class KC(Boss):
     ################################ DATA MECHAS ################################
 
     def get_good_orb(self, i_player: int):
-        mechs_list = [mech['name'] for mech in self.mechanics]
-        i_r = mechs_list.index('Good Red Orb')
-        i_w = mechs_list.index('Good White Orb')
-        return self.log.jcontent['phases'][0]['mechanicStats'][i_player][i_r][0] + self.log.jcontent['phases'][0]['mechanicStats'][i_player][i_w][0]
+        red_orbs = self.get_mech_value(i_player, 'Good Red Orb')
+        white_orbs = self.get_mech_value(i_player, 'Good White Orb')
+        return red_orbs + white_orbs
 
 ################################ XERA ################################
 
@@ -773,14 +754,10 @@ class XERA(Boss):
     ################################ DATA MECHAS ################################
 
     def get_tp_out(self, i_player: int):
-        mechs_list = [mech['name'] for mech in self.mechanics]
-        i_tp = mechs_list.index('TP')
-        return self.log.jcontent['phases'][0]['mechanicStats'][i_player][i_tp][0]
+        return self.get_mech_value(i_player, 'TP')
     
     def get_tp_back(self, i_player: int):
-        mechs_list = [mech['name'] for mech in self.mechanics]
-        i_tp = mechs_list.index('TP back')
-        return self.log.jcontent['phases'][0]['mechanicStats'][i_player][i_tp][0]
+        return self.get_mech_value(i_player, 'TP back')
     
     def get_fdp(self): # fdp = skip mini jeu XERA
         mecha_data = self.log.pjcontent['mechanics']
@@ -805,7 +782,7 @@ class XERA(Boss):
     
     def get_gliding_death(self):
         dead = []
-        for i in range(10):
+        for i in self.player_list:
             if self.log.pjcontent['players'][i]['defenses'][5]['deadCount'] > 0:
                 dead.append(i)
         return dead     
@@ -862,10 +839,7 @@ class MO(Boss):
     ################################ MVP / LVP ################################
     
     def get_mvp(self):
-        s = self.get_bad_dps()
-        if s:
-            return s   
-        return 
+        return self.get_bad_dps()
     
     def get_lvp(self):
         return self.get_lvp_dps()
@@ -939,7 +913,7 @@ class SAMAROG(Boss):
     
     def get_impaled(self):
         p = []
-        for i in range(10):
+        for i in self.player_list:
             if self.is_impaled(i):
                   p.append(i)
         return p
@@ -990,20 +964,10 @@ class DEIMOS(Boss):
     ################################ DATA MECHAS ################################
 
     def get_black_trigger(self, i_player: int):
-        mechs_list = [mech['name'] for mech in self.mechanics]
-        mech = "Black Oil Trigger"
-        if mech in mechs_list:
-            i_black = mechs_list.index(mech)
-            return self.log.jcontent['phases'][0]['mechanicStats'][i_player][i_black][0]
-        return 0
+        return self.get_mech_value(i_player, "Black Oil Trigger")
     
     def get_tears(self, i_player: int):
-        mechs_list = [mech['name'] for mech in self.mechanics]
-        mech = "Tear"
-        if mech in mechs_list:
-            i_tear = mechs_list.index(mech)
-            return self.log.jcontent['phases'][0]['mechanicStats'][i_player][i_tear][0]
-        return 0
+        return self.get_mech_value(i_player, "Tear")
 
 ################################ SH ################################
 
@@ -1075,12 +1039,7 @@ class DHUUM(Boss):
     ################################ DATA MECHAS ################################
 
     def get_cracks(self, i_player: int):
-        mechs_list = [mech['name'] for mech in self.mechanics]
-        mech = "Cracks"
-        if mech in mechs_list:
-            i_tear = mechs_list.index(mech)
-            return self.log.jcontent['phases'][0]['mechanicStats'][i_player][i_tear][0]
-        return 0    
+        return self.get_mech_value(i_player, "Cracks")    
 
 ################################ CA ################################
 
@@ -1100,10 +1059,7 @@ class CA(Boss):
     ################################ MVP / LVP ################################
     
     def get_mvp(self):
-        s = self.get_bad_dps()
-        if s:
-            return s
-        return 
+        return self.get_bad_dps()
     
     def get_lvp(self):
         return self.get_lvp_dps()
@@ -1160,12 +1116,7 @@ class LARGOS(Boss):
     ################################ DATA MECHAS ################################
 
     def get_dash(self, i_player: int):
-        mechs_list = [mech['name'] for mech in self.mechanics]
-        mech = "Vapor Rush Charge"
-        if mech in mechs_list:
-            i_dash = mechs_list.index(mech)
-            return self.log.jcontent['phases'][0]['mechanicStats'][i_player][i_dash][0]
-        return 0 
+        return self.get_mech_value(i_player, "Vapor Rush Charge") 
 
 ################################ QADIM ################################
 
@@ -1236,12 +1187,7 @@ class Q1(Boss):
         return fdp
     
     def get_wave(self, i_player: int):
-        mechs_list = [mech['name'] for mech in self.mechanics]
-        mech = "Mace Shockwave"
-        if mech in mechs_list:
-            i_wave = mechs_list.index(mech)
-            return self.log.jcontent['phases'][0]['mechanicStats'][i_player][i_wave][0]
-        return 0
+        return self.get_mech_value(i_player, "Mace Shockwave")
 
 ################################ ADINA ################################
 
@@ -1282,13 +1228,11 @@ class ADINA(Boss):
     ################################ DATA MECHAS ################################
     
     def get_dmg_split(self, i_player: int):
-        path = self.log.jcontent['phases']
-        dmg = 0
-        dmg_split1 = path[2]['dpsStats'][i_player][0]
-        dmg_split2 = path[4]['dpsStats'][i_player][0]
-        dmg_split3 = path[6]['dpsStats'][i_player][0]
-        dmg += dmg_split1 + dmg_split2 + dmg_split3
-        return dmg
+        dmg_split1 = self.log.jcontent['phases'][2]['dpsStats'][i_player][0]
+        dmg_split2 = self.log.jcontent['phases'][4]['dpsStats'][i_player][0]
+        dmg_split3 = self.log.jcontent['phases'][6]['dpsStats'][i_player][0]
+        return dmg_split1 + dmg_split2 + dmg_split3
+        
 
 ################################ SABIR ################################
 
@@ -1360,7 +1304,4 @@ class QTP(Boss):
     ################################ DATA MECHAS ################################
 
     def get_orb_caught(self, i_player: int):
-        mechs_list = [mech['name'] for mech in self.mechanics]
-        mech = "Critical Mass"
-        i_orb = mechs_list.index(mech)
-        return self.log.jcontent['phases'][0]['mechanicStats'][i_player][i_orb][0]
+        return self.get_mech_value(i_player, "Critical Mass")

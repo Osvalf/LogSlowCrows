@@ -13,11 +13,11 @@ def disp_time(td: timedelta):
     days = td.days
     hours, remainder = divmod(td.seconds, 3600)
     minutes, seconds = divmod(remainder, 60)
-    if(days==0 and hours==0 and minutes==0):
+    if days == 0 and hours == 0 and minutes == 0:
         time = f"{seconds}s"
-    elif(days==0 and hours==0):
+    elif days == 0 and hours == 0:
         time = f"{minutes}m{seconds:02}s"
-    elif(days==0):
+    elif days == 0:
         time = f"{hours}h{minutes:02}m{seconds:02}s"
     else:
         time = f"{days}d{hours:02}h{minutes:02}m{seconds:02}s"
