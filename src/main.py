@@ -1,7 +1,6 @@
 from models.log_class import*
 import concurrent.futures
 from time import perf_counter
-import matplotlib.pyplot as plt
 
 TITRE = "Run"
 
@@ -19,12 +18,12 @@ def main() -> None:
     
     print("\n")
     
-    all_bosses.sort(key=lambda x: x.start_date, reverse=False)
+    all_bosses.sort(key=lambda boss: boss.start_date, reverse=False)
 
     # Fonction reward si pas de test
-    reward = get_message_reward(all_bosses, all_mvp_dic, all_lvp_dic, titre=TITRE)
-    for s in reward:
-        print(s)
+    split_run_message = get_message_reward(all_bosses, all_mvp_dic, all_lvp_dic, titre=TITRE)
+    for message in split_run_message:
+        print(message)
             
     print("\n")
     
@@ -35,7 +34,6 @@ if __name__ == "__main__":
     start_time = perf_counter()  
     main()
     end_time = perf_counter()
-    plt.show()
     print(f"--- {end_time - start_time:.3f} seconds ---\n")
     
     

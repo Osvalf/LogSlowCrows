@@ -23,32 +23,32 @@ def disp_time(td: timedelta):
         time = f"{days}d{hours:02}h{minutes:02}m{seconds:02}s"
     return time
 
-def txt_file_to_list(filepath: str, reward=False):
+def txt_file_to_list(filepath: str, reward_mode=False):
     with open(filepath, 'r') as file:
-        lines = file.readlines()
+        input_text = file.readlines()
 
-    input_lines = [line.strip() for line in lines]
+    input_lines = [line.strip() for line in input_text]
 
     boss_names = list(boss_dict.values())
     input_urls=[]
-    escort = None
-    for i in range(len(input_lines)):
-        if ("https://" in input_lines[i]) and (input_lines[i].split("_")[1] in boss_names):
-            if input_lines[i][-3:] == "esc":
-                escort = input_lines[i]
+    escort_url = None
+    for line in input_lines:
+        if ("https://" in line) and (line.split("_")[1] in boss_names):
+            if line[-3:] == "esc":
+                escort_url = line
             else:
-                input_urls.append(input_lines[i])
-            boss_names.remove(input_lines[i].split("_")[1])
-    
-    if reward and len(input_urls) < 19: 
-        print(f"Tu as mis seulement {len(input_urls)} logs valides sur les 19\n")
+                input_urls.append(line)
+            boss_names.remove(line.split("_")[1])
+    number_url = len(input_urls)
+    if reward_mode and number_url < 19: 
+        print(f"Tu as mis seulement {number_url} logs valides sur les 19\n")
         print("Voici ceux qu'il manque :\n")
-        for e in boss_names:
-            print(f" - {e.upper()}")
+        for boss_name in boss_names:
+            print(f" - {boss_name.upper()}")
         sys.exit("\nVoilà rajoute les maintenant o7\n")
         
-    if escort:
-        input_urls.append(escort)
+    if escort_url:
+        input_urls.append(escort_url)
     return input_urls
 
 def get_message_reward(logs: list, dict_mvp: dict, dict_lvp: dict, titre="Run"):
@@ -57,92 +57,101 @@ def get_message_reward(logs: list, dict_mvp: dict, dict_lvp: dict, titre="Run"):
         return []
     mvp_scores = dict_mvp.values()
     lvp_scores = dict_lvp.values()
-    if len(mvp_scores) > 1:
+    
+    number_mvp = len(mvp_scores)
+    number_lvp = len(lvp_scores)
+    
+    if number_mvp > 1:
         score_max_mvp = max(dict_mvp.values())
         mvps = [k for k, v in dict_mvp.items() if v == score_max_mvp]
-    if len(lvp_scores) > 1:
+    if number_lvp > 1:
         score_max_lvp = max(dict_lvp.values()) 
         lvps = [k for k, v in dict_lvp.items() if v == score_max_lvp]
     
     w1, w2, w3, w4, w5, w6, w7 = [], [], [], [], [], [], []
-    for e in logs:
-        wing = e.wing
+    for log in logs:
+        wing = log.wing
         match wing:
             case 1:
-                w1.append(e)
+                w1.append(log)
             case 2:
-                w2.append(e)
+                w2.append(log)
             case 3:
-                w3.append(e)
+                w3.append(log)
             case 4:
-                w4.append(e)
+                w4.append(log)
             case 5:
-                w5.append(e)
+                w5.append(log)
             case 6:
-                w6.append(e)
+                w6.append(log)
             case 7:
-                w7.append(e)
+                w7.append(log)
     
-    temp_wings = [w1,w2,w3,w4,w5,w6,w7]     
+    all_wings = [w1,w2,w3,w4,w5,w6,w7]     
     wings = []
-    for e in temp_wings:
-        if e:
-            wings.append(e)
-    wings.sort(key=lambda x: x[0].start_date, reverse=False)
+    for wing in all_wings:
+        if wing:
+            wings.append(wing)
+    wings.sort(key=lambda wing: wing[0].start_date, reverse=False)
     first_log = all_bosses[0]
     last_log = all_bosses[-1]
-    reward_date = first_log.start_date.strftime("%d/%m/%Y")
-    reward_duration = disp_time(last_log.end_date - first_log.start_date)
-    if len(all_bosses)>1:
-        reward = f"# {titre} du {reward_date}\n"
+    run_date = first_log.start_date.strftime("%d/%m/%Y")
+    run_duration = disp_time(last_log.end_date - first_log.start_date)
+    number_boss = len(all_bosses)
+    if number_boss > 1:
+        run_message = f"# {titre} du {run_date}\n"
     else:
-        reward = ""
-    escort = False
+        run_message = ""
+    escort_in_run = False
     split_message = []
-    for i in wings:
-        current_wing_n = i[0].wing
-        current_wing_duration = disp_time(i[-1].end_date - i[0].start_date)
-        match current_wing_n:
+    for wing in wings:
+        wing_number = wing[0].wing
+        wing_first_log = wing[0]
+        wing_last_log = wing[-1]
+        wing_duration = disp_time(wing_last_log.end_date - wing_first_log.start_date)
+        match wing_number:
             case 1:
-                reward += f"## W1 - *{current_wing_duration}* (sans pre-VG)\n"
+                run_message += f"## W1 - *{wing_duration}* (sans pre-VG)\n"
             case 3:
-                for e in i:
-                    if e.name == "ESCORT":
-                        escort = True
+                for boss in wing:
+                    if boss.name == "ESCORT":
+                        escort_in_run = True
                         break
-                if escort:
-                    reward += f"## W3 - *{current_wing_duration}*\n"
+                if escort_in_run:
+                    run_message += f"## W3 - *{wing_duration}*\n"
                 else:
-                    reward += f"## W3 - *{current_wing_duration}* (sans escort)\n"
+                    run_message += f"## W3 - *{wing_duration}* (sans escort)\n"
             case 7:
-                reward += f"## W7 - *{current_wing_duration}* (sans gate)\n"
+                run_message += f"## W7 - *{wing_duration}* (sans gate)\n"
             case _:
-                reward += f"## W{current_wing_n} - *{current_wing_duration}*\n"
-        for j in i:
-            current_boss_name = j.name
-            if j.cm:
-                current_boss_name += " CM"
-            current_boss_duration = disp_time(timedelta(seconds=j.duration_ms / 1000))
-            current_boss_url = j.log.url
-            current_boss_percentil = j.wingman_percentile
-            reward += f"* **[{current_boss_name}]({current_boss_url})** **{current_boss_duration} ({current_boss_percentil}{emote_wingman})**\n"
-            if j.wingman_time:
-                med = disp_time(timedelta(seconds=j.wingman_time[0] / 1000))
-                top = disp_time(timedelta(seconds=j.wingman_time[1] / 1000))
-                #reward += f"\t:*[wingman: med. {med} top. {top}]*\n"
-            if j.mvp:
-                reward += j.mvp + "\n"
-            if j.lvp:
-                reward += j.lvp + "\n"
-        reward += "\n"
-        if len(reward) >= 1050:
-            split_message.append(reward)
-            reward = ""
-    if len(all_bosses) > 1 and len(all_mvp) > 1 and len(all_lvp) > 1 and len(wings) > 1:
-        reward += f"# [GRAND MVP : {', '.join(mvps)} avec {score_max_mvp} titres]\n"
-        reward += f"# [GRAND LVP : {', '.join(lvps)} avec {score_max_lvp} titres]\n"
-        reward += f"# Temps total : {reward_duration}"
-    split_message.append(reward)
+                run_message += f"## W{wing_number} - *{wing_duration}*\n"
+        for boss in wing:
+            boss_name = boss.name
+            if boss.cm:
+                boss_name += " CM"
+            boss_duration = disp_time(timedelta(seconds=boss.duration_ms / 1000))
+            boss_url = boss.log.url
+            boss_percentil = boss.wingman_percentile
+            run_message += f"* **[{boss_name}]({boss_url})** **{boss_duration} ({boss_percentil}{emote_wingman})**\n"
+            if boss.wingman_time:
+                median_time = disp_time(timedelta(seconds=boss.wingman_time[0] / 1000))
+                top_time = disp_time(timedelta(seconds=boss.wingman_time[1] / 1000))
+                #run_message += f"\t:*[wingman: med. {median_time} top. {top_time}]*\n"
+            if boss.mvp:
+                run_message += boss.mvp + "\n"
+            if boss.lvp:
+                run_message += boss.lvp + "\n"
+        run_message += "\n"
+        cutting_text_limit = 1050
+        run_message_length = len(run_message)
+        if run_message_length >= cutting_text_limit:
+            split_message.append(run_message)
+            run_message = ""
+    if number_boss > 1 and len(all_mvp) > 1 and len(all_lvp) > 1 and len(wings) > 1:
+        run_message += f"# [GRAND MVP : {', '.join(mvps)} avec {score_max_mvp} titres]\n"
+        run_message += f"# [GRAND LVP : {', '.join(lvps)} avec {score_max_lvp} titres]\n"
+        run_message += f"# Temps total : {run_duration}"
+    split_message.append(run_message)
     all_bosses.clear()
     all_mvp.clear()
     all_lvp.clear()

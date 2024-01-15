@@ -9,20 +9,20 @@ class Log:
         self.url = url
         self.content = self.get_html()
         self.jcontent = self.get_parsed_json()
-        self.pjcontent = self.get_json()
+        self.pjcontent = self.get_not_parsed_json()
         BossFactory.create_boss(self)
 
     def get_html(self):        # url convertie en string contenant les infos en javascript
         with requests.Session() as session:
-            html = session.get(self.url).content.decode("utf-8")
-        return html
+            html_text = session.get(self.url).content.decode("utf-8")
+        return html_text
 
     def get_parsed_json(self):     # javascript converti en json
-        cont = self.content.split('var _logData = ')[1].split('var logData = _logData;')[0].rsplit(';', 1)[0].strip()
-        jcont = json.loads(cont)
-        return jcont
+        java_data_text = self.content.split('var _logData = ')[1].split('var logData = _logData;')[0].rsplit(';', 1)[0].strip()
+        json_content = json.loads(java_data_text)
+        return json_content
     
-    def get_json(self):
+    def get_not_parsed_json(self):
         return requests.get(f"https://dps.report/getJson?permalink={self.url}").json()
     
 class BossFactory:
@@ -91,27 +91,29 @@ class Boss:
     
     def get_mechanics(self):
         mechs = []
-        for i in self.log.jcontent['mechanicMap']:
-            if i['playerMech']:
-                mechs.append(i)
+        mechanic_map = self.log.jcontent['mechanicMap']
+        for mechanic in mechanic_map:
+            is_player_mechanic = mechanic['playerMech']
+            if is_player_mechanic:
+                mechs.append(mechanic)
         return mechs
     
     def get_duration_ms(self):
         return self.log.pjcontent['durationMS']
     
     def get_start_date(self):
-        s = self.log.pjcontent['timeStartStd']
+        start_date_text = self.log.pjcontent['timeStartStd']
         date_format = "%Y-%m-%d %H:%M:%S %z"
-        start_date = datetime.strptime(s, date_format)
+        start_date = datetime.strptime(start_date_text, date_format)
         paris_timezone = timezone(timedelta(hours=1))
         return start_date.astimezone(paris_timezone)
     
     def get_end_date(self):
-        s = self.log.pjcontent['timeEndStd']
+        end_date_text = self.log.pjcontent['timeEndStd']
         date_format = "%Y-%m-%d %H:%M:%S %z"
-        start_date = datetime.strptime(s, date_format)
+        end_date = datetime.strptime(end_date_text, date_format)
         paris_timezone = timezone(timedelta(hours=1))
-        return start_date.astimezone(paris_timezone)
+        return end_date.astimezone(paris_timezone)
 
     def get_wingman_time(self):
         # return None
@@ -133,40 +135,42 @@ class Boss:
     def get_player_list(self):
         real_players = []
         players = self.log.pjcontent['players']
-        for i, e in enumerate(players):
-            if e['group'] < 50 and not self.is_buyer(i):
-                real_players.append(i)
+        for i_player, player in enumerate(players):
+            if player['group'] < 50 and not self.is_buyer(i_player):
+                real_players.append(i_player)
         return real_players
     
     def get_wingman_percentile(self):
-            time = self.duration_ms
-            name = boss_dict.get(self.boss_id)
+            log_time_ms = self.duration_ms
+            boss_short_name = boss_dict.get(self.boss_id)
                     
             if self.cm:
-                if cm_dict.get(name):
-                    times = np.sort(np.array(list(cm_dict[name]))*60*1000)[::-1]
+                if cm_dict.get(boss_short_name):
+                    all_wingman_boss_times_ms = np.sort(np.array(list(cm_dict[boss_short_name]))*60*1000)[::-1]
                 else:
                     return
             else:
-                if nm_dict.get(name):
-                    times = np.sort(np.array(list(nm_dict[name]))*60*1000)[::-1]
+                if nm_dict.get(boss_short_name):
+                    all_wingman_boss_times_ms = np.sort(np.array(list(nm_dict[boss_short_name]))*60*1000)[::-1]
                 else:
                     return
                 
-            times = np.sort(np.append(times, time))[::-1]
-            i = np.where(times==time)[0][0]
-
-            return f"{i/(len(times)-1)*100:.1f}%"
+            all_wingman_boss_times_ms = np.sort(np.append(all_wingman_boss_times_ms, log_time_ms))[::-1]
+            i = np.where(all_wingman_boss_times_ms==log_time_ms)[0][0]
+            percentile = i/(len(all_wingman_boss_times_ms)-1)*100
+            return f"{percentile:.1f}%"
             
     ################################ CONDITIONS ################################
         
     def is_quick(self, i_player: int):
+        min_quick_contrib = 20
         player_quick_contrib = self.log.jcontent['phases'][0]['boonGenGroupStats'][i_player]['data'][2]
-        return player_quick_contrib[0]>=20 or player_quick_contrib[1]>=20
+        return player_quick_contrib[0] >= min_quick_contrib or player_quick_contrib[1] >= min_quick_contrib
 
     def is_alac(self, i_player: int):
+        min_alac_contrib = 20
         player_alac_contrib = self.log.jcontent['phases'][0]['boonGenGroupStats'][i_player]['data'][3]
-        return player_alac_contrib[0]>=20 or player_alac_contrib[1]>=20
+        return player_alac_contrib[0] >= min_alac_contrib or player_alac_contrib[1] >= min_alac_contrib
     
     def is_support(self, i_player: int):
         return self.is_quick(i_player) or self.is_alac(i_player)
@@ -175,25 +179,27 @@ class Boss:
         return not self.is_support(i_player)
     
     def is_tank(self, i_player: int):
-        return self.log.pjcontent['players'][i_player]['toughness']>0
+        return self.log.pjcontent['players'][i_player]['toughness'] > 0
     
     def is_heal(self, i_player: int):
-        return self.log.pjcontent['players'][i_player]['healing']>0
+        return self.log.pjcontent['players'][i_player]['healing'] > 0
     
     def is_dead(self, i_player: int):
-        return self.log.pjcontent['players'][i_player]['defenses'][0]['deadCount']>0
+        return self.log.pjcontent['players'][i_player]['defenses'][0]['deadCount'] > 0
     
     def is_buyer(self, i_player: int):
+        player_name = self.get_player_name(i_player)
         i_death = None
         mechanics = self.log.pjcontent.get('mechanics')
         if mechanics:
-            for i, e in enumerate(mechanics):
-                if e['name'] == "Dead":
-                    i_death = i
+            for i_mech, mech in enumerate(mechanics):
+                if mech['name'] == "Dead":
+                    i_death = i_mech
                     break
             if i_death is not None:
-                for e in mechanics[i_death]['mechanicsData']:
-                    if e['time'] < 20000 and e['actor'] == self.get_player_name(i_player):
+                death_history = mechanics[i_death]['mechanicsData']
+                for death in death_history:
+                    if death['time'] < 20000 and death['actor'] == player_name:
                         return True
         return False
     
@@ -219,72 +225,73 @@ class Boss:
     
     def get_player_id(self, name: str):
         players = self.log.pjcontent['players']
-        for e in players:
-            if e['name'] == name:
-                return players.index(e)
+        for i_player, player in enumerate(players):
+            if player['name'] == name:
+                return i_player
         return None
     
     def get_mvp_cc(self):
-        p, v, t = Stats.get_min_value(self, self.get_cc_boss)
-        for e in p:
-            all_mvp.append(self.get_player_account(e))
-        s = ', '.join(list(map(self.get_player_name, p)))
-        r = v / t * 100
-        if v == 0:
-            if len(p) == 1:
-                return f" * *[**MVP** : {s} n'a pas mis de **CC**]*"
+        i_players, min_cc, total_cc = Stats.get_min_value(self, self.get_cc_boss)
+        for i_player in i_players:
+            all_mvp.append(self.get_player_account(i_player))
+        mvp_names = ', '.join([self.get_player_name(i_player) for i_player in i_players])
+        cc_ratio = min_cc / total_cc * 100
+        number_mvp = len(i_players)
+        if min_cc == 0:
+            if number_mvp == 1:
+                return f" * *[**MVP** : {mvp_names} n'a pas mis de **CC**]*"
             else:
-                return f" * *[**MVP** : {s} n'ont pas mis de **CC**]*"
+                return f" * *[**MVP** : {mvp_names} n'ont pas mis de **CC**]*"
         else:
-            if len(p) == 1:
-                return f" * *[**MVP** : {s} n'a mis que **{v:.0f}** de **CC** (**{r:.1f}%** de la squad)]*"
+            if number_mvp == 1:
+                return f" * *[**MVP** : {mvp_names} n'a mis que **{min_cc:.0f}** de **CC** (**{cc_ratio:.1f}%** de la squad)]*"
             else:
-                return f" * *[**MVP** : {s} n'ont mis que **{v:.0f}** de **CC** (**{r:.1f}%** de la squad)]*"
+                return f" * *[**MVP** : {mvp_names} n'ont mis que **{min_cc:.0f}** de **CC** (**{cc_ratio:.1f}%** de la squad)]*"
             
     def get_lvp_cc(self):
-        p, v, t = Stats.get_max_value(self, self.get_cc_boss)
-        for e in p:
-            all_lvp.append(self.get_player_account(e))
-        s = ', '.join(list(map(self.get_player_name, p)))
-        r = v / t * 100
-        return f" * *[**LVP** : {s} merci d'avoir fait **{v:.0f}** de **CC** (**{r:.1f}%** de la squad)]*"
+        i_players, max_cc, total_cc = Stats.get_max_value(self, self.get_cc_boss)
+        for i_player in i_players:
+            all_lvp.append(self.get_player_account(i_player))
+        lvp_names = ', '.join([self.get_player_name(i_player) for i_player in i_players])
+        cc_ratio = max_cc / total_cc * 100
+        return f" * *[**LVP** : {lvp_names} merci d'avoir fait **{max_cc:.0f}** de **CC** (**{cc_ratio:.1f}%** de la squad)]*"
     
     def get_bad_dps(self):
         i_sup, sup_max_dmg, _ = Stats.get_max_value(self, self.get_dmg_boss, exclude=[self.is_dps])
-        i_dps, dps_min_dmg, tot_dmg = Stats.get_min_value(self, self.get_dmg_boss, exclude=[self.is_support, self.is_dead])
+        i_dps, dps_min_dmg, _ = Stats.get_min_value(self, self.get_dmg_boss, exclude=[self.is_support, self.is_dead])
         if dps_min_dmg < sup_max_dmg:
             all_mvp.append(self.get_player_account(i_dps[0]))
-            sup = self.get_player_name(i_sup[0])
-            s = ', '.join(list(map(self.get_player_name, i_dps)))
-            r = (1 - dps_min_dmg / sup_max_dmg) * 100 
-            return f" * *[**MVP** : {s} qui en **DPS** n'a fait que **{dps_min_dmg / self.duration_ms :.1f}kdps** soit **{r:.1f}%** de moins que {sup} qui joue **support** on le rappelle]*"
+            sup_name = self.get_player_name(i_sup[0])
+            bad_dps_name = ', '.join([self.get_player_name(i) for i in i_dps])
+            dmg_ratio = (1 - dps_min_dmg / sup_max_dmg) * 100 
+            return f" * *[**MVP** : {bad_dps_name} qui en **DPS** n'a fait que **{dps_min_dmg / self.duration_ms :.1f}kdps** soit **{dmg_ratio:.1f}%** de moins que {sup_name} qui joue **support** on le rappelle]*"
         return
     
     def get_lvp_dps(self):
-        p, v, t = Stats.get_max_value(self, self.get_dmg_boss)
-        for e in p:
-            all_lvp.append(self.get_player_account(e))
-        r = v / t * 100
-        s = ', '.join(list(map(self.get_player_name, p)))
-        return f" * *[**LVP** : {s} qui a fait **{v / self.duration_ms:.1f}kdps** (**{r:.0f}%** de la squad)]*"
+        i_players, max_dmg, total_dmg = Stats.get_max_value(self, self.get_dmg_boss)
+        for i_player in i_players:
+            all_lvp.append(self.get_player_account(i_player))
+        dmg_ratio = max_dmg / total_dmg * 100
+        lvp_dps_name = ', '.join([self.get_player_name(i_player) for i_player in i_players])
+        return f" * *[**LVP** : {lvp_dps_name} qui a fait **{max_dmg / self.duration_ms:.1f}kdps** (**{dmg_ratio:.0f}%** de la squad)]*"
     
     ################################ DATA BOSS ################################
     
     def get_pos_boss(self, start: int = 0, end: int = None):
         targets = self.log.pjcontent['targets']
-        for e in targets:
-            if e['id'] in boss_dict.keys():
-                return e['combatReplayData']['positions'][start:end]
+        for target in targets:
+            if target['id'] in boss_dict.keys():
+                return target['combatReplayData']['positions'][start:end]
         raise ValueError('No Boss in targets')
     
-    def get_phase_id(self, phase: str):
+    def get_phase_id(self, target_phase: str):
         phases = self.log.pjcontent['phases']
-        for e in phases:
-            if e['name'] == phase:
-                start = time_to_index(e['start'])
-                end = time_to_index(e['end'])
+        for phase in phases:
+            if phase['name'] == target_phase:
+                start = time_to_index(phase['start'])
+                end = time_to_index(phase['end'])
                 return start, end
-        raise ValueError('{phase} not found')
+        raise ValueError(f'{target_phase} not found')
     
     def get_mech_value(self, i_player: int, mech_name: str):
         mechs_list = [mech['name'] for mech in self.mechanics]
@@ -1295,7 +1302,9 @@ class QTP(Boss):
             s = ', '.join(list(map(self.get_player_name, i_dps)))
             r = (1 - dps_min_dmg / sup_max_dmg) * 100 
             return f" * *[**MVP** : {s} qui en **DPS** n'a fait que **{dps_min_dmg / self.duration_ms :.1f}kdps** soit **{r:.1f}%** de moins que {sup} qui joue **support** on le rappelle]*"
-        return 
+        p, v, t = Stats.get_min_value(self, self.get_cc_boss, exclude=[self.is_pylon])
+        s = ', '.join(list(map(self.get_player_name, p)))
+        return f" * *[**MVP** : {s} avec {v:.0f} de **CC**]*" 
     
     def get_lvp(self):
         return self.get_lvp_dps()
