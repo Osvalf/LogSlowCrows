@@ -33,7 +33,7 @@ def txt_file_to_list(filepath: str, reward_mode=False):
     input_urls=[]
     escort_url = None
     for line in input_lines:
-        if ("https://" in line) and (line.split("_")[1] in boss_names):
+        if ("https://dps.report/" in line) and (line.split("_")[1] in boss_names) and (line.split("_")[0].split("-")[1].isdigit()) and (line.split("_")[0].split("-")[2].isdigit()):
             if line[-3:] == "esc":
                 escort_url = line
             else:
