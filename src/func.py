@@ -51,22 +51,28 @@ def txt_file_to_list(filepath: str, reward_mode=False):
         input_urls.append(escort_url)
     return input_urls
 
-def get_message_reward(logs: list, dict_mvp: dict, dict_lvp: dict, titre="Run"):
+def get_message_reward(logs: list, all_players: dict, titre="Run"):
     if not logs:
         print("No boss found")
         return []
-    mvp_scores = dict_mvp.values()
-    lvp_scores = dict_lvp.values()
-    
-    number_mvp = len(mvp_scores)
-    number_lvp = len(lvp_scores)
-    
-    if number_mvp > 1:
-        score_max_mvp = max(dict_mvp.values())
-        mvps = [k for k, v in dict_mvp.items() if v == score_max_mvp]
-    if number_lvp > 1:
-        score_max_lvp = max(dict_lvp.values()) 
-        lvps = [k for k, v in dict_lvp.items() if v == score_max_lvp]
+    mvp = []
+    lvp = []
+    max_mvp_score = 1
+    max_lvp_score = 1
+    for player in all_players.values():
+        if player.mvps > max_mvp_score:
+            max_mvp_score = player.mvps
+            mvp = [player]
+        elif player.mvps == max_mvp_score:
+            mvp.append(player)
+        if player.lvps > max_lvp_score:
+            max_lvp_score = player.lvps
+            lvp = [player]
+        elif player.lvps == max_lvp_score:
+            lvp.append(player)
+            
+    mvp_names = [player.name for player in mvp]
+    lvp_names = [player.name for player in lvp]
     
     w1, w2, w3, w4, w5, w6, w7 = [], [], [], [], [], [], []
     for log in logs:
@@ -147,12 +153,11 @@ def get_message_reward(logs: list, dict_mvp: dict, dict_lvp: dict, titre="Run"):
         if run_message_length >= cutting_text_limit:
             split_message.append(run_message)
             run_message = ""
-    if number_boss > 1 and len(all_mvp) > 1 and len(all_lvp) > 1 and len(wings) > 1:
-        run_message += f"# [GRAND MVP : {', '.join(mvps)} avec {score_max_mvp} titres]\n"
-        run_message += f"# [GRAND LVP : {', '.join(lvps)} avec {score_max_lvp} titres]\n"
+    if number_boss > 1 and len(wings) > 1:
+        run_message += f"# [GRAND MVP : {', '.join(mvp_names)} avec {max_mvp_score} titres]\n"
+        run_message += f"# [GRAND LVP : {', '.join(lvp_names)} avec {max_lvp_score} titres]\n"
         run_message += f"# Temps total : {run_duration}"
     split_message.append(run_message)
     all_bosses.clear()
-    all_mvp.clear()
-    all_lvp.clear()
+    all_players.clear()
     return split_message

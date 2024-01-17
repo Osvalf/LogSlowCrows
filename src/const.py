@@ -1,9 +1,9 @@
 import pickle
 
 BIG = 10**20
+
 all_bosses = []
-all_mvp = []
-all_lvp = []
+all_players = {}
 
 boss_dict = {
     15438 : "vg",
@@ -139,3 +139,5 @@ qadim_fdp_radius = 70
 
 
 ################################ DATA QTP ################################
+
+
