@@ -172,14 +172,22 @@ class Boss:
     ################################ CONDITIONS ################################
         
     def is_quick(self, i_player: int):
-        min_quick_contrib = 20
-        player_quick_contrib = self.log.jcontent['phases'][0]['boonGenGroupStats'][i_player]['data'][2]
-        return player_quick_contrib[0] >= min_quick_contrib or player_quick_contrib[1] >= min_quick_contrib
+        min_quick_contrib = 30
+        phases = self.log.jcontent['phases']
+        for phase in phases:
+            player_quick_contrib = phase['boonGenGroupStats'][i_player]['data'][2]
+            if player_quick_contrib[0] >= min_quick_contrib or player_quick_contrib[1] >= min_quick_contrib:
+                return True
+        return False
 
     def is_alac(self, i_player: int):
-        min_alac_contrib = 20
-        player_alac_contrib = self.log.jcontent['phases'][0]['boonGenGroupStats'][i_player]['data'][3]
-        return player_alac_contrib[0] >= min_alac_contrib or player_alac_contrib[1] >= min_alac_contrib
+        min_alac_contrib = 30
+        phases = self.log.jcontent['phases']
+        for phase in phases:
+            player_alac_contrib = phase['boonGenGroupStats'][i_player]['data'][3]
+            if player_alac_contrib[0] >= min_alac_contrib or player_alac_contrib[1] >= min_alac_contrib:
+                return True
+        return False
     
     def is_support(self, i_player: int):
         return self.is_quick(i_player) or self.is_alac(i_player)
