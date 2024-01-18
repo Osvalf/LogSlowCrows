@@ -220,6 +220,32 @@ class Boss:
                         return True
         return False
     
+    def is_buff_up(self, i_player: int, target_time: int, buff_name: str):
+        buffmap = self.log.pjcontent['buffMap']
+        resistance_id = None
+        for id, buff in buffmap.items():
+            if buff['name'] == buff_name:
+                resistance_id = int(id[1:])
+                break
+        buffs = self.log.pjcontent['players'][i_player]['buffUptimes']
+        for buff in buffs:
+            if buff['id'] == resistance_id:
+                buffplot = buff['states']
+                break
+        xbuffplot = [pos[0] for pos in buffplot]
+        ybuffplot = [pos[1] for pos in buffplot]
+        
+        left_value = None
+        for time in xbuffplot:
+            if time <= target_time:
+                left_value = time
+            else:
+                break
+        left_index = xbuffplot.index(left_value)
+        if ybuffplot[left_index]:
+            return True
+        return False
+    
     ################################ DATA JOUEUR ################################
     
     def get_player_name(self, i_player: int):

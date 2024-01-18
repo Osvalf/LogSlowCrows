@@ -1,6 +1,8 @@
 from models.log_class import*
 import concurrent.futures
 from time import perf_counter
+import matplotlib.pyplot as plt
+import numpy as np
 
 TITRE = "Run"
 
@@ -32,3 +34,4 @@ if __name__ == "__main__":
     main()
     end_time = perf_counter()
     print(f"--- {end_time - start_time:.3f} seconds ---\n")
+    
