@@ -1,6 +1,6 @@
 import pickle
 
-BIG = 10**20
+BIG = float('inf')
 
 all_bosses = []
 all_players = {}
@@ -32,8 +32,12 @@ boss_dict = {
     22006 : "adina",
     21964 : "sabir",
     22000 : "qpeer",
-    
-    16199 : "golem"}
+    }
+
+extra_boss_dict = {
+    16199 : "golem",
+    19645 : "golem"
+}
 
 with open('wingman_updater/all_times_nm.pickle', 'rb') as f:  # Python 3: open(..., 'rb')
     nm_dict = pickle.load(f)

@@ -59,7 +59,7 @@ class BossFactory:
                    
                    "golem": GOLEM}
         
-        boss_name = boss_dict.get(log.jcontent['triggerID'])
+        boss_name = boss_dict.get(log.jcontent['triggerID']) or extra_boss_dict.get(log.jcontent['triggerID'])
         if boss_name:
             all_bosses.append(factory[boss_name](log))
                  
@@ -222,14 +222,16 @@ class Boss:
     
     def is_buff_up(self, i_player: int, target_time: int, buff_name: str):
         buffmap = self.log.pjcontent['buffMap']
-        resistance_id = None
+        buff_id = None
         for id, buff in buffmap.items():
             if buff['name'] == buff_name:
-                resistance_id = int(id[1:])
+                buff_id = int(id[1:])
                 break
+        if buff_id is None:
+            return False
         buffs = self.log.pjcontent['players'][i_player]['buffUptimes']
         for buff in buffs:
-            if buff['id'] == resistance_id:
+            if buff['id'] == buff_id:
                 buffplot = buff['states']
                 break
         xbuffplot = [pos[0] for pos in buffplot]
@@ -385,47 +387,46 @@ class Stats:
     @staticmethod
     def get_max_value(boss : Boss,
                       fnc: classmethod, 
-                      exclude: list[classmethod] = []):
-
+                      exclude: list[classmethod] = []):  
+        if exclude is None:
+            exclude = []
         value_max = -1
         value_tot = 0
         i_maxs = []
         for i in boss.player_list:
             value = fnc(i)
             value_tot += value
-            for filtre in exclude:
-                if filtre(i):
-                    break
-            else:
-                if value > value_max:
-                    value_max = value
-                    i_maxs = [i]
-                elif value == value_max:
-                    i_maxs.append(i)
+            if any(filter_func(i) for filter_func in exclude):
+                continue
+            if value > value_max:
+                value_max = value
+                i_maxs = [i]
+            elif value == value_max:
+                i_maxs.append(i)
         if value_max == 0:
-            return [] , value_max , value_tot
+            return [], value_max, value_tot
         return i_maxs, value_max, value_tot
-    
+        
     @staticmethod
     def get_min_value(boss : Boss,
                       fnc: classmethod, 
                       exclude: list[classmethod] = []):
 
+        if exclude is None:
+            exclude = []
         value_min = BIG
         value_tot = 0
         i_mins = []
         for i in boss.player_list:
             value = fnc(i)
             value_tot += value
-            for filtre in exclude:
-                if filtre(i):
-                    break
-            else:
-                if value < value_min:
-                    value_min = value
-                    i_mins = [i]
-                elif value == value_min:
-                    i_mins.append(i)
+            if any(filter_func(i) for filter_func in exclude):
+                continue
+            if value < value_min:
+                value_min = value
+                i_mins = [i]
+            elif value == value_min:
+                i_mins.append(i)
         return i_mins, value_min, value_tot
 
     @staticmethod
@@ -433,11 +434,12 @@ class Stats:
                       fnc: classmethod, 
                       exclude: list[classmethod] = []):
                 
+        if exclude is None:
+            exclude = []
         value_tot = 0
         for i in boss.player_list:
-            for filtre in exclude:
-                if filtre(i):
-                    break
+            if any(filter_func(i) for filter_func in exclude):
+                continue
             value_tot += fnc(i)
         return value_tot
     

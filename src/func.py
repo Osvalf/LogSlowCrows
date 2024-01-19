@@ -1,55 +1,65 @@
 import math
 from datetime import datetime, timedelta, timezone
 from const import*
-import sys
+
+class InsufficientLogsError(Exception):
+    pass
 
 def time_to_index(time: int): #time in millisecond
     return int(time/150)
 
-def get_dist(pos1: list[float,float], pos2: list[float,float]):
-    return math.sqrt((pos1[0]-pos2[0])**2+(pos1[1]-pos2[1])**2)
+def get_dist(pos1: list[float], pos2: list[float]):
+    x1, y1 = pos1[0], pos1[1]
+    x2, y2 = pos2[0], pos2[1]
+    return math.hypot(x1 - x2, y1 - y2)
 
 def disp_time(td: timedelta):
-    days = td.days
-    hours, remainder = divmod(td.seconds, 3600)
+    days, seconds = td.days, td.seconds
+    hours, remainder = divmod(seconds, 3600)
     minutes, seconds = divmod(remainder, 60)
-    if days == 0 and hours == 0 and minutes == 0:
-        time = f"{seconds}s"
-    elif days == 0 and hours == 0:
-        time = f"{minutes}m{seconds:02}s"
-    elif days == 0:
-        time = f"{hours}h{minutes:02}m{seconds:02}s"
+    if days == 0:
+        if hours == 0:
+            time = f"{minutes}m{seconds:02}s" if minutes > 0 else f"{seconds}s"
+        else:
+            time = f"{hours}h{minutes:02}m{seconds:02}s"
     else:
         time = f"{days}d{hours:02}h{minutes:02}m{seconds:02}s"
     return time
-
+    
 def txt_file_to_list(filepath: str, reward_mode=False):
-    with open(filepath, 'r') as file:
-        input_text = file.readlines()
-
+    try:
+        with open(filepath, 'r') as file:
+            input_text = file.readlines()
+    except FileNotFoundError:
+        print(f"Error: File not found at {filepath}")
+        return []
     input_lines = [line.strip() for line in input_text]
-
+    input_urls = []
     boss_names = list(boss_dict.values())
-    input_urls=[]
     escort_url = None
     for line in input_lines:
-        if ("https://dps.report/" in line) and (line.split("_")[1] in boss_names) and (line.split("_")[0].split("-")[1].isdigit()) and (line.split("_")[0].split("-")[2].isdigit()):
-            if line[-3:] == "esc":
+        if is_valid_url(line):
+            if line.endswith("esc"):
                 escort_url = line
             else:
                 input_urls.append(line)
             boss_names.remove(line.split("_")[1])
-    number_url = len(input_urls)
-    if reward_mode and number_url < 19: 
-        print(f"Tu as mis seulement {number_url} logs valides sur les 19\n")
-        print("Voici ceux qu'il manque :\n")
+    number_urls = len(input_urls)
+    if reward_mode and number_urls < 19:
+        print(f"You only provided {number_urls} valid logs out of 19\n")
+        print("The following logs are missing:\n")
         for boss_name in boss_names:
             print(f" - {boss_name.upper()}")
-        sys.exit("\nVoilà rajoute les maintenant o7\n")
-        
+        raise InsufficientLogsError("\nPlease add the missing logs now. o7\n")
     if escort_url:
         input_urls.append(escort_url)
     return input_urls
+
+def is_valid_url(line):
+    parts = line.split("_")
+    if "https://dps.report/" in line and parts[1] in boss_dict.values() and parts[0].split("-")[1].isdigit() and parts[0].split("-")[2].isdigit():
+        return True
+    return False
 
 def get_message_reward(logs: list, all_players: dict, titre="Run"):
     if not logs:
@@ -139,10 +149,6 @@ def get_message_reward(logs: list, all_players: dict, titre="Run"):
             boss_url = boss.log.url
             boss_percentil = boss.wingman_percentile
             run_message += f"* **[{boss_name}]({boss_url})** **{boss_duration} ({boss_percentil}{emote_wingman})**\n"
-            if boss.wingman_time:
-                median_time = disp_time(timedelta(seconds=boss.wingman_time[0] / 1000))
-                top_time = disp_time(timedelta(seconds=boss.wingman_time[1] / 1000))
-                #run_message += f"\t:*[wingman: med. {median_time} top. {top_time}]*\n"
             if boss.mvp:
                 run_message += boss.mvp + "\n"
             if boss.lvp:

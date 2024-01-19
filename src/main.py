@@ -9,7 +9,7 @@ TITRE = "Run"
 def main() -> None:
     input_urls = txt_file_to_list("src/input logs.txt")
     #Pour tester séparément
-    #input_urls = ["https://dps.report/ifmF-20240113-223219_sam"]
+    #input_urls = ["https://dps.report/YqDK-20240118-125906_golem"]
     
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [executor.submit(Log, input_value) for input_value in input_urls]
