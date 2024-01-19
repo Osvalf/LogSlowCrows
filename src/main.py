@@ -9,7 +9,7 @@ TITRE = "Run"
 def main() -> None:
     input_urls = txt_file_to_list("src/input logs.txt")
     #Pour tester séparément
-    #input_urls = ["https://dps.report/YqDK-20240118-125906_golem"]
+    input_urls = ["https://dps.report/XXNc-20240117-232331_vg"]
     
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [executor.submit(Log, input_value) for input_value in input_urls]
@@ -31,7 +31,11 @@ def main() -> None:
 if __name__ == "__main__":
     print("Starting")
     start_time = perf_counter()  
-    main()
+    #main()
+    log = Log("https://dps.report/pgiO-20240117-223507_sam")
+    boss = all_bosses[0]
+    id = 2
+    print(boss.mvp)
     end_time = perf_counter()
     print(f"--- {end_time - start_time:.3f} seconds ---\n")
     

@@ -273,8 +273,20 @@ class Boss:
         for i_player, player in enumerate(players):
             if player['name'] == name:
                 return i_player
-        
         return None
+    
+    def get_player_mech_history(self, i_player: int):
+        history = []
+        player_name = self.get_player_name(i_player)
+        mech_history = self.log.pjcontent['mechanics']
+        for mech in mech_history:
+            for data in mech['mechanicsData']:
+                if data['actor'] == player_name:
+                    history.append({"name": mech['name'], "time": data['time']})
+        history.sort(key=lambda mech: mech["time"], reverse=False)
+        return history
+    
+    ################################ MVP ################################
     
     def get_mvp_cc_boss(self, extra_exclude: list[classmethod]=[]):
         i_players, min_cc, total_cc = Stats.get_min_value(self, self.get_cc_boss, exclude=[*extra_exclude])
@@ -294,15 +306,6 @@ class Boss:
                 return f" * *[**MVP** : {mvp_names} n'a mis que **{min_cc:.0f}** de **CC** (**{cc_ratio:.1f}%** de la squad)]*"
             else:
                 return f" * *[**MVP** : {mvp_names} n'ont mis que **{min_cc:.0f}** de **CC** (**{cc_ratio:.1f}%** de la squad)]*"
-            
-    def get_lvp_cc_boss(self):
-        i_players, max_cc, total_cc = Stats.get_max_value(self, self.get_cc_boss)
-        for i in i_players:
-            account = self.get_player_account(i)
-            all_players[account].lvps += 1
-        lvp_names = self.players_to_string(i_players)
-        cc_ratio = max_cc / total_cc * 100
-        return f" * *[**LVP** : {lvp_names} merci d'avoir fait **{max_cc:.0f}** de **CC** (**{cc_ratio:.1f}%** de la squad)]*"
     
     def get_mvp_cc_total(self,extra_exclude: list[classmethod]=[]):
         i_players, min_cc, total_cc = Stats.get_min_value(self, self.get_cc_total, exclude=[*extra_exclude])
@@ -322,15 +325,6 @@ class Boss:
                 return f" * *[**MVP** : {mvp_names} n'a mis que **{min_cc:.0f}** de **CC** (**{cc_ratio:.1f}%** de la squad)]*"
             else:
                 return f" * *[**MVP** : {mvp_names} n'ont mis que **{min_cc:.0f}** de **CC** (**{cc_ratio:.1f}%** de la squad)]*"
-            
-    def get_lvp_cc_total(self):
-        i_players, max_cc, total_cc = Stats.get_max_value(self, self.get_cc_total)
-        for i in i_players:
-            account = self.get_player_account(i)
-            all_players[account].lvps += 1
-        lvp_names = self.players_to_string(i_players)
-        cc_ratio = max_cc / total_cc * 100
-        return f" * *[**LVP** : {lvp_names} merci d'avoir fait **{max_cc:.0f}** de **CC** (**{cc_ratio:.1f}%** de la squad)]*"
     
     def get_bad_dps(self, extra_exclude: list[classmethod]=[]):
         i_sup, sup_max_dmg, _ = Stats.get_max_value(self, self.get_dmg_boss, exclude=[self.is_dps])
@@ -344,6 +338,26 @@ class Boss:
             dmg_ratio = (1 - dps_min_dmg / sup_max_dmg) * 100 
             return f" * *[**MVP** : {bad_dps_name} qui en **DPS** n'a fait que **{dps_min_dmg / self.duration_ms :.1f}kdps** soit **{dmg_ratio:.1f}%** de moins que {sup_name} qui joue **support** on le rappelle]*"
         return
+    
+    ################################ LVP ################################
+    
+    def get_lvp_cc_boss(self):
+        i_players, max_cc, total_cc = Stats.get_max_value(self, self.get_cc_boss)
+        for i in i_players:
+            account = self.get_player_account(i)
+            all_players[account].lvps += 1
+        lvp_names = self.players_to_string(i_players)
+        cc_ratio = max_cc / total_cc * 100
+        return f" * *[**LVP** : {lvp_names} merci d'avoir fait **{max_cc:.0f}** de **CC** (**{cc_ratio:.1f}%** de la squad)]*"
+    
+    def get_lvp_cc_total(self):
+        i_players, max_cc, total_cc = Stats.get_max_value(self, self.get_cc_total)
+        for i in i_players:
+            account = self.get_player_account(i)
+            all_players[account].lvps += 1
+        lvp_names = self.players_to_string(i_players)
+        cc_ratio = max_cc / total_cc * 100
+        return f" * *[**LVP** : {lvp_names} merci d'avoir fait **{max_cc:.0f}** de **CC** (**{cc_ratio:.1f}%** de la squad)]*"
     
     def get_lvp_dps(self):
         i_players, max_dmg, total_dmg = Stats.get_max_value(self, self.get_dmg_boss)
@@ -1081,31 +1095,15 @@ class SAMAROG(Boss):
     ################################ CONDITIONS ################################
     
     def is_impaled(self, i_player: int):
-        if self.is_dead(i_player):
-            last_pos = self.get_pos_player(i_player)[-1]
-            #TOP WALL condition
-            a, b, c = self.get_sama_cartesian(sama_top_left_corn, sama_top_right_corn)
-            top = a * last_pos[0] + b * last_pos[1] + c < 0
-            #BOT WALL condition
-            a, b, c = self.get_sama_cartesian(sama_bot_left_corn, sama_bot_right_corn)
-            bot = a * last_pos[0] + b * last_pos[1] + c > 0
-            #LEFT WALL condition
-            a, b, c = self.get_sama_cartesian(sama_top_left_corn, sama_bot_left_corn)
-            left = a * last_pos[0] + b * last_pos[1] + c > 0
-            #RIGHT WALL condition
-            a, b, c = self.get_sama_cartesian(sama_top_right_corn, sama_bot_right_corn)
-            right = a * last_pos[0] + b * last_pos[1] + c < 0
-            return top or bot or left or right
+        mech_history = self.get_player_mech_history(i_player)
+        for mech in mech_history:
+            if mech['name'] == "DC":
+                mech_history.remove(mech)
+        if mech_history[-2]['name'] == "Swp" and mech_history[-1]['name'] == "Dead":
+            return True
         return False
     
     ################################ DATA MECHAS ################################
-
-    @staticmethod
-    def get_sama_cartesian(corner1: list[float,float], corner2: list[float,float]):
-        a = corner2[1] - corner1[1]
-        b = corner1[0] - corner2[0]
-        c = - a * corner1[0] - b * corner1[1]
-        return a, b, c  
     
     def get_impaled(self):
         i_players = []
