@@ -248,6 +248,21 @@ class Boss:
             return True
         return False
     
+    def is_dead_instant(self, i_player: int):
+        mech_history = self.get_player_mech_history(i_player)
+        downs_deaths = []
+        for mech in mech_history:
+            if mech['name'] == "Downed" or mech['name'] == "Dead":
+                downs_deaths.append(mech)
+        if downs_deaths:
+            if downs_deaths[-1]['name'] == "Dead":
+                if len(downs_deaths) == 1:
+                    return True
+                if len(downs_deaths) > 1:
+                    if downs_deaths[-2]['time'] < downs_deaths[-1]['time']-8000:
+                        return True
+        return False
+    
     ################################ DATA JOUEUR ################################
     
     def get_player_name(self, i_player: int):
@@ -286,10 +301,26 @@ class Boss:
         history.sort(key=lambda mech: mech["time"], reverse=False)
         return history
     
+    def players_to_string(self, i_players: list[int]):
+        return ', '.join([self.get_player_name(i) for i in i_players])
+    
+    def get_player_death_timer(self, i_player: int):
+        if self.is_dead(i_player):
+            mech_history = self.get_player_mech_history(i_player)
+            for mech in mech_history:
+                if mech["name"] == "Dead":
+                    return mech["time"]
+        return
+    
+    def get_player_rotation(self, i_player: int):
+        return self.log.pjcontent['players'][i_player]['rotation']
+    
     ################################ MVP ################################
     
     def get_mvp_cc_boss(self, extra_exclude: list[classmethod]=[]):
         i_players, min_cc, total_cc = Stats.get_min_value(self, self.get_cc_boss, exclude=[*extra_exclude])
+        if total_cc == 0:
+            return
         for i in i_players:
             account = self.get_player_account(i)
             all_players[account].mvps += 1  
@@ -309,6 +340,8 @@ class Boss:
     
     def get_mvp_cc_total(self,extra_exclude: list[classmethod]=[]):
         i_players, min_cc, total_cc = Stats.get_min_value(self, self.get_cc_total, exclude=[*extra_exclude])
+        if total_cc == 0:
+            return
         for i in i_players:
             account = self.get_player_account(i)
             all_players[account].mvps += 1  
@@ -343,6 +376,8 @@ class Boss:
     
     def get_lvp_cc_boss(self):
         i_players, max_cc, total_cc = Stats.get_max_value(self, self.get_cc_boss)
+        if total_cc == 0:
+            return
         for i in i_players:
             account = self.get_player_account(i)
             all_players[account].lvps += 1
@@ -352,6 +387,8 @@ class Boss:
     
     def get_lvp_cc_total(self):
         i_players, max_cc, total_cc = Stats.get_max_value(self, self.get_cc_total)
+        if total_cc == 0:
+            return
         for i in i_players:
             account = self.get_player_account(i)
             all_players[account].lvps += 1
@@ -393,8 +430,12 @@ class Boss:
             return self.log.jcontent['phases'][0]['mechanicStats'][i_player][i_mech][0]
         return 0
     
-    def players_to_string(self, i_players: list[int]):
-        return ', '.join([self.get_player_name(i) for i in i_players])
+    def bosshp_to_time(self, hp: float):
+        hp_percents = self.log.pjcontent['targets'][0]['healthPercents']
+        for timer in hp_percents:
+            if timer[1] < hp:
+                return timer[0]
+        return
             
     
 class Stats:
@@ -687,7 +728,11 @@ class SLOTH(Boss):
     ################################ CONDITIONS ###############################
     
     def is_shroom(self, i_player: int):
-        return self.get_mech_value(i_player, "Slub Transform") > 0
+        rota = self.get_player_rotation(i_player)
+        for skill in rota:
+            if skill['id'] == 34408:
+                return True
+        return False
     
     ################################ DATA MECHAS ################################
     
@@ -1069,7 +1114,7 @@ class SAMAROG(Boss):
         msg_impaled = self.mvp_impaled()
         if msg_impaled:
             return msg_impaled
-        return self.get_mvp_cc_boss()
+        return self.get_mvp_cc_boss(extra_exclude=[self.is_fix])
     
     def get_lvp(self):
         return self.get_lvp_cc_boss()
@@ -1094,21 +1139,25 @@ class SAMAROG(Boss):
     
     ################################ CONDITIONS ################################
     
-    def is_impaled(self, i_player: int):
-        mech_history = self.get_player_mech_history(i_player)
-        for mech in mech_history:
-            if mech['name'] == "DC":
-                mech_history.remove(mech)
-        if mech_history[-2]['name'] == "Swp" and mech_history[-1]['name'] == "Dead":
-            return True
+    def got_impaled(self, i_player: int):
+        if self.is_dead_instant(i_player):
+            mech_history = self.get_player_mech_history(i_player)
+            for mech in mech_history:
+                if mech['name'] == "DC":
+                    mech_history.remove(mech)
+            if mech_history[-2]['name'] == "Swp" and mech_history[-1]['name'] == "Dead":
+                return True
         return False
+    
+    def is_fix(self, i_player: int):
+        return self.get_mech_value(i_player, "Fixate: Samarog") >= 3
     
     ################################ DATA MECHAS ################################
     
     def get_impaled(self):
         i_players = []
         for i in self.player_list:
-            if self.is_impaled(i):
+            if self.got_impaled(i):
                   i_players.append(i)
         return i_players
 
@@ -1131,6 +1180,9 @@ class DEIMOS(Boss):
         msg_black = self.mvp_black()
         if msg_black:
             return msg_black
+        msg_pizza = self.mvp_pizza()
+        if msg_pizza:
+            return msg_pizza
         return
     
     def get_lvp(self):
@@ -1153,6 +1205,16 @@ class DEIMOS(Boss):
             return f" * *[**MVP** : {mvp_names} merci à ces **champions** d'avoir tous les {len(i_players)} trigger **{max_black} black**]*"
         return
     
+    def mvp_pizza(self):
+        i_players = self.get_pizzaed()
+        mvp_names = self.players_to_string(i_players)
+        for i in i_players:
+            account = self.get_player_account(i)
+            all_players[account].mvps += 1
+        if i_players:
+            return f" * *[**MVP** : {mvp_names} pour s'être fait **éjecter** de la **plateforme**]*"
+        return
+    
     ################################ LVP ################################ 
     
     def lvp_tears(self):
@@ -1167,7 +1229,16 @@ class DEIMOS(Boss):
     
     ################################ CONDITIONS ################################
     
-    
+    def got_pizzaed(self, i_player: int):
+        if self.is_dead_instant(i_player):
+            mech_history = self.get_player_mech_history(i_player)
+            for mech in mech_history:
+                if mech['name'] == "DC":
+                    mech_history.remove(mech)
+            if mech_history[-2]['name'] == "Pizza" and mech_history[-1]['name'] == "Dead":
+                return True
+        return False
+            
     
     ################################ DATA MECHAS ################################
 
@@ -1176,6 +1247,13 @@ class DEIMOS(Boss):
     
     def get_tears(self, i_player: int):
         return self.get_mech_value(i_player, "Tear")
+    
+    def get_pizzaed(self):
+        pizzaed = []
+        for i in self.player_list:
+            if self.got_pizzaed(i):
+                pizzaed.append(i)
+        return pizzaed
 
 ################################ SH ################################
 
@@ -1193,6 +1271,12 @@ class SH(Boss):
         SH.last = self
         
     def get_mvp(self):
+        msg_wall = self.mvp_wall()
+        if msg_wall:
+            return msg_wall
+        msg_fall = self.mvp_fall()
+        if msg_fall:
+            return msg_fall
         return self.get_mvp_cc_boss()
     
     def get_lvp(self):
@@ -1200,19 +1284,64 @@ class SH(Boss):
         
     ################################ MVP ################################
     
+    def mvp_wall(self):
+        i_players = self.get_walled_players()
+        mvp_names = self.players_to_string(i_players)
+        for i in i_players:
+            account = self.get_player_account(i)
+            all_players[account].mvps += 1
+        if i_players:
+            return f" * *[**MVP** : {mvp_names} pour avoir **goûté** à un **mur**]*"
+        return
     
+    def mvp_fall(self):
+        i_players = self.get_walled_players()
+        mvp_names = self.players_to_string(i_players)
+        for i in i_players:
+            account = self.get_player_account(i)
+            all_players[account].mvps += 1
+        if i_players:
+            return f" * *[**MVP** : {mvp_names} pour être **tombé** de la **plateforme**]*"
+        return
     
-    ################################ MVP ################################
+    ################################ LVP ################################
     
     
     
     ################################ CONDITIONS ################################
     
-    
+    def took_wall(self, i_player: int):
+        if self.is_dead_instant(i_player) and not self.has_fallen(i_player):
+            return True
+        return False
+        
+    def has_fallen(self, i_player: int):
+        if self.is_dead_instant(i_player):
+            last_pos = self.get_pos_player(i_player)[-1]
+            death_time = self.get_player_death_timer(i_player)
+            fell_at_begin = get_dist(sh_center_arena, last_pos) > sh_radius2
+            fell_to_radius23 = death_time > self.bosshp_to_time(90)+2500 and death_time < self.bosshp_to_time(66)+2500 and get_dist(sh_center_arena, last_pos) > sh_radius3
+            fell_to_radius34 = death_time > self.bosshp_to_time(66)+2500 and death_time < self.bosshp_to_time(33)+2500 and get_dist(sh_center_arena, last_pos) > sh_radius4
+            fell_to_radius45 = death_time > self.bosshp_to_time(33)+2500 and get_dist(sh_center_arena, last_pos) > sh_radius5
+            if fell_at_begin or fell_to_radius23 or fell_to_radius34 or (self.cm and fell_to_radius45):
+                return True
+        return False
     
     ################################ DATA MECHAS ################################
 
+    def get_walled_players(self):
+        walled = []
+        for i in self.player_list:
+            if self.took_wall(i):
+                walled.append(i)
+        return walled
     
+    def get_fallen_players(self):
+        fallen = []
+        for i in self.player_list:
+            if self.has_fallen(i):
+                fallen.append(i)
+        return fallen
 
 ################################ DHUUM ################################
 
@@ -1556,7 +1685,11 @@ class QTP(Boss):
         msg_bad_dps = self.get_bad_dps(extra_exclude=[self.is_pylon])
         if msg_bad_dps:
             return msg_bad_dps
-        return self.get_mvp_cc_boss(extra_exclude=[self.is_pylon])
+        msg_cc = self.get_mvp_cc_boss(extra_exclude=[self.is_pylon])
+        if msg_cc:
+            return msg_cc
+        return
+        
     
     def get_lvp(self):
         return self.get_lvp_dps() 
