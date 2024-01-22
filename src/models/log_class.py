@@ -236,11 +236,7 @@ class Boss:
         return False
     
     def is_dead_instant(self, i_player: int):
-        mech_history = self.get_player_mech_history(i_player)
-        downs_deaths = []
-        for mech in mech_history:
-            if mech['name'] == "Downed" or mech['name'] == "Dead":
-                downs_deaths.append(mech)
+        downs_deaths = self.get_player_mech_history(i_player, ["Downed", "Dead"])
         if downs_deaths:
             if downs_deaths[-1]['name'] == "Dead":
                 if len(downs_deaths) == 1:
@@ -277,14 +273,18 @@ class Boss:
                 return i_player
         return None
     
-    def get_player_mech_history(self, i_player: int):
+    def get_player_mech_history(self, i_player: int, mechs: list[str] = []):
         history = []
         player_name = self.get_player_name(i_player)
         mech_history = self.log.pjcontent['mechanics']
         for mech in mech_history:
             for data in mech['mechanicsData']:
                 if data['actor'] == player_name:
-                    history.append({"name": mech['name'], "time": data['time']})
+                    if mechs:
+                        if mech['name'] in mechs:
+                            history.append({"name": mech['name'], "time": data['time']})
+                    else:
+                        history.append({"name": mech['name'], "time": data['time']})
         history.sort(key=lambda mech: mech["time"], reverse=False)
         return history
     
@@ -293,10 +293,9 @@ class Boss:
     
     def get_player_death_timer(self, i_player: int):
         if self.is_dead(i_player):
-            mech_history = self.get_player_mech_history(i_player)
-            for mech in mech_history:
-                if mech["name"] == "Dead":
-                    return mech["time"]
+            mech_history = self.get_player_mech_history(i_player, ["Dead"])
+            if mech_history:
+                return mech_history[-1]['time']
         return
     
     def get_player_rotation(self, i_player: int):
@@ -522,6 +521,9 @@ class VG(Boss):
         msg_bleu = self.mvp_bleu()
         if msg_bleu:
             return msg_bleu
+        msg_bad_dps = self.get_bad_dps()
+        if msg_bad_dps:
+            return msg_bad_dps
         return    
     
     def get_lvp(self):
@@ -532,14 +534,14 @@ class VG(Boss):
     def mvp_bleu(self):
         i_players, max_bleu, _ = Stats.get_max_value(self, self.get_bleu)
         mvp_names = self.players_to_string(i_players)
-        
-        for i in i_players:
-            account = self.get_player_account(i)
-            all_players[account].mvps += 1
-        if len(i_players) == 1:
-            return f" * *[**MVP** : {mvp_names} s'est pris **{max_bleu}** **bleues**]*"
-        if len(i_players) > 1:
-            return f" * *[**MVP** : {mvp_names} se sont tous les {len(i_players)} pris **{max_bleu}** **bleues**]*"         
+        if max_bleu > 1:
+            for i in i_players:
+                account = self.get_player_account(i)
+                all_players[account].mvps += 1
+            if len(i_players) == 1:
+                return f" * *[**MVP** : {mvp_names} s'est pris **{max_bleu}** **bleues**]*"
+            if len(i_players) > 1:
+                return f" * *[**MVP** : {mvp_names} se sont tous les {len(i_players)} pris **{max_bleu}** **bleues**]*"         
         return
     
     ################################ LVP ################################
@@ -630,6 +632,9 @@ class SABETHA(Boss):
         SABETHA.last = self
         
     def get_mvp(self):
+        msg_terrorists = self.mvp_terrorists()
+        if msg_terrorists:
+            return msg_terrorists
         return self.mvp_dmg_split()
     
     def get_lvp(self):
@@ -645,6 +650,16 @@ class SABETHA(Boss):
         dmg_ratio = min_dmg / total_dmg * 100
         mvp_names = self.players_to_string(i_players)
         return f" * *[**MVP** : {mvp_names} avec seulement **{dmg_ratio:.1f}%** des degats sur **split** sans faire de **canon**]*"
+    
+    def mvp_terrorists(self):
+        i_players = self.get_terrorists()
+        for i in i_players:
+            account = self.get_player_account(i)
+            all_players[account].mvps += 1
+        if i_players:
+            mvp_names = self.players_to_string(i_players)
+            return f" * *[**MVP** : {mvp_names} pour avoir **explosé** une bombe dans le **pack**]*"
+        return
     
     ################################ LVP ################################
     
@@ -680,13 +695,37 @@ class SABETHA(Boss):
                     return True
         return False
     
+    def is_terrorist(self, i_player: int):
+        bomb_history = self.get_player_mech_history(i_player, ["Timed Bomb"])
+        if bomb_history:
+            poses = self.get_pos_player(i_player)
+            players = self.player_list
+            for bomb in bomb_history:
+                bomb_time = bomb['time'] + 3000
+                time_index = time_to_index(bomb_time)
+                bomb_pos = poses[time_index]
+                for i in players:
+                    if i == i_player:
+                        continue
+                    i_pos = self.get_pos_player(i)[time_index]
+                    if get_dist(bomb_pos, i_pos) <= 280/9.6:
+                        return True
+        return False
+    
     ################################ DATA MECHAS ################################
         
     def get_dmg_split(self,i_player: int):
         dmg_kernan = self.log.jcontent['phases'][2]['dpsStatsTargets'][i_player][0][0]
         dmg_mornifle = self.log.jcontent['phases'][5]['dpsStatsTargets'][i_player][0][0]
         dmg_karde = self.log.jcontent['phases'][7]['dpsStatsTargets'][i_player][0][0]
-        return dmg_kernan + dmg_mornifle + dmg_karde  
+        return dmg_kernan + dmg_mornifle + dmg_karde 
+    
+    def get_terrorists(self):
+        terrotists = []
+        for i in self.player_list:
+            if self.is_terrorist(i):
+                terrotists.append(i)
+        return terrotists 
 
 ################################ SLOTH ################################
 
