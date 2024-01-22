@@ -1,4 +1,3 @@
-from urllib.request import Request, urlopen
 import json
 import requests
 import numpy as np
@@ -152,22 +151,16 @@ class Boss:
         return real_players
     
     def get_wingman_percentile(self):
-            log_time_ms = self.duration_ms
-            boss_short_name = boss_dict.get(self.boss_id)                  
-            if self.cm:
-                if cm_dict.get(boss_short_name):
-                    all_wingman_boss_times_ms = np.sort(np.array(list(cm_dict[boss_short_name]))*60*1000)[::-1]
-                else:
-                    return
-            else:
-                if nm_dict.get(boss_short_name):
-                    all_wingman_boss_times_ms = np.sort(np.array(list(nm_dict[boss_short_name]))*60*1000)[::-1]
-                else:
-                    return               
-            all_wingman_boss_times_ms = np.sort(np.append(all_wingman_boss_times_ms, log_time_ms))[::-1]
-            i = np.where(all_wingman_boss_times_ms==log_time_ms)[0][0]
-            percentile = i/(len(all_wingman_boss_times_ms)-1)*100
-            return f"{percentile:.1f}%"
+        log_time_ms = self.duration_ms
+        boss_short_name = boss_dict.get(self.boss_id)
+        if self.cm:
+            all_wingman_boss_times_ms = np.array(cm_dict.get(boss_short_name, []))*60000
+        else:
+            all_wingman_boss_times_ms = np.array(nm_dict.get(boss_short_name, []))*60000
+        all_wingman_boss_times_ms = np.sort(np.append(all_wingman_boss_times_ms, log_time_ms))[::-1]
+        i = np.where(all_wingman_boss_times_ms == log_time_ms)[0][0]
+        percentile = i / (len(all_wingman_boss_times_ms) - 1) * 100
+        return f"{percentile:.1f}%"
             
     ################################ CONDITIONS ################################
         
@@ -206,18 +199,12 @@ class Boss:
     
     def is_buyer(self, i_player: int):
         player_name = self.get_player_name(i_player)
-        i_death = None
         mechanics = self.log.pjcontent.get('mechanics')
         if mechanics:
-            for i_mech, mech in enumerate(mechanics):
-                if mech['name'] == "Dead":
-                    i_death = i_mech
-                    break
-            if i_death is not None:
-                death_history = mechanics[i_death]['mechanicsData']
-                for death in death_history:
-                    if death['time'] < 20000 and death['actor'] == player_name:
-                        return True
+            death_history = [death for mech in mechanics if mech['name'] == "Dead" for death in mech['mechanicsData']]
+            for death in death_history:
+                if death['time'] < 20000 and death['actor'] == player_name:
+                    return True
         return False
     
     def is_buff_up(self, i_player: int, target_time: int, buff_name: str):
@@ -271,7 +258,7 @@ class Boss:
     def get_player_account(self, i_player: int):
         return self.log.pjcontent['players'][i_player]['account']
     
-    def get_pos_player(self, i_player: int , start: int = 0, end: int = None): 
+    def get_pos_player(self, i_player: int , start: int = 0, end: int = None):
         return self.log.pjcontent['players'][i_player]['combatReplayData']['positions'][start:end]
     
     def get_cc_boss(self, i_player: int):
@@ -314,6 +301,24 @@ class Boss:
     
     def get_player_rotation(self, i_player: int):
         return self.log.pjcontent['players'][i_player]['rotation']
+    
+    def time_entered_area(self, i_player: int, center: list[float], radius: float):
+        poses = self.get_pos_player(i_player)
+        for i, pos in enumerate(poses):
+            if get_dist(pos, center) < radius:
+                return i*150
+        return
+    
+    def time_exited_area(self, i_player, center: list[float], radius: float):
+        time_enter = self.time_entered_area(i_player, center, radius)
+        if time_enter:
+            i_enter = int(time_enter/150)
+            poses = self.get_pos_player(i_player)[i_enter:]
+            for i, pos in enumerate(poses):
+                if get_dist(pos, center) > radius:
+                    return (i+i_enter) * 150
+        return
+            
     
     ################################ MVP ################################
     
@@ -816,6 +821,9 @@ class ESCORT(Boss):
         return
        
     def get_lvp(self):
+        msg_tower = self.lvp_tower()
+        if msg_tower:
+            return msg_tower
         return self.lvp_glenna()
     
     ################################ MVP ################################
@@ -844,22 +852,54 @@ class ESCORT(Boss):
         lvp_names = self.players_to_string(i_players)
         return f" * *[**LVP** : {lvp_names}, merci d'avoir **call** glenna **{max_call}** fois]*"
     
+    def lvp_tower(self):
+        towers = self.get_towers()
+        lvp_names = self.players_to_string(towers)
+        for i in self.player_list:
+            for n in range(1,6):
+                if self.is_tower_n(i,n) and not self.is_tower(i):
+                    return
+        if len(towers) == 1:
+            return f" * *[**LVP** : {lvp_names} qui a **réussit** tous ses **solo cap**]*" 
+        return f" * *[**LVP** : {lvp_names} qui ont **réussit** tous leurs **duo cap**]*"
+    
     ################################ CONDITIONS ################################
     
-    def is_mined(self, i_player: int):
+    def got_mined(self, i_player: int):
         return self.get_mech_value(i_player, "Mine Detonation Hit") > 0
     
+    def is_tower_n(self, i_player: int, n: int):
+        poses = self.get_pos_player(i_player)
+        tower = globals()[f"escort_tower{n}"]
+        for pos in poses:
+            if get_dist(pos, tower) < tower_radius:
+                return True
+        return False
+    
+    def is_tower(self, i_player: int):
+        for n in range(1,6):
+            if not self.is_tower_n(i_player, n):
+                return False
+        return True
+
     ################################ DATA MECHAS ################################
     
     def get_mined_players(self):
         p = []
         for i in self.player_list:
-            if self.is_mined(i):
+            if self.got_mined(i):
                 p.append(i)
         return p
-    
+            
     def get_glenna_call(self, i_player: int):
         return self.get_mech_value(i_player, "Over Here! Cast")
+    
+    def get_towers(self):
+        towers = []
+        for i in self.player_list:
+            if self.is_tower(i):
+                towers.append(i)
+        return towers
 
 ################################ KC ################################
 
