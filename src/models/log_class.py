@@ -246,6 +246,14 @@ class Boss:
                         return True
         return False
     
+    def is_condi(self, i_player: int):
+        power_dmg = self.log.pjcontent['players'][i_player]['dpsAll'][0]['powerDamage']
+        condi_dmg = self.log.pjcontent['players'][i_player]['dpsAll'][0]['condiDamage']
+        return condi_dmg > power_dmg
+    
+    def is_power(self, i_player: int):
+        return not self.is_condi(i_player)
+    
     ################################ DATA JOUEUR ################################
     
     def get_player_name(self, i_player: int):
@@ -289,7 +297,7 @@ class Boss:
         return history
     
     def players_to_string(self, i_players: list[int]):
-        return ', '.join([self.get_player_name(i) for i in i_players])
+        return "__"+'__ / __'.join([self.get_player_name(i) for i in i_players])+"__"
     
     def get_player_death_timer(self, i_player: int):
         if self.is_dead(i_player):
@@ -317,6 +325,16 @@ class Boss:
                 if get_dist(pos, center) > radius:
                     return (i+i_enter) * 150
         return
+    
+    def add_mvps(self, players: int):
+        for i in players:
+            account = self.get_player_account(i)
+            all_players[account].mvps += 1
+                
+    def add_lvps(self, players: int):
+        for i in players:
+            account = self.get_player_account(i)
+            all_players[account].lvps += 1
             
     
     ################################ MVP ################################
@@ -325,9 +343,7 @@ class Boss:
         i_players, min_cc, total_cc = Stats.get_min_value(self, self.get_cc_boss, exclude=[*extra_exclude])
         if total_cc == 0:
             return
-        for i in i_players:
-            account = self.get_player_account(i)
-            all_players[account].mvps += 1  
+        self.add_mvps(i_players)  
         mvp_names = self.players_to_string(i_players)
         cc_ratio = min_cc / total_cc * 100
         number_mvp = len(i_players)  
@@ -346,9 +362,7 @@ class Boss:
         i_players, min_cc, total_cc = Stats.get_min_value(self, self.get_cc_total, exclude=[*extra_exclude])
         if total_cc == 0:
             return
-        for i in i_players:
-            account = self.get_player_account(i)
-            all_players[account].mvps += 1  
+        self.add_mvps(i_players)  
         mvp_names = self.players_to_string(i_players)
         cc_ratio = min_cc / total_cc * 100
         number_mvp = len(i_players)  
@@ -382,9 +396,7 @@ class Boss:
         i_players, max_cc, total_cc = Stats.get_max_value(self, self.get_cc_boss)
         if total_cc == 0:
             return
-        for i in i_players:
-            account = self.get_player_account(i)
-            all_players[account].lvps += 1
+        self.add_lvps(i_players)
         lvp_names = self.players_to_string(i_players)
         cc_ratio = max_cc / total_cc * 100
         return f" * *[**LVP** : {lvp_names} merci d'avoir fait **{max_cc:.0f}** de **CC** (**{cc_ratio:.1f}%** de la squad)]*"
@@ -393,18 +405,14 @@ class Boss:
         i_players, max_cc, total_cc = Stats.get_max_value(self, self.get_cc_total)
         if total_cc == 0:
             return
-        for i in i_players:
-            account = self.get_player_account(i)
-            all_players[account].lvps += 1
+        self.add_lvps(i_players)
         lvp_names = self.players_to_string(i_players)
         cc_ratio = max_cc / total_cc * 100
         return f" * *[**LVP** : {lvp_names} merci d'avoir fait **{max_cc:.0f}** de **CC** (**{cc_ratio:.1f}%** de la squad)]*"
     
     def get_lvp_dps(self):
         i_players, max_dmg, total_dmg = Stats.get_max_value(self, self.get_dmg_boss)
-        for i in i_players:
-            account = self.get_player_account(i)
-            all_players[account].lvps += 1
+        self.add_lvps(i_players)
         dmg_ratio = max_dmg / total_dmg * 100
         lvp_dps_name = self.players_to_string(i_players)
         return f" * *[**LVP** : {lvp_dps_name} qui a fait **{max_dmg / self.duration_ms:.1f}kdps** (**{dmg_ratio:.0f}%** de la squad)]*"
@@ -521,7 +529,7 @@ class VG(Boss):
         msg_bleu = self.mvp_bleu()
         if msg_bleu:
             return msg_bleu
-        msg_bad_dps = self.get_bad_dps()
+        msg_bad_dps = self.get_bad_dps(extra_exclude=[self.is_condi])
         if msg_bad_dps:
             return msg_bad_dps
         return    
@@ -535,9 +543,7 @@ class VG(Boss):
         i_players, max_bleu, _ = Stats.get_max_value(self, self.get_bleu)
         mvp_names = self.players_to_string(i_players)
         if max_bleu > 1:
-            for i in i_players:
-                account = self.get_player_account(i)
-                all_players[account].mvps += 1
+            self.add_mvps(i_players)
             if len(i_players) == 1:
                 return f" * *[**MVP** : {mvp_names} s'est pris **{max_bleu}** **bleues**]*"
             if len(i_players) > 1:
@@ -575,6 +581,9 @@ class GORS(Boss):
         GORS.last = self
         
     def get_mvp(self):
+        msg_egg = self.mvp_egg()
+        if msg_egg:
+            return msg_egg
         return self.mvp_dmg_split()
     
     def get_lvp(self):
@@ -584,27 +593,35 @@ class GORS(Boss):
     
     def mvp_dmg_split(self):
         i_players, min_dmg, total_dmg = Stats.get_min_value(self, self.get_dmg_split, exclude=[self.is_support])
-        for i in i_players:
-            account = self.get_player_account(i)
-            all_players[account].mvps += 1
+        self.add_mvps(i_players)
         mvp_names = self.players_to_string(i_players)
         dmg_ratio = min_dmg / total_dmg * 100
         return f" * *[**MVP** : {mvp_names} avec seulement **{dmg_ratio:.1f}%** des degats sur **split** en **DPS**]*"
+    
+    def mvp_egg(self):
+        i_players = self.get_egged()
+        if i_players:
+            self.add_mvps(i_players)
+            mvp_names = self.players_to_string(i_players)
+            if len(i_players) == 1:
+                return f" * *[**MVP** : **Cui-cui** {mvp_names} est sorti de **l'oeuf**]*"
+            if len(i_players) > 1:
+                return f" * *[**MVP** : **Cui-cui** {mvp_names} sont sortis de **l'oeuf**]*"
+        return 
     
     ################################ LVP ################################
     
     def lvp_dmg_split(self):
         i_players, max_dmg, total_dmg = Stats.get_max_value(self, self.get_dmg_split)
-        for i in i_players:
-            account = self.get_player_account(i)
-            all_players[account].lvps += 1
+        self.add_lvps(i_players)
         lvp_names = self.players_to_string(i_players)
         dmg_ratio = max_dmg / total_dmg * 100
         return f" * *[**LVP** : {lvp_names} avec **{dmg_ratio:.1f}%** des degats sur **split** en **DPS**]*"
 
     ################################ CONDITIONS ###############################
     
-    
+    def got_egged(self, i_player: int):
+        return self.get_mech_value(i_player, "Egged") > 0
     
     ################################ DATA MECHAS ################################
         
@@ -615,6 +632,13 @@ class GORS(Boss):
         for add_split1, add_split2 in zip(dmg_split_1,dmg_split_2):
             dmg_split += add_split1[0] + add_split2[0]
         return dmg_split
+    
+    def get_egged(self):
+        egged = []
+        for i in self.player_list:
+            if self.got_egged(i):
+                egged.append(i)
+        return egged
     
 ################################ SABETHA ################################
 
@@ -644,18 +668,14 @@ class SABETHA(Boss):
     
     def mvp_dmg_split(self):
         i_players, min_dmg, total_dmg = Stats.get_min_value(self, self.get_dmg_split, exclude=[self.is_support,self.is_cannon])
-        for i in i_players:
-            account = self.get_player_account(i)
-            all_players[account].mvps += 1
+        self.add_mvps(i_players)
         dmg_ratio = min_dmg / total_dmg * 100
         mvp_names = self.players_to_string(i_players)
         return f" * *[**MVP** : {mvp_names} avec seulement **{dmg_ratio:.1f}%** des degats sur **split** sans faire de **canon**]*"
     
     def mvp_terrorists(self):
         i_players = self.get_terrorists()
-        for i in i_players:
-            account = self.get_player_account(i)
-            all_players[account].mvps += 1
+        self.add_mvps(i_players)
         if i_players:
             mvp_names = self.players_to_string(i_players)
             return f" * *[**MVP** : {mvp_names} pour avoir **explosé** une bombe dans le **pack**]*"
@@ -665,9 +685,7 @@ class SABETHA(Boss):
     
     def lvp_dmg_split(self):
         i_players, max_dmg, total_dmg = Stats.get_max_value(self, self.get_dmg_split)
-        for i in i_players:
-            account = self.get_player_account(i)
-            all_players[account].lvps += 1
+        self.add_lvps(i_players)
         lvp_names = self.players_to_string(i_players)
         dmg_ratio = max_dmg / total_dmg * 100
         return f" * *[**LVP** : {lvp_names} avec **{dmg_ratio:.1f}%** des degats sur **split** en **DPS**]*"
@@ -752,9 +770,7 @@ class SLOTH(Boss):
     
     def mvp_cc_sloth(self):
         i_players, min_cc, total_cc = Stats.get_min_value(self, self.get_cc_boss, exclude=[self.is_shroom])
-        for i in i_players:
-            account = self.get_player_account(i)
-            all_players[account].mvps += 1
+        self.add_mvps(i_players)
         cc_ratio = min_cc / total_cc * 100
         mvp_names = self.players_to_string(i_players)
         if min_cc == 0:
@@ -807,9 +823,7 @@ class MATTHIAS(Boss):
     
     def mvp_cc_matthias(self):
         i_players, min_cc, total_cc = Stats.get_min_value(self, self.get_cc_total, exclude=[self.is_sac])
-        for i in i_players:
-            account = self.get_player_account(i)
-            all_players[account].mvps += 1
+        self.add_mvps(i_players)
         cc_ratio = min_cc / total_cc * 100
         mvp_names = self.players_to_string(i_players)
         if min_cc == 0:
@@ -821,9 +835,7 @@ class MATTHIAS(Boss):
             
     def lvp_cc_matthias(self):
         i_players, max_cc, total_cc = Stats.get_max_value(self, self.get_cc_total)       
-        for i in i_players:
-            account = self.get_player_account(i)
-            all_players[account].lvps += 1
+        self.add_lvps(i_players)
         cc_ratio = max_cc / total_cc * 100
         lvp_names = self.players_to_string(i_players)
         return f" * *[**LVP** : {lvp_names} merci d'avoir mis **{max_cc:.0f}** de **CC** (**{cc_ratio:.1f}%** de la squad)]*"
@@ -870,10 +882,7 @@ class ESCORT(Boss):
     def mvp_mine(self):
         i_players = self.get_mined_players()
         if i_players:
-            for i in i_players:
-
-                account = self.get_player_account(i)
-                all_players[account].mvps += 1
+            self.add_mvps(i_players)
             mvp_names = self.players_to_string(i_players)
             if len(i_players) == 1:
                 return f" * *[**MVP** : {mvp_names} qui a bien **profité** de l'escort en prenant une **mine**]*"
@@ -885,9 +894,7 @@ class ESCORT(Boss):
     
     def lvp_glenna(self):
         i_players, max_call, _ = Stats.get_max_value(self, self.get_glenna_call)
-        for i in i_players:
-            account = self.get_player_account(i)
-            all_players[account].lvps += 1
+        self.add_lvps(i_players)
         lvp_names = self.players_to_string(i_players)
         return f" * *[**LVP** : {lvp_names}, merci d'avoir **call** glenna **{max_call}** fois]*"
     
@@ -898,6 +905,7 @@ class ESCORT(Boss):
             for n in range(1,6):
                 if self.is_tower_n(i,n) and not self.is_tower(i):
                     return
+        self.add_lvps(towers)
         if len(towers) == 1:
             return f" * *[**LVP** : {lvp_names} qui a **réussit** tous ses **solo cap**]*" 
         return f" * *[**LVP** : {lvp_names} qui ont **réussit** tous leurs **duo cap**]*"
@@ -966,9 +974,7 @@ class KC(Boss):
     def mvp_orb_kc(self):
         i_players, min_orb, _ = Stats.get_min_value(self, self.get_good_orb)
         mvp_names = self.players_to_string(i_players)
-        for i in i_players:
-            account = self.get_player_account(i)
-            all_players[account].mvps += 1
+        self.add_mvps(i_players)
         if min_orb == 0:
             return f" * *[**MVP** : {mvp_names} avec aucune **orbe** collectée sur tout le fight]*"
         else:
@@ -1024,9 +1030,7 @@ class XERA(Boss):
     def mvp_fdp_xera(self):
         i_fdp = self.get_fdp()
         fdp_names = self.players_to_string(i_fdp)
-        for i in i_fdp:
-            account = self.get_player_account(i)
-            all_players[account].mvps += 1
+        self.add_mvps(i_fdp)
         if len(i_fdp) == 1:
             return f" * *[**MVP** : oui {fdp_names} a vraiment **skip** un **mini-jeu**]*"
         if len(i_fdp) > 1:
@@ -1036,9 +1040,7 @@ class XERA(Boss):
     def mvp_glide(self):
         i_glide = self.get_gliding_death()
         glide_names = self.players_to_string(i_glide)
-        for i in i_glide:
-            account = self.get_player_account(i)
-            all_players[account].mvps += 1
+        self.add_mvps(i_glide)
         if len(i_glide) == 1:
             return f" * *[**MVP** : {glide_names} champion **mort** pendant le **glide**]*"
         if len(i_glide) > 1:
@@ -1049,9 +1051,7 @@ class XERA(Boss):
     
     def lvp_minijeu(self):
         i_players, max_minijeu, _ = Stats.get_max_value(self, self.get_tp_back, exclude=[self.is_fdp])
-        for i in i_players:
-            account = self.get_player_account(i)
-            all_players[account].lvps += 1
+        self.add_lvps(i_players)
         lvp_names = self.players_to_string(i_players)
         if max_minijeu == 2:
             return f" * *[**LVP** : {lvp_names} merci d'avoir tanké **2** mini-jeu sans les skip]*"
@@ -1203,9 +1203,7 @@ class SAMAROG(Boss):
     def mvp_impaled(self):
         i_players = self.get_impaled()
         mvp_names = self.players_to_string(i_players)
-        for i in i_players:
-            account = self.get_player_account(i)
-            all_players[account].mvps += 1
+        self.add_mvps(i_players)
         if len(i_players) == 1:
             return f" * *[**MVP** : {mvp_names} s'est fait **empaler**, gros respect]*" 
         if len(i_players) > 1:
@@ -1275,9 +1273,7 @@ class DEIMOS(Boss):
     def mvp_black(self):
         i_players, max_black, _ = Stats.get_max_value(self, self.get_black_trigger)
         mvp_names = self.players_to_string(i_players)
-        for i in i_players:
-            account = self.get_player_account(i)
-            all_players[account].mvps += 1
+        self.add_mvps(i_players)
         if len(i_players) == 1:
             return f" * *[**MVP** : {mvp_names} merci à ce **champion** d'avoir trigger **{max_black} black**]*"
         if len(i_players) > 1:
@@ -1287,9 +1283,7 @@ class DEIMOS(Boss):
     def mvp_pizza(self):
         i_players = self.get_pizzaed()
         mvp_names = self.players_to_string(i_players)
-        for i in i_players:
-            account = self.get_player_account(i)
-            all_players[account].mvps += 1
+        self.add_mvps(i_players)
         if i_players:
             return f" * *[**MVP** : {mvp_names} pour s'être fait **éjecter** de la **plateforme**]*"
         return
@@ -1299,10 +1293,8 @@ class DEIMOS(Boss):
     def lvp_tears(self):
         i_players, max_tears, _ = Stats.get_max_value(self, self.get_tears)
         lvp_names = self.players_to_string(i_players)
-        for i in i_players:
-            account = self.get_player_account(i)
-            all_players[account].lvps += 1
         if i_players and max_tears > 2:
+            self.add_lvps(i_players)
             return f" * *[**LVP** : {lvp_names} merci d'avoir ramassé **{max_tears} tears**]*"
         return
     
@@ -1366,9 +1358,7 @@ class SH(Boss):
     def mvp_wall(self):
         i_players = self.get_walled_players()
         mvp_names = self.players_to_string(i_players)
-        for i in i_players:
-            account = self.get_player_account(i)
-            all_players[account].mvps += 1
+        self.add_mvps(i_players)
         if i_players:
             return f" * *[**MVP** : {mvp_names} pour avoir **goûté** à un **mur**]*"
         return
@@ -1376,9 +1366,7 @@ class SH(Boss):
     def mvp_fall(self):
         i_players = self.get_walled_players()
         mvp_names = self.players_to_string(i_players)
-        for i in i_players:
-            account = self.get_player_account(i)
-            all_players[account].mvps += 1
+        self.add_mvps(i_players)
         if i_players:
             return f" * *[**MVP** : {mvp_names} pour être **tombé** de la **plateforme**]*"
         return
@@ -1451,9 +1439,7 @@ class DHUUM(Boss):
     def mvp_cracks(self):
         i_players, max_cracks, _ = Stats.get_max_value(self, self.get_cracks)
         mvp_names = self.players_to_string(i_players)
-        for i in i_players:
-            account = self.get_player_account(i)
-            all_players[account].mvps += 1
+        self.add_mvps(i_players)
         if len(i_players) == 1:
             return f" * *[**MVP** : {mvp_names} s'est pris **{max_cracks} cracks**]*"
         if len(i_players) > 1:
@@ -1539,9 +1525,7 @@ class LARGOS(Boss):
     def mvp_dash(self):
         i_players, max_dash, _ = Stats.get_max_value(self, self.get_dash, exclude=[self.is_heal, self.is_tank])
         mvp_names = self.players_to_string(i_players)
-        for i in i_players:
-            account = self.get_player_account(i)
-            all_players[account].mvps += 1
+        self.add_mvps(i_players)
         if len(i_players) == 1:
             return f" * *[**MVP** : {mvp_names} s'est pris **{max_dash} dash**]*"
         if len(i_players) > 1:
@@ -1595,9 +1579,7 @@ class Q1(Boss):
     
     def mvp_fdp(self):
         i_players = self.get_fdp()
-        for i in i_players:
-            account = self.get_player_account(i)
-            all_players[account].mvps += 1
+        self.add_mvps(i_players)
         fdp_names = self.players_to_string(i_players)
         if len(i_players) == 1:
             return f" * *[**MVP** : {fdp_names} n'est pas allé taper le **pyre**]*"
@@ -1606,9 +1588,7 @@ class Q1(Boss):
     
     def mvp_wave(self):
         i_players, max_waves, _ = Stats.get_max_value(self, self.get_wave)
-        for i in i_players:
-            account = self.get_player_account(i)
-            all_players[account].mvps += 1
+        self.add_mvps(i_players)
         mvp_names = self.players_to_string(i_players)
         if len(i_players) == 1:
             return f" * *[**MVP** : {mvp_names} s'est pris **{max_waves} shockwave**]*"
@@ -1677,9 +1657,7 @@ class ADINA(Boss):
 
     def mvp_dmg_split(self):
         i_players, min_dmg, total_dmg = Stats.get_min_value(self, self.get_dmg_split, exclude=[self.is_support])
-        for i in i_players:
-            account = self.get_player_account(i)
-            all_players[account].mvps += 1
+        self.add_mvps(i_players)
         mvp_names = self.players_to_string(i_players)
         dmg_ratio = min_dmg / total_dmg * 100
         return f" * *[**MVP** : {mvp_names} n'a fait que **{dmg_ratio:.1f}%** des dégats sur split]*"
@@ -1688,9 +1666,7 @@ class ADINA(Boss):
     
     def lvp_dmg_split(self):
         i_players, max_dmg, total_dmg = Stats.get_max_value(self, self.get_dmg_split)
-        for i in i_players:
-            account = self.get_player_account(i)
-            all_players[account].lvps += 1
+        self.add_lvps(i_players)
         lvp_names = self.players_to_string(i_players)
         dmg_ratio = max_dmg / total_dmg * 100
         return f" * *[**LVP** : {lvp_names} merci d'avoir fait **{dmg_ratio:.1f}%** des dégats sur split]*"
