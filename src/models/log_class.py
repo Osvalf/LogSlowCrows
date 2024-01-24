@@ -262,17 +262,17 @@ class Boss:
     def get_player_account(self, i_player: int):
         return self.log.pjcontent['players'][i_player]['account']
     
-    def get_pos_player(self, i_player: int , start: int = 0, end: int = None):
+    def get_player_pos(self, i_player: int , start: int = 0, end: int = None):
         return self.log.pjcontent['players'][i_player]['combatReplayData']['positions'][start:end]
     
     def get_cc_boss(self, i_player: int):
-        return self.log.jcontent['phases'][0]['dpsStatsTargets'][i_player][0][3]
+        return self.log.pjcontent['players'][i_player]['dpsTargets'][0][0]['breakbarDamage']
     
     def get_dmg_boss(self, i_player: int):
-        return self.log.jcontent['phases'][0]['dpsStatsTargets'][i_player][0][0]
+        return self.log.pjcontent['players'][i_player]['dpsTargets'][0][0]['damage']
     
     def get_cc_total(self, i_player: int):
-        return self.log.jcontent['phases'][0]['dpsStats'][i_player][3]
+        return self.log.pjcontent['players'][i_player]['dpsAll'][0]['breakbarDamage']
     
     def get_player_id(self, name: str):
         players = self.log.pjcontent['players'] 
@@ -310,7 +310,7 @@ class Boss:
         return self.log.pjcontent['players'][i_player]['rotation']
     
     def time_entered_area(self, i_player: int, center: list[float], radius: float):
-        poses = self.get_pos_player(i_player)
+        poses = self.get_player_pos(i_player)
         for i, pos in enumerate(poses):
             if get_dist(pos, center) < radius:
                 return i*150
@@ -320,7 +320,7 @@ class Boss:
         time_enter = self.time_entered_area(i_player, center, radius)
         if time_enter:
             i_enter = int(time_enter/150)
-            poses = self.get_pos_player(i_player)[i_enter:]
+            poses = self.get_player_pos(i_player)[i_enter:]
             for i, pos in enumerate(poses):
                 if get_dist(pos, center) > radius:
                     return (i+i_enter) * 150
@@ -584,7 +584,11 @@ class GORS(Boss):
         msg_egg = self.mvp_egg()
         if msg_egg:
             return msg_egg
-        return self.mvp_dmg_split()
+        
+        msg_dmg_split = self.mvp_dmg_split()
+        if msg_dmg_split:
+            return msg_dmg_split     
+        return
     
     def get_lvp(self):
         return self.lvp_dmg_split()
@@ -593,10 +597,13 @@ class GORS(Boss):
     
     def mvp_dmg_split(self):
         i_players, min_dmg, total_dmg = Stats.get_min_value(self, self.get_dmg_split, exclude=[self.is_support])
-        self.add_mvps(i_players)
-        mvp_names = self.players_to_string(i_players)
-        dmg_ratio = min_dmg / total_dmg * 100
-        return f" * *[**MVP** : {mvp_names} avec seulement **{dmg_ratio:.1f}%** des degats sur **split** en **DPS**]*"
+        dps_total_dmg = Stats.get_tot_value(self, self.get_dmg_split, exclude=[self.is_support])
+        if min_dmg/dps_total_dmg < 0.1:
+            self.add_mvps(i_players)
+            mvp_names = self.players_to_string(i_players)
+            dmg_ratio = min_dmg / total_dmg * 100
+            return f" * *[**MVP** : {mvp_names} avec seulement **{dmg_ratio:.1f}%** des degats sur **split** en **DPS**]*"
+        return
     
     def mvp_egg(self):
         i_players = self.get_egged()
@@ -656,10 +663,15 @@ class SABETHA(Boss):
         SABETHA.last = self
         
     def get_mvp(self):
+        
         msg_terrorists = self.mvp_terrorists()
         if msg_terrorists:
             return msg_terrorists
-        return self.mvp_dmg_split()
+        
+        msg_dmg_split = self.mvp_dmg_split()
+        if msg_dmg_split:
+            return self.mvp_dmg_split()
+        return
     
     def get_lvp(self):
         return self.lvp_dmg_split()
@@ -668,10 +680,13 @@ class SABETHA(Boss):
     
     def mvp_dmg_split(self):
         i_players, min_dmg, total_dmg = Stats.get_min_value(self, self.get_dmg_split, exclude=[self.is_support,self.is_cannon])
-        self.add_mvps(i_players)
-        dmg_ratio = min_dmg / total_dmg * 100
-        mvp_names = self.players_to_string(i_players)
-        return f" * *[**MVP** : {mvp_names} avec seulement **{dmg_ratio:.1f}%** des degats sur **split** sans faire de **canon**]*"
+        dps_total_dmg = Stats.get_tot_value(self, self.get_dmg_split, exclude=[self.is_support])
+        if min_dmg/dps_total_dmg < 0.1:
+            self.add_mvps(i_players) 
+            dmg_ratio = min_dmg / total_dmg * 100
+            mvp_names = self.players_to_string(i_players)
+            return f" * *[**MVP** : {mvp_names} avec seulement **{dmg_ratio:.1f}%** des degats sur **split** sans faire de **canon**]*"
+        return
     
     def mvp_terrorists(self):
         i_players = self.get_terrorists()
@@ -693,7 +708,7 @@ class SABETHA(Boss):
     ################################ CONDITIONS ###############################
     
     def is_cannon(self, i_player: int, n: int=0):
-        pos_player = self.get_pos_player(i_player)
+        pos_player = self.get_player_pos(i_player)
         match n:
             case 0: 
                 canon_pos = [pos_canon1, pos_canon2, pos_canon3, pos_canon4]
@@ -716,16 +731,19 @@ class SABETHA(Boss):
     def is_terrorist(self, i_player: int):
         bomb_history = self.get_player_mech_history(i_player, ["Timed Bomb"])
         if bomb_history:
-            poses = self.get_pos_player(i_player)
+            poses = self.get_player_pos(i_player)
             players = self.player_list
             for bomb in bomb_history:
                 bomb_time = bomb['time'] + 3000
                 time_index = time_to_index(bomb_time)
-                bomb_pos = poses[time_index]
+                try:
+                    bomb_pos = poses[time_index]
+                except:
+                    continue
                 for i in players:
                     if i == i_player:
                         continue
-                    i_pos = self.get_pos_player(i)[time_index]
+                    i_pos = self.get_player_pos(i)[time_index]
                     if get_dist(bomb_pos, i_pos) <= 280/9.6:
                         return True
         return False
@@ -761,7 +779,14 @@ class SLOTH(Boss):
         SLOTH.last = self
         
     def get_mvp(self):
-        return self.mvp_cc_sloth()    
+        msg_tantrum = self.mvp_tantrum()
+        if msg_tantrum:
+            return msg_tantrum
+        
+        msg_cc = self.mvp_cc_sloth()
+        if msg_cc:
+            return self.mvp_cc_sloth()
+        return    
         
     def get_lvp(self):
         return self.get_lvp_cc_boss()
@@ -769,17 +794,27 @@ class SLOTH(Boss):
     ################################ MVP ################################
     
     def mvp_cc_sloth(self):
-        i_players, min_cc, total_cc = Stats.get_min_value(self, self.get_cc_boss, exclude=[self.is_shroom])
-        self.add_mvps(i_players)
-        cc_ratio = min_cc / total_cc * 100
-        mvp_names = self.players_to_string(i_players)
-        if min_cc == 0:
+        i_players, min_cc, total_cc = Stats.get_min_value(self, self.get_cc_boss, exclude=[self.is_shroom])  
+        if min_cc < 500:
+            self.add_mvps(i_players)
+            cc_ratio = min_cc / total_cc * 100
+            mvp_names = self.players_to_string(i_players)
+            if min_cc == 0:
+                if len(i_players) > 1:
+                    return f" * *[**MVP** : {mvp_names} qui n'ont même pas **CC** sans manger de **shroom**]*"
+                return f" * *[**MVP** : {mvp_names} qui n'a même pas **CC** sans manger de **shroom**]*"
             if len(i_players) > 1:
-                return f" * *[**MVP** : {mvp_names} qui n'ont même pas **CC** sans manger de **shroom**]*"
-            return f" * *[**MVP** : {mvp_names} qui n'a même pas **CC** sans manger de **shroom**]*"
-        if len(i_players) > 1:
-            return f" * *[**MVP** : {mvp_names} qui ont fait seulement **{min_cc:.0f}** de **CC** (**{cc_ratio:.1f}%** du total) sans manger de **shroom**]*"
-        return f" * *[**MVP** : {mvp_names} qui a fait seulement **{min_cc:.0f}** de **CC** (**{cc_ratio:.1f}%** du total) sans manger de **shroom**]*"
+                return f" * *[**MVP** : {mvp_names} qui ont fait seulement **{min_cc:.0f}** de **CC** (**{cc_ratio:.1f}%** du total) sans manger de **shroom**]*"
+            return f" * *[**MVP** : {mvp_names} qui a fait seulement **{min_cc:.0f}** de **CC** (**{cc_ratio:.1f}%** du total) sans manger de **shroom**]*"
+    
+    def mvp_tantrum(self):
+        i_players, max_tantrum, _ = Stats.get_max_value(self, self.get_tantrum)
+        if max_tantrum > 1:
+            self.add_mvps(i_players)
+            mvp_names = self.players_to_string(i_players)
+            if len(i_players) > 1:
+                return f" * *[**MVP** : {mvp_names} qui ont pris **{max_tantrum}** fois le **tantrum**]*"
+            return f" * *[**MVP** : {mvp_names} qui a pris **{max_tantrum}** fois le **tantrum**]*"
     
     ################################ LVP ################################
     
@@ -796,7 +831,8 @@ class SLOTH(Boss):
     
     ################################ DATA MECHAS ################################
     
-
+    def get_tantrum(self, i_player: int):
+        return self.get_mech_value(i_player, "Tantrum")
 
 ################################ MATTHIAS ################################
 
@@ -916,7 +952,7 @@ class ESCORT(Boss):
         return self.get_mech_value(i_player, "Mine Detonation Hit") > 0
     
     def is_tower_n(self, i_player: int, n: int):
-        poses = self.get_pos_player(i_player)
+        poses = self.get_player_pos(i_player)
         tower = globals()[f"escort_tower{n}"]
         for pos in poses:
             if get_dist(pos, tower) < tower_radius:
@@ -1086,7 +1122,7 @@ class XERA(Boss):
             i_player = self.get_player_id(player_name)
             tp_time += 1000  # 1s de delais pour etre sur
             i_time = time_to_index(tp_time)
-            pos_player = self.get_pos_player(i_player, i_time, i_time + i_delta)
+            pos_player = self.get_player_pos(i_player, i_time, i_time + i_delta)
             for p in pos_player:
                 if get_dist(p, xera_centre) <= xera_centre_radius:
                     fdp.append(i_player)
@@ -1384,7 +1420,7 @@ class SH(Boss):
         
     def has_fallen(self, i_player: int):
         if self.is_dead_instant(i_player):
-            last_pos = self.get_pos_player(i_player)[-1]
+            last_pos = self.get_player_pos(i_player)[-1]
             death_time = self.get_player_death_timer(i_player)
             fell_at_begin = get_dist(sh_center_arena, last_pos) > sh_radius2
             fell_to_radius23 = death_time > self.bosshp_to_time(90)+2500 and death_time < self.bosshp_to_time(66)+2500 and get_dist(sh_center_arena, last_pos) > sh_radius3
@@ -1613,8 +1649,8 @@ class Q1(Boss):
         for i in self.player_list:
             if not self.is_tank(i):
                 add_fdp = True
-                pos_p1 = self.get_pos_player(i, start=start_p1, end=end_p1)
-                pos_p2 = self.get_pos_player(i, start=start_p2, end=end_p2)
+                pos_p1 = self.get_player_pos(i, start=start_p1, end=end_p1)
+                pos_p2 = self.get_player_pos(i, start=start_p2, end=end_p2)
                 for pos in pos_p1:
                     dist = get_dist(pos, qadim_center)
                     if dist > qadim_fdp_radius:
