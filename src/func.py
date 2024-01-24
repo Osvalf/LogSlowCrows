@@ -108,6 +108,7 @@ def get_message_reward(logs: list, players: dict, titre="Run"):
     run_message = f"# {titre} du {run_date}\n" if number_boss > 1 else ""
 
     split_message = []
+    total_wingman_score = 0
     for wing in wings:
         wing_number = wing[0].wing
         wing_first_log = wing[0]
@@ -132,6 +133,7 @@ def get_message_reward(logs: list, players: dict, titre="Run"):
             boss_duration = disp_time(timedelta(seconds=boss.duration_ms / 1000))
             boss_url = boss.log.url
             boss_percentil = boss.wingman_percentile
+            total_wingman_score += boss_percentil
 
             run_message += f"* **[{boss_name}]({boss_url})** **{boss_duration} ({boss_percentil}{emote_wingman})**\n"
 
@@ -152,6 +154,7 @@ def get_message_reward(logs: list, players: dict, titre="Run"):
         run_message += f"# [GRAND MVP : {', '.join(mvp_names)} avec {max_mvp_score} titres]\n"
         run_message += f"# [GRAND LVP : {', '.join(lvp_names)} avec {max_lvp_score} titres]\n"
         run_message += f"# Temps total : {run_duration}"
+        run_message += f"# Note Wingman moyenne : ({"+str(round(total_wingman_score/number_boss, 2))+"%{emote_wingman})"
 
     split_message.append(run_message)
 
