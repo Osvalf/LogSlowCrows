@@ -448,6 +448,14 @@ class Boss:
             if timer[1] < hp:
                 return timer[0]
         return
+    
+    def get_mechanic_history(self, name: str):
+        mechanics = self.log.pjcontent['mechanics']
+        for mech in mechanics:
+            if mech['fullName'] == name:
+                return mech['mechanicsData']
+        return
+        
             
     
 class Stats:
@@ -587,7 +595,11 @@ class GORS(Boss):
         
         msg_dmg_split = self.mvp_dmg_split()
         if msg_dmg_split:
-            return msg_dmg_split     
+            return msg_dmg_split
+        
+        msg_bad_dps = self.get_bad_dps()
+        if msg_bad_dps:
+            return msg_bad_dps     
         return
     
     def get_lvp(self):
@@ -744,7 +756,7 @@ class SABETHA(Boss):
                     if i == i_player:
                         continue
                     i_pos = self.get_player_pos(i)[time_index]
-                    if get_dist(bomb_pos, i_pos) <= 280/9.6:
+                    if get_dist(bomb_pos, i_pos)*sabetha_scaler <= 280:
                         return True
         return False
     
@@ -1018,7 +1030,11 @@ class KC(Boss):
             
     ################################ LVP ################################
     
-    
+    def lvp_orb_kc(self):
+        i_players, max_orb, _ = Stats.get_max_value(self, self.get_good_orb)
+        mvp_names = self.players_to_string(i_players)
+        self.add_lvps(i_players)
+        return f" * *[**LVP** : {mvp_names} avec **{max_orb}** orbes collectées]*"
     
     ################################ CONDITIONS ################################
     
@@ -1152,14 +1168,30 @@ class CAIRN(Boss):
         CAIRN.last = self
         
     def get_mvp(self):
-        return self.get_bad_dps()          
+        msg_bad_dps = self.get_bad_dps()
+        if msg_bad_dps:
+            return msg_bad_dps
+        
+        msg_tp = self.mvp_tp()
+        if msg_tp:
+            return msg_tp
+        return          
     
     def get_lvp(self):
         return self.get_lvp_dps()
       
     ################################ MVP ################################
     
-    
+    def mvp_tp(self):
+        i_players, max_tp, _ = Stats.get_max_value(self, self.get_tp)
+        mvp_names = self.players_to_string(i_players)
+        if max_tp > 1:
+            self.add_mvps(i_players)
+            if len(i_players) == 1:
+                return f" * *[**MVP** : {mvp_names} s'est fait TP **{max_tp}** fois]*"
+            if len(i_players) > 1:
+                return f" * *[**MVP** : {mvp_names} se sont fait TP **{max_tp}** fois]*"
+        return
     
     ################################ LVP ################################
     
@@ -1171,7 +1203,8 @@ class CAIRN(Boss):
     
     ################################ DATA MECHAS ################################
 
-    
+    def get_tp(self, i_player: int):
+        return self.get_mech_value(i_player, 'Orange TP')
 
 ################################ MO ################################
 
@@ -1229,6 +1262,11 @@ class SAMAROG(Boss):
         msg_impaled = self.mvp_impaled()
         if msg_impaled:
             return msg_impaled
+        
+        msg_bisou = self.mvp_traitors()
+        if msg_bisou:
+            return msg_bisou
+        
         return self.get_mvp_cc_boss(extra_exclude=[self.is_fix])
     
     def get_lvp(self):
@@ -1244,6 +1282,17 @@ class SAMAROG(Boss):
             return f" * *[**MVP** : {mvp_names} s'est fait **empaler**, gros respect]*" 
         if len(i_players) > 1:
             return f" * *[**MVP** : {mvp_names} se sont fait **empaler**, gros respect]*"
+        return 
+    
+    def mvp_traitors(self):
+        i_trait, i_vict = self.get_traitors()
+        trait_names = self.players_to_string(i_trait)
+        vict_names = self.players_to_string(i_vict)
+        self.add_mvps(i_trait)
+        if len(i_trait) == 1:
+            return f" * *[**MVP** : {trait_names} n'a pas fait de **bisou** à {vict_names}]*"
+        if len(i_trait) > 1:
+            return f" * *[**MVP** : {trait_names} n'ont pas fait de **bisou** à {vict_names}]*"
         return  
     
     ################################ LVP ################################ 
@@ -1273,6 +1322,26 @@ class SAMAROG(Boss):
             if self.got_impaled(i):
                   i_players.append(i)
         return i_players
+    
+    def get_traitors(self):
+        traitors, victims = [], []
+        big_greens = self.get_mechanic_history("Big Green")
+        small_greens = self.get_mechanic_history("Small Green")
+        for s, b in zip(small_greens, big_greens):
+            i_s, i_b = self.get_player_id(s['actor']), self.get_player_id(b['actor'])
+            kiss_time = b['time']+6000
+            i_kiss = time_to_index(kiss_time)
+            try:
+                s_pos = self.get_player_pos(i_s)[i_kiss]
+                b_pos = self.get_player_pos(i_b)[i_kiss]
+            except:
+                continue
+            if get_dist(s_pos, b_pos)*samarog_scaler > 80:
+                if i_b not in victims:
+                    victims.append(i_b)
+                if i_s not in traitors:
+                    traitors.append(i_s)
+        return traitors, victims
 
 ################################ DEIMOS ################################
 
