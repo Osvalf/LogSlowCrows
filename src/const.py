@@ -1,4 +1,4 @@
-import pickle
+import json
 
 BIG = float('inf')
 
@@ -39,11 +39,11 @@ extra_boss_dict = {
     19645 : "golem"
 }
 
-with open('wingman_updater/all_times_nm.pickle', 'rb') as f:  # Python 3: open(..., 'rb')
-    nm_dict = pickle.load(f)
+with open('wingman_updater/nm_times.json') as f:
+    nm_dict = json.load(f)
     
-with open('wingman_updater/all_times_cm.pickle', 'rb') as f:  # Python 3: open(..., 'rb')
-    cm_dict = pickle.load(f)
+with open('wingman_updater/cm_times.json') as f:
+    cm_dict = json.load(f)
     
 emote_wingman = ":wing:"
 

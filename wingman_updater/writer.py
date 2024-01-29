@@ -4,6 +4,7 @@ import re
 import pickle
 import numpy as np
 import concurrent.futures
+import json
 
 boss_dict = {
     15438 : "vg",
@@ -31,6 +32,7 @@ boss_dict = {
 boss_nm = list(boss_dict.values())
 boss_cm = ["kc"]+list(boss_dict.values())[8:]
 
+timers = {}
 timers_nm = {}
 timers_cm = {}
 
@@ -68,7 +70,7 @@ def update_log_times(name, cm):
         
     pattern = r'durationPoints\.push\((\d+\.\d+)\);'
     matches = re.findall(pattern, html)
-    values = [float(match) for match in matches]
+    values = [float(match) for match in matches].sort()
     
     if name == "q1":
         name = "qadim"
@@ -89,8 +91,10 @@ def update_nm():
         
     print("parsing NM done")
     
-    with open('all_times_nm.pickle', 'wb') as times:
-        pickle.dump(timers_nm, times, protocol=pickle.HIGHEST_PROTOCOL)
+    timers['nm_times'] = timers_nm
+    
+    with open("nm_times.json", "w") as final:
+        json.dump(timers_nm, final)
         
 def update_cm():
     print("Updating CM")
@@ -100,8 +104,8 @@ def update_cm():
         
     print("parsing CM done")
     
-    with open('all_times_cm.pickle', 'wb') as times:
-        pickle.dump(timers_cm, times, protocol=pickle.HIGHEST_PROTOCOL)
+    with open("cm_times.json", "w") as final:
+        json.dump(timers_cm, final)
         
 def main():
     start = perf_counter()
