@@ -70,7 +70,7 @@ def update_log_times(name, cm):
         
     pattern = r'durationPoints\.push\((\d+\.\d+)\);'
     matches = re.findall(pattern, html)
-    values = [float(match) for match in matches].sort()
+    values = sorted([float(match) for match in matches])
     
     if name == "q1":
         name = "qadim"
@@ -92,9 +92,6 @@ def update_nm():
     print("parsing NM done")
     
     timers['nm_times'] = timers_nm
-    
-    with open("nm_times.json", "w") as final:
-        json.dump(timers_nm, final)
         
 def update_cm():
     print("Updating CM")
@@ -104,13 +101,14 @@ def update_cm():
         
     print("parsing CM done")
     
-    with open("cm_times.json", "w") as final:
-        json.dump(timers_cm, final)
+    timers['cm_times'] = timers_cm
         
 def main():
     start = perf_counter()
     update_nm()
     update_cm()
+    with open("wingman_times.json", "w") as final:
+        json.dump(timers, final)
     end = perf_counter()
     print(f"Done in {end - start:.3f}s")
     
