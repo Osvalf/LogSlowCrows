@@ -378,16 +378,21 @@ class Boss:
     
     def get_bad_dps(self, extra_exclude: list[classmethod]=[]):
         i_sup, sup_max_dmg, _ = Stats.get_max_value(self, self.get_dmg_boss, exclude=[self.is_dps])
-        i_dps, dps_min_dmg, _ = Stats.get_min_value(self, self.get_dmg_boss, exclude=[self.is_support, self.is_dead, *extra_exclude])
-        if dps_min_dmg < sup_max_dmg:
-            bad_dps = i_dps[0]
-            bad_dps_name = self.players_to_string([bad_dps])
-            bad_dps_account = self.get_player_account(bad_dps)
-            all_players[bad_dps_account].mvps += 1
-            sup_name = self.get_player_name(i_sup[0])
-            dmg_ratio = (1 - dps_min_dmg / sup_max_dmg) * 100 
-            return f" * *[**MVP** : {bad_dps_name} qui en **DPS** n'a fait que **{dps_min_dmg / self.duration_ms :.1f}kdps** soit **{dmg_ratio:.1f}%** de moins que {sup_name} qui joue **support** on le rappelle]*"
-        return
+        sup_name = self.players_to_string(i_sup)
+        bad_dps = []
+        for i in self.player_list:   
+            if any(filter_func(i) for filter_func in extra_exclude) or self.is_dead(i) or self.is_support(i):
+                continue
+            dps = self.get_dmg_boss(i)
+            if dps < sup_max_dmg:
+                bad_dps.append(i)
+        if bad_dps:
+            self.add_mvps(bad_dps)
+            bad_dps_name = self.players_to_string(bad_dps)
+            if len(bad_dps) == 1:
+                return f" * *[**MVP** : {bad_dps_name} qui en **DPS** a fait moins de **dégats** que {sup_name} qui joue **support** on le rappelle]*"
+            else:
+                return f" * *[**MVP** : {bad_dps_name} qui en **DPS** ont fait moins de **dégats** que {sup_name} qui joue **support** on le rappelle]*"
     
     ################################ LVP ################################
     
@@ -542,7 +547,7 @@ class VG(Boss):
         return    
     
     def get_lvp(self):
-        return
+        return self.get_lvp_dps()
         
     ################################ MVP ################################   
     
@@ -609,7 +614,7 @@ class GORS(Boss):
     def mvp_dmg_split(self):
         i_players, min_dmg, total_dmg = Stats.get_min_value(self, self.get_dmg_split, exclude=[self.is_support])
         dps_total_dmg = Stats.get_tot_value(self, self.get_dmg_split, exclude=[self.is_support])
-        if min_dmg/dps_total_dmg < 0.1:
+        if min_dmg/dps_total_dmg < 1/6*0.75:
             self.add_mvps(i_players)
             mvp_names = self.players_to_string(i_players)
             dmg_ratio = min_dmg / total_dmg * 100
@@ -692,7 +697,7 @@ class SABETHA(Boss):
     def mvp_dmg_split(self):
         i_players, min_dmg, total_dmg = Stats.get_min_value(self, self.get_dmg_split, exclude=[self.is_support,self.is_cannon])
         dps_total_dmg = Stats.get_tot_value(self, self.get_dmg_split, exclude=[self.is_support])
-        if min_dmg/dps_total_dmg < 0.1:
+        if min_dmg/dps_total_dmg < 1/6*0.75:
             self.add_mvps(i_players) 
             dmg_ratio = min_dmg / total_dmg * 100
             mvp_names = self.players_to_string(i_players)
@@ -806,7 +811,7 @@ class SLOTH(Boss):
     
     def mvp_cc_sloth(self):
         i_players, min_cc, total_cc = Stats.get_min_value(self, self.get_cc_boss, exclude=[self.is_shroom])  
-        if min_cc < 500:
+        if min_cc < 800:
             self.add_mvps(i_players)
             cc_ratio = min_cc / total_cc * 100
             mvp_names = self.players_to_string(i_players)
@@ -1014,7 +1019,7 @@ class KC(Boss):
         return self.mvp_orb_kc()
     
     def get_lvp(self):
-        return 
+        return self.lvp_orb_kc()
         
     ################################ MVP ################################
             
@@ -1221,6 +1226,9 @@ class MO(Boss):
         MO.last = self
         
     def get_mvp(self):
+        msg_pic = self.mvp_pic()
+        if msg_pic:
+            return msg_pic
         return self.get_bad_dps()
     
     def get_lvp(self):
@@ -1228,7 +1236,15 @@ class MO(Boss):
         
     ################################ MVP ################################
     
-    
+    def mvp_pic(self):
+        i_players = self.get_piced()
+        mvp_names = self.players_to_string(i_players)
+        self.add_mvps(i_players)
+        if len(i_players) == 1:
+            return f" * *[**MVP** : {mvp_names} s'est fait **empaler**, gros respect]*" 
+        if len(i_players) > 1:
+            return f" * *[**MVP** : {mvp_names} se sont fait **empaler**, gros respect]*"
+        return
     
     ################################ LVP ################################
     
@@ -1240,7 +1256,12 @@ class MO(Boss):
     
     ################################ DATA MECHAS ################################
 
-      
+    def get_piced(self):
+        piced = []
+        for i in self.player_list:
+            if self.is_dead_instant(i):
+                piced.append(i)
+        return piced
 
 ################################ SAMAROG ################################
 
@@ -1536,7 +1557,7 @@ class DHUUM(Boss):
         return
     
     def get_lvp(self):
-        return
+        return self.get_lvp_dps()
    
     ################################ MVP ################################
     
@@ -1677,7 +1698,7 @@ class Q1(Boss):
         return
     
     def get_lvp(self):
-        return 
+        return self.get_lvp_dps()
         
     ################################ MVP ################################
     
@@ -1848,7 +1869,6 @@ class QTP(Boss):
         if msg_cc:
             return msg_cc
         return
-        
     
     def get_lvp(self):
         return self.get_lvp_dps() 
