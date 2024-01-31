@@ -66,7 +66,7 @@ pos_canon4 = [713.9,403.1]
 
 canon_detect_radius = 45
 
-sabetha_scaler = 9.344
+sabetha_scaler = 9.34179
 
 ################################ DATA SLOTH ################################
 
@@ -118,7 +118,7 @@ sama_top_right_corn = [667.6,660.7]
 sama_bot_left_corn = [299.4,58.6]
 sama_bot_right_corn = [690.7,73.6]
 
-samarog_scaler = 5.464
+samarog_scaler = 5.4621
 
 ################################ DATA DEIMOS ################################
 

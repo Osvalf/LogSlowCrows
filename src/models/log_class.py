@@ -756,12 +756,15 @@ class SABETHA(Boss):
                     bomb_pos = poses[time_index]
                 except:
                     continue
+                bombed_players = 0
                 for i in players:
-                    if i == i_player:
+                    if i == i_player or self.is_dead(i):
                         continue
                     i_pos = self.get_player_pos(i)[time_index]
-                    if get_dist(bomb_pos, i_pos)*sabetha_scaler <= 280:
-                        return True
+                    if get_dist(bomb_pos, i_pos)*sabetha_scaler <= 270:
+                        bombed_players += 1
+                if bombed_players > 1:
+                    return True
         return False
     
     ################################ DATA MECHAS ################################
@@ -1391,7 +1394,7 @@ class DEIMOS(Boss):
         msg_tears = self.lvp_tears()
         if msg_tears:
             return msg_tears
-        return
+        return self.get_lvp_dps()
 
     ################################ MVP ################################
     
