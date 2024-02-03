@@ -39,12 +39,16 @@ extra_boss_dict = {
     19645 : "golem"
 }
 
-with open('wingman_updater/wingman_times.json') as f:
-    wingman_times_dict = json.load(f)
+with open('wingman_updater/WINGMAN_DATA.json') as f:
+    wingman_data = json.load(f)
     
-nm_dict = wingman_times_dict["nm_times"]
-cm_dict = wingman_times_dict["cm_times"]
-
+nm_dict = {}
+for boss, data in wingman_data["NM_BOSSES"].items():
+    nm_dict[boss] = data["Duration"]
+    
+cm_dict = {}
+for boss, data in wingman_data["CM_BOSSES"].items():
+    cm_dict[boss] = data["Duration"]
     
 emote_wingman = ":wing:"
 

@@ -1868,12 +1868,15 @@ class QTP(Boss):
         msg_bad_dps = self.get_bad_dps(extra_exclude=[self.is_pylon])
         if msg_bad_dps:
             return msg_bad_dps
-        msg_cc = self.get_mvp_cc_boss(extra_exclude=[self.is_pylon])
+        msg_cc = self.get_mvp_cc_total(extra_exclude=[self.is_pylon])
         if msg_cc:
             return msg_cc
         return
     
     def get_lvp(self):
+        msg_cc = self.get_lvp_cc_total()
+        if msg_cc:
+            return msg_cc
         return self.get_lvp_dps() 
  
     ################################ MVP ################################
