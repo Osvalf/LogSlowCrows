@@ -153,9 +153,13 @@ class Boss:
         log_time_ms = self.duration_ms
         boss_short_name = boss_dict.get(self.boss_id)
         if self.cm:
-            all_wingman_boss_times_ms = np.array(cm_dict.get(boss_short_name, []))*60000
+            cms = wingman_data.get("CM_BOSSES")
+            boss_data = cms.get(boss_short_name)
+            all_wingman_boss_times_ms = np.array(boss_data.get("Duration", []))*60000
         else:
-            all_wingman_boss_times_ms = np.array(nm_dict.get(boss_short_name, []))*60000
+            nms = wingman_data.get("NM_BOSSES")
+            boss_data = nms.get(boss_short_name)
+            all_wingman_boss_times_ms = np.array(boss_data.get("Duration", []))*60000
         all_wingman_boss_times_ms = np.sort(np.append(all_wingman_boss_times_ms, log_time_ms))[::-1]
         i = np.where(all_wingman_boss_times_ms == log_time_ms)[0][0]
         percentile = i / (len(all_wingman_boss_times_ms) - 1) * 100

@@ -42,14 +42,6 @@ extra_boss_dict = {
 with open('wingman_updater/WINGMAN_DATA.json') as f:
     wingman_data = json.load(f)
     
-nm_dict = {}
-for boss, data in wingman_data["NM_BOSSES"].items():
-    nm_dict[boss] = data["Duration"]
-    
-cm_dict = {}
-for boss, data in wingman_data["CM_BOSSES"].items():
-    cm_dict[boss] = data["Duration"]
-    
 emote_wingman = ":wing:"
 
 ################################ DATA VG ################################
