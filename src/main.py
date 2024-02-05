@@ -36,9 +36,9 @@ if __name__ == "__main__":
     print("Starting\n")
     start_time = perf_counter()  
     main()
-    '''log = Log("https://dps.report/eQNe-20240127-224814_esc")
+    """log = Log("https://dps.report/fNbj-20240203-223238_sam")
     boss = all_bosses[0]
-    print(boss.wingman_percentile)'''
+    print(boss.mvp)"""
     end_time = perf_counter()
     print(f"--- {end_time - start_time:.3f} seconds ---\n")
     

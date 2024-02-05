@@ -151,14 +151,16 @@ class Boss:
     
     def get_wingman_percentile(self):
         log_time_ms = self.duration_ms
-        boss_short_name = boss_dict.get(self.boss_id)
+        boss_name = self.name
         if self.cm:
-            cms = wingman_data.get("CM_BOSSES")
-            boss_data = cms.get(boss_short_name)
+            raids = wingman_data.get("RAIDS")
+            cms = raids.get("CM")
+            boss_data = cms.get(boss_name)
             all_wingman_boss_times_ms = np.array(boss_data.get("Duration", []))*60000
         else:
-            nms = wingman_data.get("NM_BOSSES")
-            boss_data = nms.get(boss_short_name)
+            raids = wingman_data.get("RAIDS")
+            nms = raids.get("NM")
+            boss_data = nms.get(boss_name)
             all_wingman_boss_times_ms = np.array(boss_data.get("Duration", []))*60000
         all_wingman_boss_times_ms = np.sort(np.append(all_wingman_boss_times_ms, log_time_ms))[::-1]
         i = np.where(all_wingman_boss_times_ms == log_time_ms)[0][0]
@@ -586,7 +588,7 @@ class VG(Boss):
 class GORS(Boss):
     
     last = None
-    name = "GORS"
+    name = "GORSEVAL"
     wing = 1
     boss_id = 15429
     
@@ -1334,8 +1336,9 @@ class SAMAROG(Boss):
             for mech in mech_history:
                 if mech['name'] == "DC":
                     mech_history.remove(mech)
-            if mech_history[-2]['name'] == "Swp" and mech_history[-1]['name'] == "Dead":
-                return True
+            if len(mech_history) > 1:
+                if (mech_history[-2]['name'] == "Swp" or mech_history[-2]['name'] == "Schk.Wv") and mech_history[-1]['name'] == "Dead":
+                    return True
         return False
     
     def is_fix(self, i_player: int):

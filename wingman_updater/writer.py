@@ -6,42 +6,70 @@ import numpy as np
 import concurrent.futures
 import json
 
-boss_dict = {
-    15438 : "vg",
-    15429 : "gors",
-    15375 : "sab",
-    16123 : "sloth",
-    16115 : "matt",
-    16253 : "esc",
-    16235 : "kc",
-    16246 : "xera",
-    17194 : "cairn",
-    17172 : "mo",
-    17188 : "sam",
-    17154 : "dei",
-    19767 : "sh",
-    19450 : "dhuum",
-    43974 : "ca",
-    21105 : "twins",
-    20934 : "qadim",
-    22006 : "adina",
-    21964 : "sabir",
-    22000 : "qpeer"}
+raid_names = {
+    "vg" : "VG",
+    "gors" : "GORSEVAL",
+    "sab" : "SABETHA",
+    
+    "sloth" : "SLOTH",
+    "matt" : "MATTHIAS",
+    
+    "esc" : "ESCORT",
+    "kc" : "KC",
+    "xera" : "XERA",
+    
+    "cairn" : "CAIRN",
+    "mo" : "MO",
+    "sam" : "SAMAROG",
+    "dei" : "DEIMOS",
+    
+    "sh" : "SH",
+    "dhuum" : "DHUUM",
+    
+    "ca" : "CA",
+    "twins" : "LARGOS",
+    "qadim" : "QUOIDIMM",
+    
+    "adina" : "ADINA",
+    "sabir" : "SABIR",
+    "qpeer" : "QTP",
+}
+
+strike_names = {
+    "ice": "COL",
+    "kodas": "KODANS",
+    "frae": "FRAENIR",
+    "bone": "BONESKINNER",
+    "woj": "WOJ",
+    
+    "mai": "AH",
+    "ankka": "ANKKA",
+    "li": "KO",
+    "va": "HT",
+    "olc": "OLC",
+    "dagda": "DAGDA",
+    "cerus": "FEBE"   
+}
 
 
-boss_nm = list(boss_dict.values())
-boss_cm = ["kc"]+list(boss_dict.values())[8:]
+raids_nm = list(raid_names.keys())
+raids_cm = ["kc"]+list(raid_names.keys())[8:]
+
+strikes_nm = list(strike_names.keys())
+strikes_cm = list(strike_names.keys())[5:]
 
 modes = {}
-nm_bosses = {}
-cm_bosses = {}
+nm_raid_bosses = {}
+cm_raid_bosses = {}
+nm_strike_bosses = {}
+cm_strike_bosses = {}
 
-def update_log_times(name, cm):
+def update_log_times(name, mode, cm):
     if name == "qadim":
         name = "q1"
     if name == "qpeer":
         name = "q2"
-    url = f"https://gw2wingman.nevermindcreations.de/content/raid/{name}?"
+    url = f"https://gw2wingman.nevermindcreations.de/content/{mode.lower()}/{name}?"
     url += "onlyMyRecords=AllRecords&"
     url += "noSpeedruns=includeGroupRuns&"
     url += "fromDate=2012-08-28&"
@@ -75,31 +103,45 @@ def update_log_times(name, cm):
     if name == "q2":
         name = "qpeer"
     
-    if cm:
-        cm_bosses[name] = data
-    else:
-        nm_bosses[name] = data
+    if mode == "RAID": 
+        if cm:
+            cm_raid_bosses[raid_names[name]] = data
+        else:
+            nm_raid_bosses[raid_names[name]] = data
+    if mode == "STRIKE": 
+        if cm:
+            cm_strike_bosses[strike_names[name]] = data
+        else:
+            nm_strike_bosses[strike_names[name]] = data
     return
 
-def update_nm():
-    print("Updating NM")
+def update_nm_raids():
+    print("Updating NM RAIDS")
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [executor.submit(update_log_times, name, False) for name in boss_nm]
-        concurrent.futures.wait(futures)
+        futures = [executor.submit(update_log_times, name, "RAID", False) for name in raids_nm]
+        concurrent.futures.wait(futures)  
+    print("parsing NM RAIDS done")
         
-    print("parsing NM done")
-    
-    modes['NM_BOSSES'] = nm_bosses
-        
-def update_cm():
-    print("Updating CM")
+def update_cm_raids():
+    print("Updating CM RAIDS")
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [executor.submit(update_log_times, name, True) for name in boss_cm]
-        concurrent.futures.wait(futures)
-        
-    print("parsing CM done")
+        futures = [executor.submit(update_log_times, name, "RAID", True) for name in raids_cm]
+        concurrent.futures.wait(futures)  
+    print("parsing CM RAIDS done")
     
-    modes['CM_BOSSES'] = cm_bosses
+def update_nm_strikes():
+    print("Updating NM STRIKES")
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = [executor.submit(update_log_times, name, "STRIKE", False) for name in strikes_nm]
+        concurrent.futures.wait(futures)  
+    print("parsing NM STRIKES done")
+    
+def update_cm_strikes():
+    print("Updating CM STRIKES")
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = [executor.submit(update_log_times, name, "STRIKE", True) for name in strikes_cm]
+        concurrent.futures.wait(futures)  
+    print("parsing CM STRIKES done")
     
 def find_links(html):
     links = html.split("links = ")[1]
@@ -135,15 +177,32 @@ def assemble_data(html):
     data["links"] = links
     return data
         
-def main():
+def update_all():
     start = perf_counter()
-    update_nm()
-    update_cm()
+    update_nm_raids()
+    update_cm_raids()
+    update_nm_strikes()
+    update_cm_strikes()
+    modes["RAIDS"] = {"NM": nm_raid_bosses, "CM": cm_raid_bosses}
+    modes["STRIKES"] = {"NM": nm_strike_bosses, "CM": cm_strike_bosses}
     with open("WINGMAN_DATA.json", "w") as final:
         json.dump(modes, final)
     end = perf_counter()
     print(f"Done in {end - start:.3f}s")
     
-main()
-
+def test():
+    with open("wingman_updater/WINGMAN_DATA.json", "r") as final:
+        data = json.load(final)
+    
+    i, bossname,  maxDown = None, None, 0
+    for name, boss in data["RAIDS"]["NM"].items():
+        if max(boss["Downed"]) > maxDown:
+            maxDown = max(boss["Downed"])
+            i = boss["Downed"].index(maxDown)
+            bossname = name 
+    print(bossname, maxDown, i)
+    
+    
+update_all()
+#test()
 
