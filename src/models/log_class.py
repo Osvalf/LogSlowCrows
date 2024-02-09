@@ -827,8 +827,8 @@ class SLOTH(Boss):
             mvp_names = self.players_to_string(i_players)
             if min_cc == 0:
                 if len(i_players) > 1:
-                    return langues["selected_language"]["SLOTH MVP CC 0 P"].format(mvp_names=mvp_names)
-                return langues["selected_language"]["SLOTH MVP CC 0 S"].format(mvp_names=mvp_names)
+                    return langues["selected_language"]["SLOTH MVP 0 CC P"].format(mvp_names=mvp_names)
+                return langues["selected_language"]["SLOTH MVP 0 CC S"].format(mvp_names=mvp_names)
             if len(i_players) > 1:
                 return langues["selected_language"]["SLOTH MVP CC P"].format(mvp_names=mvp_names, min_cc=min_cc, cc_ratio=cc_ratio)
             return langues["selected_language"]["SLOTH MVP CC S"].format(mvp_names=mvp_names, min_cc=min_cc, cc_ratio=cc_ratio)
@@ -1797,7 +1797,7 @@ class ADINA(Boss):
         self.add_mvps(i_players)
         mvp_names = self.players_to_string(i_players)
         dmg_ratio = min_dmg / total_dmg * 100
-        return langues["selected_language"]["ADINA MVP SPLIT"].format(mvp_names=mvp_names, min_dmg=min_dmg, dmg_ratio=dmg_ratio)
+        return langues["selected_language"]["ADINA MVP SPLIT"].format(mvp_names=mvp_names, dmg_ratio=dmg_ratio)
     
     ################################ LVP ################################    
     
@@ -1806,7 +1806,7 @@ class ADINA(Boss):
         self.add_lvps(i_players)
         lvp_names = self.players_to_string(i_players)
         dmg_ratio = max_dmg / total_dmg * 100
-        return langues["selected_language"]["ADINA LVP SPLIT"].format(lvp_names=lvp_names, max_dmg=max_dmg, dmg_ratio=dmg_ratio)
+        return langues["selected_language"]["ADINA LVP SPLIT"].format(lvp_names=lvp_names, dmg_ratio=dmg_ratio)
     
     ################################ CONDITIONS ################################
     

@@ -46,7 +46,7 @@ english = {
     "KC MVP 0 ORB": " * *[**MVP** : {mvp_names} who dodged every **orbs** in the fight]*",
     "KC MVP ORB": " * *[**MVP** : {mvp_names} only with **{min_orb}** orbs collected in the fight]*",
     
-    "KC LVP ORB": " * *[**LVP** : {mvp_names} with **{max_orb}** orbs collected, what a team player]*",
+    "KC LVP ORB": " * *[**LVP** : {lvp_names} with **{max_orb}** orbs collected, what a team player]*",
     
     ################################ XERA ################################
     "XERA MVP SKIP S": " * *[**MVP** : yeah {fdp_names} really **skiped** a **mini-game**, not cool man]*",
@@ -105,7 +105,7 @@ english = {
     ################################ ADINA ################################
     "ADINA MVP SPLIT": " * *[**MVP** : {mvp_names} only did **{dmg_ratio:.1f}%** damage on split, what a skill-saver]*",
     
-    "ADINA MVP SPLIT": " * *[**LVP** : {lvp_names} thanks for doing **{dmg_ratio:.1f}%** damage on split]*",
+    "ADINA LVP SPLIT": " * *[**LVP** : {lvp_names} thanks for doing **{dmg_ratio:.1f}%** damage on split]*",
     
     ################################ SABIR ################################
     

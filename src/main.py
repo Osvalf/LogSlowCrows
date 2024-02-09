@@ -36,9 +36,9 @@ def main() -> None:
 if __name__ == "__main__":
     print("Starting\n")
     start_time = perf_counter()    
-    langues["selected_language"] = langues["EN"]
+    langues["selected_language"] = langues["FR"]
     main()
-    """log = Log("https://dps.report/oF0B-20240203-233957_matt")
+    """log = Log("https://dps.report/E7lm-20240203-230641_esc")
     boss = all_bosses[0]
     print(boss.mvp)"""
     end_time = perf_counter()
