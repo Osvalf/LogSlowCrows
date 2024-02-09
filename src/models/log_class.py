@@ -354,14 +354,14 @@ class Boss:
         number_mvp = len(i_players)  
         if min_cc == 0:
             if number_mvp == 1:
-                return f" * *[**MVP** : {mvp_names} n'a pas mis de **CC**]*"
+                return langues["selected_language"]["MVP BOSS 0 CC S"].format(mvp_names=mvp_names)
             else:
-                return f" * *[**MVP** : {mvp_names} n'ont pas mis de **CC**]*"
+                return langues["selected_language"]["MVP BOSS 0 CC P"].format(mvp_names=mvp_names)
         else:
             if number_mvp == 1:
-                return f" * *[**MVP** : {mvp_names} n'a mis que **{min_cc:.0f}** de **CC** (**{cc_ratio:.1f}%** de la squad)]*"
+                return langues["selected_language"]["MVP BOSS CC S"].format(mvp_names=mvp_names, min_cc=min_cc, cc_ratio=cc_ratio)
             else:
-                return f" * *[**MVP** : {mvp_names} n'ont mis que **{min_cc:.0f}** de **CC** (**{cc_ratio:.1f}%** de la squad)]*"
+                return langues["selected_language"]["MVP BOSS CC P"].format(mvp_names=mvp_names, min_cc=min_cc, cc_ratio=cc_ratio)
     
     def get_mvp_cc_total(self,extra_exclude: list[classmethod]=[]):
         i_players, min_cc, total_cc = Stats.get_min_value(self, self.get_cc_total, exclude=[*extra_exclude])
@@ -373,14 +373,14 @@ class Boss:
         number_mvp = len(i_players)  
         if min_cc == 0:
             if number_mvp == 1:
-                return f" * *[**MVP** : {mvp_names} n'a pas mis de **CC**]*"
+                return langues["selected_language"]["MVP TOTAL 0 CC S"].format(mvp_names=mvp_names)
             else:
-                return f" * *[**MVP** : {mvp_names} n'ont pas mis de **CC**]*"
+                return langues["selected_language"]["MVP TOTAL 0 CC P"].format(mvp_names=mvp_names)
         else:
             if number_mvp == 1:
-                return f" * *[**MVP** : {mvp_names} n'a mis que **{min_cc:.0f}** de **CC** (**{cc_ratio:.1f}%** de la squad)]*"
+                return langues["selected_language"]["MVP TOTAL CC S"].format(mvp_names=mvp_names, min_cc=min_cc, cc_ratio=cc_ratio)
             else:
-                return f" * *[**MVP** : {mvp_names} n'ont mis que **{min_cc:.0f}** de **CC** (**{cc_ratio:.1f}%** de la squad)]*"
+                return langues["selected_language"]["MVP TOTAL CC P"].format(mvp_names=mvp_names, min_cc=min_cc, cc_ratio=cc_ratio)
     
     def get_bad_dps(self, extra_exclude: list[classmethod]=[]):
         i_sup, sup_max_dmg, _ = Stats.get_max_value(self, self.get_dmg_boss, exclude=[self.is_dps])
@@ -396,9 +396,9 @@ class Boss:
             self.add_mvps(bad_dps)
             bad_dps_name = self.players_to_string(bad_dps)
             if len(bad_dps) == 1:
-                return f" * *[**MVP** : {bad_dps_name} qui en **DPS** a fait moins de **dégats** que {sup_name} qui joue **support** on le rappelle]*"
+                return langues["selected_language"]["MVP BAD DPS S"].format(bad_dps_name=bad_dps_name, sup_name=sup_name)
             else:
-                return f" * *[**MVP** : {bad_dps_name} qui en **DPS** ont fait moins de **dégats** que {sup_name} qui joue **support** on le rappelle]*"
+                return langues["selected_language"]["MVP BAD DPS P"].format(bad_dps_name=bad_dps_name, sup_name=sup_name)
     
     ################################ LVP ################################
     
@@ -409,7 +409,7 @@ class Boss:
         self.add_lvps(i_players)
         lvp_names = self.players_to_string(i_players)
         cc_ratio = max_cc / total_cc * 100
-        return f" * *[**LVP** : {lvp_names} merci d'avoir fait **{max_cc:.0f}** de **CC** (**{cc_ratio:.1f}%** de la squad)]*"
+        return langues["selected_language"]["LVP BOSS CC"].format(lvp_names=lvp_names, max_cc=max_cc, cc_ratio=cc_ratio)
     
     def get_lvp_cc_total(self):
         i_players, max_cc, total_cc = Stats.get_max_value(self, self.get_cc_total)
@@ -418,14 +418,15 @@ class Boss:
         self.add_lvps(i_players)
         lvp_names = self.players_to_string(i_players)
         cc_ratio = max_cc / total_cc * 100
-        return f" * *[**LVP** : {lvp_names} merci d'avoir fait **{max_cc:.0f}** de **CC** (**{cc_ratio:.1f}%** de la squad)]*"
+        return langues["selected_language"]["LVP TOTAL CC"].format(lvp_names=lvp_names, max_cc=max_cc, cc_ratio=cc_ratio)
     
     def get_lvp_dps(self):
         i_players, max_dmg, total_dmg = Stats.get_max_value(self, self.get_dmg_boss)
         self.add_lvps(i_players)
         dmg_ratio = max_dmg / total_dmg * 100
         lvp_dps_name = self.players_to_string(i_players)
-        return f" * *[**LVP** : {lvp_dps_name} qui a fait **{max_dmg / self.duration_ms:.1f}kdps** (**{dmg_ratio:.0f}%** de la squad)]*"
+        dps = max_dmg / self.duration_ms
+        return langues["selected_language"]["LVP DPS"].format(lvp_dps_name=lvp_dps_name, max_dmg=max_dmg, dmg_ratio=dmg_ratio, dps=dps)
     
     ################################ DATA BOSS ################################
     
@@ -562,10 +563,11 @@ class VG(Boss):
         mvp_names = self.players_to_string(i_players)
         if max_bleu > 1:
             self.add_mvps(i_players)
-            if len(i_players) == 1:
-                return f" * *[**MVP** : {mvp_names} s'est pris **{max_bleu}** **bleues**]*"
-            if len(i_players) > 1:
-                return f" * *[**MVP** : {mvp_names} se sont tous les {len(i_players)} pris **{max_bleu}** **bleues**]*"         
+            nb_players = len(i_players)
+            if nb_players == 1:
+                return langues["selected_language"]["VG MVP BLEU S"].format(mvp_names=mvp_names, max_bleu=max_bleu)
+            if nb_players > 1:
+                return langues["selected_language"]["VG MVP BLEU P"].format(mvp_names=mvp_names, nb_players=nb_players, max_bleu=max_bleu)
         return
     
     ################################ LVP ################################
@@ -624,8 +626,7 @@ class GORS(Boss):
             self.add_mvps(i_players)
             mvp_names = self.players_to_string(i_players)
             dmg_ratio = min_dmg / total_dmg * 100
-            return f" * *[**MVP** : {mvp_names} avec seulement **{dmg_ratio:.1f}%** des degats sur **split** en **DPS**]*"
-        return
+            return langues["selected_language"]["GORS MVP SPLIT"].format(mvp_names=mvp_names, min_dmg=min_dmg, dmg_ratio=dmg_ratio)
     
     def mvp_egg(self):
         i_players = self.get_egged()
@@ -633,9 +634,9 @@ class GORS(Boss):
             self.add_mvps(i_players)
             mvp_names = self.players_to_string(i_players)
             if len(i_players) == 1:
-                return f" * *[**MVP** : **Cui-cui** {mvp_names} est sorti de **l'oeuf**]*"
+                return langues["selected_language"]["GORS MVP EGG S"].format(mvp_names=mvp_names)
             if len(i_players) > 1:
-                return f" * *[**MVP** : **Cui-cui** {mvp_names} sont sortis de **l'oeuf**]*"
+                return langues["selected_language"]["GORS MVP EGG P"].format(mvp_names=mvp_names)
         return 
     
     ################################ LVP ################################
@@ -645,7 +646,7 @@ class GORS(Boss):
         self.add_lvps(i_players)
         lvp_names = self.players_to_string(i_players)
         dmg_ratio = max_dmg / total_dmg * 100
-        return f" * *[**LVP** : {lvp_names} avec **{dmg_ratio:.1f}%** des degats sur **split** en **DPS**]*"
+        return langues["selected_language"]["GORS LVP SPLIT"].format(lvp_names=lvp_names, max_dmg=max_dmg, dmg_ratio=dmg_ratio)
 
     ################################ CONDITIONS ###############################
     
@@ -707,7 +708,7 @@ class SABETHA(Boss):
             self.add_mvps(i_players) 
             dmg_ratio = min_dmg / total_dmg * 100
             mvp_names = self.players_to_string(i_players)
-            return f" * *[**MVP** : {mvp_names} avec seulement **{dmg_ratio:.1f}%** des degats sur **split** sans faire de **canon**]*"
+            return langues["selected_language"]["SABETHA MVP SPLIT"].format(mvp_names=mvp_names, dmg_ratio=dmg_ratio)
         return
     
     def mvp_terrorists(self):
@@ -715,7 +716,7 @@ class SABETHA(Boss):
         self.add_mvps(i_players)
         if i_players:
             mvp_names = self.players_to_string(i_players)
-            return f" * *[**MVP** : {mvp_names} pour avoir **explosé** une bombe dans le **pack**]*"
+            return langues["selected_language"]["SABETHA MVP BOMB"].format(mvp_names=mvp_names)
         return
     
     ################################ LVP ################################
@@ -725,7 +726,7 @@ class SABETHA(Boss):
         self.add_lvps(i_players)
         lvp_names = self.players_to_string(i_players)
         dmg_ratio = max_dmg / total_dmg * 100
-        return f" * *[**LVP** : {lvp_names} avec **{dmg_ratio:.1f}%** des degats sur **split** en **DPS**]*"
+        return langues["selected_language"]["SABETHA LVP SPLIT"].format(lvp_names=lvp_names, dmg_ratio=dmg_ratio)
 
     ################################ CONDITIONS ###############################
     
@@ -826,11 +827,11 @@ class SLOTH(Boss):
             mvp_names = self.players_to_string(i_players)
             if min_cc == 0:
                 if len(i_players) > 1:
-                    return f" * *[**MVP** : {mvp_names} qui n'ont même pas **CC** sans manger de **shroom**]*"
-                return f" * *[**MVP** : {mvp_names} qui n'a même pas **CC** sans manger de **shroom**]*"
+                    return langues["selected_language"]["SLOTH MVP CC 0 P"].format(mvp_names=mvp_names)
+                return langues["selected_language"]["SLOTH MVP CC 0 S"].format(mvp_names=mvp_names)
             if len(i_players) > 1:
-                return f" * *[**MVP** : {mvp_names} qui ont fait seulement **{min_cc:.0f}** de **CC** (**{cc_ratio:.1f}%** du total) sans manger de **shroom**]*"
-            return f" * *[**MVP** : {mvp_names} qui a fait seulement **{min_cc:.0f}** de **CC** (**{cc_ratio:.1f}%** du total) sans manger de **shroom**]*"
+                return langues["selected_language"]["SLOTH MVP CC P"].format(mvp_names=mvp_names, min_cc=min_cc, cc_ratio=cc_ratio)
+            return langues["selected_language"]["SLOTH MVP CC S"].format(mvp_names=mvp_names, min_cc=min_cc, cc_ratio=cc_ratio)
     
     def mvp_tantrum(self):
         i_players, max_tantrum, _ = Stats.get_max_value(self, self.get_tantrum)
@@ -838,8 +839,8 @@ class SLOTH(Boss):
             self.add_mvps(i_players)
             mvp_names = self.players_to_string(i_players)
             if len(i_players) > 1:
-                return f" * *[**MVP** : {mvp_names} qui ont pris **{max_tantrum}** fois le **tantrum**]*"
-            return f" * *[**MVP** : {mvp_names} qui a pris **{max_tantrum}** fois le **tantrum**]*"
+                return langues["selected_language"]["SLOTH MVP TANTRUM P"].format(mvp_names=mvp_names, max_tantrum=max_tantrum)
+            return langues["selected_language"]["SLOTH MVP TANTRUM S"].format(mvp_names=mvp_names, max_tantrum=max_tantrum)
     
     ################################ LVP ################################
     
@@ -888,9 +889,9 @@ class MATTHIAS(Boss):
         cc_ratio = min_cc / total_cc * 100
         mvp_names = self.players_to_string(i_players)
         if min_cc == 0:
-            return f" * *[**MVP** : {mvp_names} avec aucun **CC** sans s'être **sacrifié**]*"
+            return langues["selected_language"]["MATTHIAS MVP 0 CC"].format(mvp_names=mvp_names)
         else:
-            return f" * *[**MVP** : {mvp_names} avec seulement **{min_cc:.0f}** de **CC** (**{cc_ratio:.1f}%** du total) sans s'être sacrifié]*"
+            return langues["selected_language"]["MATTHIAS MVP CC"].format(mvp_names=mvp_names, min_cc=min_cc, cc_ratio=cc_ratio)
         
     ################################ LVP ################################
             
@@ -899,8 +900,8 @@ class MATTHIAS(Boss):
         self.add_lvps(i_players)
         cc_ratio = max_cc / total_cc * 100
         lvp_names = self.players_to_string(i_players)
-        return f" * *[**LVP** : {lvp_names} merci d'avoir mis **{max_cc:.0f}** de **CC** (**{cc_ratio:.1f}%** de la squad)]*"
-
+        return langues["selected_language"]["MATTHIAS LVP CC"].format(lvp_names=lvp_names, max_cc=max_cc, cc_ratio=cc_ratio)
+    
     ################################ CONDITIONS ###############################
     
     def is_sac(self, i_player: int):
@@ -946,9 +947,9 @@ class ESCORT(Boss):
             self.add_mvps(i_players)
             mvp_names = self.players_to_string(i_players)
             if len(i_players) == 1:
-                return f" * *[**MVP** : {mvp_names} qui a bien **profité** de l'escort en prenant une **mine**]*"
+                return langues["selected_language"]["ESCORT MVP MINE S"].format(mvp_names=mvp_names)
             else:
-                return f" * *[**MVP** : {mvp_names} qui ont bien **profité** de l'escort en prenant une **mine**]*"
+                return langues["selected_language"]["ESCORT MVP MINE P"].format(mvp_names=mvp_names)
         return
     
     ################################ LVP ################################
@@ -957,7 +958,7 @@ class ESCORT(Boss):
         i_players, max_call, _ = Stats.get_max_value(self, self.get_glenna_call)
         self.add_lvps(i_players)
         lvp_names = self.players_to_string(i_players)
-        return f" * *[**LVP** : {lvp_names}, merci d'avoir **call** glenna **{max_call}** fois]*"
+        return langues["selected_language"]["ESCORT LVP GLENNA"].format(lvp_names=lvp_names)
     
     def lvp_tower(self):
         towers = self.get_towers()
@@ -968,8 +969,8 @@ class ESCORT(Boss):
                     return
         self.add_lvps(towers)
         if len(towers) == 1:
-            return f" * *[**LVP** : {lvp_names} qui a **réussit** tous ses **solo cap**]*" 
-        return f" * *[**LVP** : {lvp_names} qui ont **réussit** tous leurs **duo cap**]*"
+            return langues["selected_language"]["ESCORT LVP TOWER S"].format(lvp_names=lvp_names)
+        return langues["selected_language"]["ESCORT LVP TOWER P"].format(lvp_names=lvp_names)
     
     ################################ CONDITIONS ################################
     
@@ -1037,17 +1038,17 @@ class KC(Boss):
         mvp_names = self.players_to_string(i_players)
         self.add_mvps(i_players)
         if min_orb == 0:
-            return f" * *[**MVP** : {mvp_names} avec aucune **orbe** collectée sur tout le fight]*"
+            return langues["selected_language"]["KC MVP ORB 0"].format(mvp_names=mvp_names)
         else:
-            return f" * *[**MVP** : {mvp_names} avec seulement **{min_orb}** orbes collectées sur tout le fight]*"
+            return langues["selected_language"]["KC MVP ORB"].format(mvp_names=mvp_names, min_orb=min_orb)
             
     ################################ LVP ################################
     
     def lvp_orb_kc(self):
         i_players, max_orb, _ = Stats.get_max_value(self, self.get_good_orb)
-        mvp_names = self.players_to_string(i_players)
+        lvp_names = self.players_to_string(i_players)
         self.add_lvps(i_players)
-        return f" * *[**LVP** : {mvp_names} avec **{max_orb}** orbes collectées]*"
+        return langues["selected_language"]["KC LVP ORB"].format(lvp_names=lvp_names, max_orb=max_orb)
     
     ################################ CONDITIONS ################################
     
@@ -1097,9 +1098,9 @@ class XERA(Boss):
         fdp_names = self.players_to_string(i_fdp)
         self.add_mvps(i_fdp)
         if len(i_fdp) == 1:
-            return f" * *[**MVP** : oui {fdp_names} a vraiment **skip** un **mini-jeu**]*"
+            return langues["selected_language"]["XERA MVP SKIP S"].format(fdp_names=fdp_names)
         if len(i_fdp) > 1:
-            return f" * *[**MVP** : oui {fdp_names} ont vraiment **skip** un **mini-jeu**]*"
+            return langues["selected_language"]["XERA MVP SKIP P"].format(fdp_names=fdp_names)
         return
     
     def mvp_glide(self):
@@ -1107,9 +1108,9 @@ class XERA(Boss):
         glide_names = self.players_to_string(i_glide)
         self.add_mvps(i_glide)
         if len(i_glide) == 1:
-            return f" * *[**MVP** : {glide_names} champion **mort** pendant le **glide**]*"
+            return langues["selected_language"]["XERA MVP GLIDE S"].format(glide_names=glide_names)
         if len(i_glide) > 1:
-            return f" * *[**MVP** : {glide_names} champions **morts** pendant le **glide**]*"
+            return langues["selected_language"]["XERA MVP GLIDE P"].format(glide_names=glide_names)
         return
     
     ################################ LVP ################################
@@ -1119,7 +1120,7 @@ class XERA(Boss):
         self.add_lvps(i_players)
         lvp_names = self.players_to_string(i_players)
         if max_minijeu == 2:
-            return f" * *[**LVP** : {lvp_names} merci d'avoir tanké **2** mini-jeu sans les skip]*"
+            return langues["selected_language"]["XERA LVP MINI-JEU"].format(lvp_names=lvp_names)
         return
     
     ################################ CONDITIONS ################################
@@ -1201,9 +1202,9 @@ class CAIRN(Boss):
         if max_tp > 1:
             self.add_mvps(i_players)
             if len(i_players) == 1:
-                return f" * *[**MVP** : {mvp_names} s'est fait TP **{max_tp}** fois]*"
+                return langues["selected_language"]["CAIRN MVP TP S"].format(mvp_names=mvp_names, max_tp=max_tp)
             if len(i_players) > 1:
-                return f" * *[**MVP** : {mvp_names} se sont fait TP **{max_tp}** fois]*"
+                return langues["selected_language"]["CAIRN MVP TP P"].format(mvp_names=mvp_names, max_tp=max_tp)
         return
     
     ################################ LVP ################################
@@ -1250,9 +1251,9 @@ class MO(Boss):
         mvp_names = self.players_to_string(i_players)
         self.add_mvps(i_players)
         if len(i_players) == 1:
-            return f" * *[**MVP** : {mvp_names} s'est fait **empaler**, gros respect]*" 
+            return langues["selected_language"]["MO MVP PICS S"].format(mvp_names=mvp_names) 
         if len(i_players) > 1:
-            return f" * *[**MVP** : {mvp_names} se sont fait **empaler**, gros respect]*"
+            return langues["selected_language"]["MO MVP PICS P"].format(mvp_names=mvp_names)
         return
     
     ################################ LVP ################################
@@ -1308,9 +1309,9 @@ class SAMAROG(Boss):
         mvp_names = self.players_to_string(i_players)
         self.add_mvps(i_players)
         if len(i_players) == 1:
-            return f" * *[**MVP** : {mvp_names} s'est fait **empaler**, gros respect]*" 
+            return langues["selected_language"]["SAMAROG MVP IMPALED S"].format(mvp_names=mvp_names) 
         if len(i_players) > 1:
-            return f" * *[**MVP** : {mvp_names} se sont fait **empaler**, gros respect]*"
+            return langues["selected_language"]["SAMAROG MVP IMPALED P"].format(mvp_names=mvp_names)
         return 
     
     def mvp_traitors(self):
@@ -1319,9 +1320,9 @@ class SAMAROG(Boss):
         vict_names = self.players_to_string(i_vict)
         self.add_mvps(i_trait)
         if len(i_trait) == 1:
-            return f" * *[**MVP** : {trait_names} n'a pas fait de **bisou** à {vict_names}]*"
+            return langues["selected_language"]["SAMAROG MVP BISOU S"].format(trait_names=trait_names, vict_names=vict_names)
         if len(i_trait) > 1:
-            return f" * *[**MVP** : {trait_names} n'ont pas fait de **bisou** à {vict_names}]*"
+            return langues["selected_language"]["SAMAROG MVP BISOU P"].format(trait_names=trait_names, vict_names=vict_names)
         return  
     
     ################################ LVP ################################ 
@@ -1409,10 +1410,11 @@ class DEIMOS(Boss):
         i_players, max_black, _ = Stats.get_max_value(self, self.get_black_trigger)
         mvp_names = self.players_to_string(i_players)
         self.add_mvps(i_players)
-        if len(i_players) == 1:
-            return f" * *[**MVP** : {mvp_names} merci à ce **champion** d'avoir trigger **{max_black} black**]*"
-        if len(i_players) > 1:
-            return f" * *[**MVP** : {mvp_names} merci à ces **champions** d'avoir tous les {len(i_players)} trigger **{max_black} black**]*"
+        nb_players = len(i_players)
+        if nb_players == 1:
+            return langues["selected_language"]["DEIMOS MVP BLACK S"].format(mvp_names=mvp_names, max_black=max_black)
+        if nb_players > 1:
+            return langues["selected_language"]["DEIMOS MVP BLACK P"].format(mvp_names=mvp_names, max_black=max_black)
         return
     
     def mvp_pizza(self):
@@ -1420,7 +1422,7 @@ class DEIMOS(Boss):
         mvp_names = self.players_to_string(i_players)
         self.add_mvps(i_players)
         if i_players:
-            return f" * *[**MVP** : {mvp_names} pour s'être fait **éjecter** de la **plateforme**]*"
+            return langues["selected_language"]["DEIMOS MVP PIZZA"].format(mvp_names=mvp_names)
         return
     
     ################################ LVP ################################ 
@@ -1430,7 +1432,7 @@ class DEIMOS(Boss):
         lvp_names = self.players_to_string(i_players)
         if i_players and max_tears > 2:
             self.add_lvps(i_players)
-            return f" * *[**LVP** : {lvp_names} merci d'avoir ramassé **{max_tears} tears**]*"
+            return langues["selected_language"]["DEIMOS LVP TEARS"].format(lvp_names=lvp_names, max_tears=max_tears)
         return
     
     ################################ CONDITIONS ################################
@@ -1495,7 +1497,7 @@ class SH(Boss):
         mvp_names = self.players_to_string(i_players)
         self.add_mvps(i_players)
         if i_players:
-            return f" * *[**MVP** : {mvp_names} pour avoir **goûté** à un **mur**]*"
+            return langues["selected_language"]["SH MVP WALL"].format(mvp_names=mvp_names)
         return
     
     def mvp_fall(self):
@@ -1503,7 +1505,7 @@ class SH(Boss):
         mvp_names = self.players_to_string(i_players)
         self.add_mvps(i_players)
         if i_players:
-            return f" * *[**MVP** : {mvp_names} pour être **tombé** de la **plateforme**]*"
+            return langues["selected_language"]["SH MVP FALL"].format(mvp_names=mvp_names)
         return
     
     ################################ LVP ################################
@@ -1576,9 +1578,9 @@ class DHUUM(Boss):
         mvp_names = self.players_to_string(i_players)
         self.add_mvps(i_players)
         if len(i_players) == 1:
-            return f" * *[**MVP** : {mvp_names} s'est pris **{max_cracks} cracks**]*"
+            return langues["selected_language"]["DHUUM MVP CRACKS S"].format(mvp_names=mvp_names, max_cracks=max_cracks)
         if len(i_players) > 1:
-            return f" * *[**MVP** : {mvp_names} se sont pris **{max_cracks} cracks**]*"
+            return langues["selected_language"]["DHUUM MVP CRACKS P"].format(mvp_names=mvp_names, max_cracks=max_cracks)
         return 
     
     ################################ LVP ################################
@@ -1662,9 +1664,9 @@ class LARGOS(Boss):
         mvp_names = self.players_to_string(i_players)
         self.add_mvps(i_players)
         if len(i_players) == 1:
-            return f" * *[**MVP** : {mvp_names} s'est pris **{max_dash} dash**]*"
+            return langues["selected_language"]["LARGOS MVP DASH S"].format(mvp_names=mvp_names, max_dash=max_dash)
         if len(i_players) > 1:
-            return f" * *[**MVP** : {mvp_names} se sont pris **{max_dash} dash**]*"
+            return langues["selected_language"]["LARGOS MVP DASH P"].format(mvp_names=mvp_names, max_dash=max_dash)
         return
     
     ################################ LVP ################################ 
@@ -1717,18 +1719,18 @@ class Q1(Boss):
         self.add_mvps(i_players)
         fdp_names = self.players_to_string(i_players)
         if len(i_players) == 1:
-            return f" * *[**MVP** : {fdp_names} n'est pas allé taper le **pyre**]*"
+            return langues["selected_language"]["QADIM MVP PYRE S"].format(fdp_names=fdp_names)
         if len(i_players) > 1:
-            return f" * *[**MVP** : {fdp_names} ne sont pas allé taper le **pyre**]*"
+            return langues["selected_language"]["QADIM MVP PYRE P"].format(fdp_names=fdp_names)
     
     def mvp_wave(self):
         i_players, max_waves, _ = Stats.get_max_value(self, self.get_wave)
         self.add_mvps(i_players)
         mvp_names = self.players_to_string(i_players)
         if len(i_players) == 1:
-            return f" * *[**MVP** : {mvp_names} s'est pris **{max_waves} shockwave**]*"
+            return langues["selected_language"]["QADIM MVP WAVE S"].format(mvp_names=mvp_names, max_waves=max_waves)
         if len(i_players) > 1:
-            return f" * *[**MVP** : {mvp_names} se sont pris **{max_waves} shockwave**]*"
+            return langues["selected_language"]["QADIM MVP WAVE P"].format(mvp_names=mvp_names, max_waves=max_waves)
         return
     
     ################################ LVP ################################ 
@@ -1795,7 +1797,7 @@ class ADINA(Boss):
         self.add_mvps(i_players)
         mvp_names = self.players_to_string(i_players)
         dmg_ratio = min_dmg / total_dmg * 100
-        return f" * *[**MVP** : {mvp_names} n'a fait que **{dmg_ratio:.1f}%** des dégats sur split]*"
+        return langues["selected_language"]["ADINA MVP SPLIT"].format(mvp_names=mvp_names, min_dmg=min_dmg, dmg_ratio=dmg_ratio)
     
     ################################ LVP ################################    
     
@@ -1804,7 +1806,7 @@ class ADINA(Boss):
         self.add_lvps(i_players)
         lvp_names = self.players_to_string(i_players)
         dmg_ratio = max_dmg / total_dmg * 100
-        return f" * *[**LVP** : {lvp_names} merci d'avoir fait **{dmg_ratio:.1f}%** des dégats sur split]*"
+        return langues["selected_language"]["ADINA LVP SPLIT"].format(lvp_names=lvp_names, max_dmg=max_dmg, dmg_ratio=dmg_ratio)
     
     ################################ CONDITIONS ################################
     

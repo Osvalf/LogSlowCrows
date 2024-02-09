@@ -14,6 +14,7 @@ def main() -> None:
     #Pour tester séparément
     #input_urls = ["https://dps.report/XXNc-20240117-232331_vg"]
     
+    
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [executor.submit(Log, input_value) for input_value in input_urls]
         concurrent.futures.wait(futures)
@@ -34,9 +35,10 @@ def main() -> None:
 
 if __name__ == "__main__":
     print("Starting\n")
-    start_time = perf_counter()  
+    start_time = perf_counter()    
+    langues["selected_language"] = langues["EN"]
     main()
-    """log = Log("https://dps.report/fNbj-20240203-223238_sam")
+    """log = Log("https://dps.report/oF0B-20240203-233957_matt")
     boss = all_bosses[0]
     print(boss.mvp)"""
     end_time = perf_counter()

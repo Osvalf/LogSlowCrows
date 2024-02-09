@@ -1,6 +1,7 @@
 import math
 from datetime import datetime, timedelta, timezone
 from const import*
+from languages import *
 
 def time_to_index(time: int): #time in millisecond
     return int(time/150)
@@ -105,7 +106,7 @@ def get_message_reward(logs: list, players: dict, titre="Run"):
     run_duration = disp_time(logs[-1].end_date - logs[0].start_date)
     number_boss = len(logs)
 
-    run_message = f"# {titre} du {run_date}\n" if number_boss > 1 else ""
+    run_message = langues["selected_language"]["TITRE RUN"].format(titre=titre, run_date=run_date) if number_boss > 1 else ""
 
     split_message = []
     total_wingman_score = 0
@@ -116,15 +117,15 @@ def get_message_reward(logs: list, players: dict, titre="Run"):
         wing_duration = disp_time(wing_last_log.end_date - wing_first_log.start_date)
 
         if wing_number == 1:
-            run_message += f"## W1 - *{wing_duration}* (sans pre-VG)\n"
+            run_message += langues["selected_language"]["W1"].format(wing_duration=wing_duration)
         elif wing_number == 3:
             escort_in_run = any(boss.name == "ESCORT" for boss in wing)
             if escort_in_run:
                 run_message += f"## W3 - *{wing_duration}*\n"
             else:
-                run_message += f"## W3 - *{wing_duration}* (sans escort)\n"
+                run_message += langues["selected_language"]["W3"].format(wing_duration=wing_duration)
         elif wing_number == 7:
-            run_message += f"## W7 - *{wing_duration}* (sans gate)\n"
+            run_message += langues["selected_language"]["W7"].format(wing_duration=wing_duration)
         else:
             run_message += f"## W{wing_number} - *{wing_duration}*\n"
 
@@ -151,10 +152,13 @@ def get_message_reward(logs: list, players: dict, titre="Run"):
             run_message = ""
 
     if number_boss > 1 and len(wings) > 1:
-        run_message += f"# [GRAND MVP : {', '.join(mvp_names)} avec {max_mvp_score} titres]\n"
-        run_message += f"# [GRAND LVP : {', '.join(lvp_names)} avec {max_lvp_score} titres]\n"
-        run_message += f"# Temps total : {run_duration}\n"
-        run_message += f"# Note Wingman moyenne : {total_wingman_score/number_boss:.2f}%{emote_wingman}"
+        mvps = ', '.join(mvp_names)
+        lvps = ', '.join(lvp_names)
+        note_wingman = total_wingman_score/number_boss
+        run_message += langues["selected_language"]["MVP"].format(mvps=mvps, max_mvp_score=max_mvp_score)
+        run_message += langues["selected_language"]["LVP"].format(lvps=lvps, max_lvp_score=max_lvp_score)
+        run_message += langues["selected_language"]["TIME"].format(run_duration=run_duration)
+        run_message += langues["selected_language"]["WINGMAN"].format(note_wingman=note_wingman, emote_wingman=emote_wingman)
 
     split_message.append(run_message)
 
