@@ -1,7 +1,7 @@
 english = {
     ################################ VG ################################
-    "VG MVP BLUE S": " * *[**MVP** : {mvp_names} got teleported to Narnia **{max_bleu}** times]*",
-    "VG MVP BLUE P": " * *[**MVP** : {mvp_names} got teleported to Narnia **{max_bleu}** times]*",
+    "VG MVP BLEU S": " * *[**MVP** : {mvp_names} got teleported to Narnia **{max_bleu}** times]*",
+    "VG MVP BLEU P": " * *[**MVP** : {mvp_names} got teleported to Narnia **{max_bleu}** times]*",
     
     ################################ GORS ################################
     "GORS MVP SPLIT": " * *[**MVP** : {mvp_names} with only **{dmg_ratio:.1f}%** damage on **split** as **DPS**]*",

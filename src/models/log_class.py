@@ -210,6 +210,10 @@ class Boss:
             for death in death_history:
                 if death['time'] < 20000 and death['actor'] == player_name:
                     return True
+        try:
+            rota = self.get_player_rotation(i_player)
+        except:
+            return True
         return False
     
     def is_buff_up(self, i_player: int, target_time: int, buff_name: str):
