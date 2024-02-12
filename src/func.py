@@ -73,6 +73,15 @@ def get_message_reward(logs: list, players: dict, titre="Run"):
     if not logs:
         print("No boss found")
         return []
+    
+    def cut_text(text):
+        run_message_length = len(text)
+        if run_message_length >= cutting_text_limit:
+            split_message.append(text)
+            return ""
+        return text
+    
+    cutting_text_limit = 1800
 
     mvp = []
     lvp = []
@@ -137,19 +146,16 @@ def get_message_reward(logs: list, players: dict, titre="Run"):
             total_wingman_score += boss_percentil
 
             run_message += f"* **[{boss_name}]({boss_url})** **{boss_duration} ({boss_percentil:.1f}%{emote_wingman})**\n"
+            run_message = cut_text(run_message)
 
             if boss.mvp:
                 run_message += boss.mvp + "\n"
+                run_message = cut_text(run_message)
             if boss.lvp:
                 run_message += boss.lvp + "\n"
+                run_message = cut_text(run_message)
 
         run_message += "\n"
-
-        cutting_text_limit = 1050
-        run_message_length = len(run_message)
-        if run_message_length >= cutting_text_limit:
-            split_message.append(run_message)
-            run_message = ""
 
     if number_boss > 1 and len(wings) > 1:
         mvps = ', '.join(mvp_names)

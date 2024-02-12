@@ -193,14 +193,19 @@ def update_all():
 def test():
     with open("wingman_updater/WINGMAN_DATA.json", "r") as final:
         data = json.load(final)
-    
-    i, bossname,  maxDown = None, None, 0
-    for name, boss in data["RAIDS"]["NM"].items():
-        if max(boss["Downed"]) > maxDown:
-            maxDown = max(boss["Downed"])
-            i = boss["Downed"].index(maxDown)
-            bossname = name 
-    print(bossname, maxDown, i)
+
+    mode_name, cmnm, boss_name, i_max, Max = None, None, None, None, 0
+    meca = "Downed"
+    for Mode_name, Mode in data.items():
+        if True:
+            for CmNm, Bosses in Mode.items():
+                for Boss_name, Boss in Bosses.items():
+                    for i_val, val in enumerate(Boss[meca]):
+                        if val > Max:
+                            mode_name, cmnm, boss_name, i_max, Max = Mode_name, CmNm, Boss_name, i_val, val
+
+    print(f"{meca} = {Max} : {data[mode_name][cmnm][boss_name]['links'][i_max]}")
+        
     
     
 update_all()
