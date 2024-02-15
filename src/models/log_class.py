@@ -87,6 +87,8 @@ class Boss:
                 all_players[account] = new_player
             else:
                 player.add_boss(self)
+        for player_account, dps_mark in self.get_dps_ranking().items():
+            all_players[player_account].add_mark(dps_mark)
         
     ################################ Fonction pour attribus Boss ################################
     
@@ -345,7 +347,25 @@ class Boss:
             account = self.get_player_account(i)
             all_players[account].lvps += 1
             
-    
+    def _get_dps_contrib(self, exclude: list[classmethod]=[], phase: int=0):
+        dps_ranking = {}
+        max_dps = 0
+        players = self.log.pjcontent['players']
+        for i in self.player_list:
+            if any(filter_func(i) for filter_func in exclude):
+                continue
+            player_dps = self.log.pjcontent['players'][i]['dpsTargets'][0][phase]['damage']
+            if player_dps > max_dps:
+                max_dps = player_dps
+            dps_ranking[self.log.pjcontent['players'][i]['account']] = player_dps
+        for player in dps_ranking:
+            dps_ranking[player] = 20 * dps_ranking[player] / max_dps
+        return dps_ranking
+
+
+    def get_dps_ranking(self):
+        return self._get_dps_contrib([self.is_support])
+
     ################################ MVP ################################
     
     def get_mvp_cc_boss(self, extra_exclude: list[classmethod]=[]):
@@ -450,11 +470,11 @@ class Boss:
                 return start, end
         raise ValueError(f'{target_phase} not found')
     
-    def get_mech_value(self, i_player: int, mech_name: str):
+    def get_mech_value(self, i_player: int, mech_name: str, phase: int=0):
         mechs_list = [mech['name'] for mech in self.mechanics]
         if mech_name in mechs_list:
             i_mech = mechs_list.index(mech_name)
-            return self.log.jcontent['phases'][0]['mechanicStats'][i_player][i_mech][0]
+            return self.log.jcontent['phases'][phase]['mechanicStats'][i_player][i_mech][0]
         return 0
     
     def bosshp_to_time(self, hp: float):
@@ -559,6 +579,9 @@ class VG(Boss):
     
     def get_lvp(self):
         return self.get_lvp_dps()
+
+    def get_dps_ranking(self):
+        return self._get_dps_contrib([self.is_support, self.is_condi])
         
     ################################ MVP ################################   
     
@@ -703,6 +726,9 @@ class SABETHA(Boss):
     def get_lvp(self):
         return self.lvp_dmg_split()
     
+    def get_dps_ranking(self):
+        return self._get_dps_contrib([self.is_support, self.is_cannon])
+
     ################################ MVP ################################
     
     def mvp_dmg_split(self):
@@ -821,6 +847,9 @@ class SLOTH(Boss):
     def get_lvp(self):
         return self.get_lvp_cc_boss()
         
+    def get_dps_ranking(self):
+        return self._get_dps_contrib([self.is_support, self.is_shroom])
+
     ################################ MVP ################################
     
     def mvp_cc_sloth(self):
@@ -885,6 +914,9 @@ class MATTHIAS(Boss):
     def get_lvp(self):
         return self.lvp_cc_matthias()
           
+    def get_dps_ranking(self):
+        return self._get_dps_contrib([self.is_support, self.is_sac])
+
     ################################ MVP ################################
     
     def mvp_cc_matthias(self):
@@ -1095,6 +1127,9 @@ class XERA(Boss):
             return msg_minijeu
         return self.get_lvp_cc_boss()    
         
+    def get_dps_ranking(self):
+        return self._get_dps_contrib([self.is_support], 2)
+
     ################################ MVP ################################
     
     def mvp_fdp_xera(self):
@@ -1408,6 +1443,9 @@ class DEIMOS(Boss):
             return msg_tears
         return self.get_lvp_dps()
 
+    def get_dps_ranking(self):
+        return self._get_dps_contrib([self.is_support, self.is_sac])
+
     ################################ MVP ################################
     
     def mvp_black(self):
@@ -1450,8 +1488,13 @@ class DEIMOS(Boss):
             if mech_history[-2]['name'] == "Pizza" and mech_history[-1]['name'] == "Dead":
                 return True
         return False
-            
-    
+
+    def is_sac(self, i_player: int):
+        greens = self.get_mechanic_history('Chosen (Green)')
+        if not greens:
+            return False
+        return greens[-1]['actor'] == self.get_player_name(i_player)
+
     ################################ DATA MECHAS ################################
 
     def get_black_trigger(self, i_player: int):
@@ -1574,6 +1617,9 @@ class DHUUM(Boss):
     
     def get_lvp(self):
         return self.get_lvp_dps()
+
+    def get_dps_ranking(self):
+        return self._get_dps_contrib([self.is_support, self.is_green])
    
     ################################ MVP ################################
     
@@ -1593,7 +1639,8 @@ class DHUUM(Boss):
     
     ################################ CONDITIONS ################################
     
-    
+    def is_green(self, i_player: int) -> bool:
+        return self.get_mech_value(i_player, "Green port", 2) > 0
     
     ################################ DATA MECHAS ################################
 
@@ -1892,6 +1939,10 @@ class QTP(Boss):
             return msg_cc
         return self.get_lvp_dps() 
  
+
+    def get_dps_ranking(self):
+        return self._get_dps_contrib([self.is_support, self.is_pylon])
+
     ################################ MVP ################################
     
     

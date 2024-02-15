@@ -1,15 +1,18 @@
 import math
 from datetime import datetime, timedelta, timezone
-from const import*
+from const import *
 from languages import *
 
-def time_to_index(time: int): #time in millisecond
-    return int(time/150)
+
+def time_to_index(time: int):  # time in millisecond
+    return int(time / 150)
+
 
 def get_dist(pos1: list[float], pos2: list[float]):
     x1, y1 = pos1[0], pos1[1]
     x2, y2 = pos2[0], pos2[1]
     return math.hypot(x1 - x2, y1 - y2)
+
 
 def disp_time(td: timedelta):
     days, seconds = td.days, td.seconds
@@ -24,7 +27,8 @@ def disp_time(td: timedelta):
         return f"{minutes}m{seconds:02}s"
     else:
         return f"{seconds}s"
-    
+
+
 def txt_file_to_lines(filepath: str):
     try:
         with open(filepath, 'r') as file:
@@ -32,7 +36,8 @@ def txt_file_to_lines(filepath: str):
     except FileNotFoundError:
         print(f"Error: File not found at {filepath}")
         return []
-    
+
+
 def lines_to_urls(lines: list[str], reward_mode=False):
 
     input_urls = []
@@ -49,8 +54,8 @@ def lines_to_urls(lines: list[str], reward_mode=False):
             boss_names.remove(line.split("_")[1])
 
     number_urls = len(input_urls)
-    
-    if reward_mode and number_urls < 19: 
+
+    if reward_mode and number_urls < 19:
         error_message = ""
         error_message += f"Tu as mis seulement **{len(input_urls)}** logs valides sur les **19**\n"
         error_message += "Voici ceux qu'il manque pour compléter la reward :saluting_face:\n"
@@ -61,7 +66,8 @@ def lines_to_urls(lines: list[str], reward_mode=False):
     if escort_url:
         input_urls.append(escort_url)
 
-    return input_urls, False    
+    return input_urls, False
+
 
 def is_valid_url(line):
     parts = line.split("_")
@@ -69,18 +75,19 @@ def is_valid_url(line):
         return True
     return False
 
+
 def get_message_reward(logs: list, players: dict, titre="Run"):
     if not logs:
         print("No boss found")
         return []
-    
+
     def cut_text(text):
         run_message_length = len(text)
         if run_message_length >= cutting_text_limit:
             split_message.append(text)
             return ""
         return text
-    
+
     cutting_text_limit = 1800
 
     mvp = []
@@ -160,12 +167,19 @@ def get_message_reward(logs: list, players: dict, titre="Run"):
     if number_boss > 1 and len(wings) > 1:
         mvps = ', '.join(mvp_names)
         lvps = ', '.join(lvp_names)
-        note_wingman = total_wingman_score/number_boss
+        note_wingman = total_wingman_score / number_boss
         run_message += langues["selected_language"]["MVP"].format(mvps=mvps, max_mvp_score=max_mvp_score)
         run_message += langues["selected_language"]["LVP"].format(lvps=lvps, max_lvp_score=max_lvp_score)
         run_message += langues["selected_language"]["TIME"].format(run_duration=run_duration)
         run_message += langues["selected_language"]["WINGMAN"].format(note_wingman=note_wingman, emote_wingman=emote_wingman)
 
+    player_rankings = list(filter(
+        lambda x: x[1] is not None,
+        [(player.account, player.get_mark()) for player in players.values()]
+    ))
+    player_rankings.sort(key=lambda r: r[1], reverse=True)
+    for r in player_rankings:
+        run_message += f"{r[0]} a la note moyenne de {r[1]:0.2f}/20 en dps\n"
     split_message.append(run_message)
 
     logs.clear()
