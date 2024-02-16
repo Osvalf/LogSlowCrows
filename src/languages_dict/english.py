@@ -68,8 +68,8 @@ english = {
     "MO MVP PICS P": "⬗ *[**MVP** : {mvp_names} got **impaled**, big respect]*",
     
     ################################ SAMAROG ################################
-    "SAMAROG MVP IMPALED S": "⬗ *[**MVP** : got **impaled**, what a champ]*",
-    "SAMAROG MVP IMPALED P": "⬗ *[**MVP** : got **impaled**, big respect]*",
+    "SAMAROG MVP IMPALED S": "⬗ *[**MVP** : {mvp_names} got **impaled**, what a champ]*",
+    "SAMAROG MVP IMPALED P": "⬗ *[**MVP** : {mvp_names} got **impaled**, big respect]*",
     
     "SAMAROG MVP BISOU S": "⬗ *[**MVP** : {trait_names} left {vict_names} **alone** during green mechanic, traitor]*",
     "SAMAROG MVP BISOU P": "⬗ *[**MVP** : {trait_names} left {vict_names} **alone** during green mechanic, traitors]*",

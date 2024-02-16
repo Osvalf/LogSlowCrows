@@ -46,7 +46,7 @@ if __name__ == "__main__":
     arg.add_argument('--debug', action='store_true')
     args = arg.parse_args()
     main(args)
-    """log = Log("https://dps.report/tI5s-20240209-221243_vg")
+    """log = Log("https://dps.report/jGvX-20240214-211913_sam")
     boss = all_bosses[0]
     print(boss.mvp)"""
     end_time = perf_counter()

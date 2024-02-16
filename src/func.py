@@ -88,7 +88,7 @@ def get_message_reward(logs: list, players: dict, titre="Run"):
             return ""
         return text
 
-    cutting_text_limit = 1800
+    cutting_text_limit = 1700
 
     mvp = []
     lvp = []
@@ -173,6 +173,7 @@ def get_message_reward(logs: list, players: dict, titre="Run"):
         run_message += langues["selected_language"]["TIME"].format(run_duration=run_duration)
         run_message += langues["selected_language"]["WINGMAN"].format(note_wingman=note_wingman, emote_wingman=emote_wingman)
 
+    """
     player_rankings = list(filter(
         lambda x: x[1] is not None,
         [(player.account, player.get_mark()) for player in players.values()]
@@ -180,6 +181,7 @@ def get_message_reward(logs: list, players: dict, titre="Run"):
     player_rankings.sort(key=lambda r: r[1], reverse=True)
     for r in player_rankings:
         run_message += f"{r[0]} a la note moyenne de {r[1]:0.2f}/20 en dps\n"
+    """
     split_message.append(run_message)
 
     logs.clear()
