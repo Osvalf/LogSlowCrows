@@ -150,9 +150,11 @@ def get_message_reward(logs: list, players: dict, titre="Run"):
             boss_duration = disp_time(timedelta(seconds=boss.duration_ms / 1000))
             boss_url = boss.log.url
             boss_percentil = boss.wingman_percentile
-            total_wingman_score += boss_percentil
-
-            run_message += f"* **[{boss_name}]({boss_url})** **{boss_duration} ({boss_percentil:.1f}%{emote_wingman})**\n"
+            if boss_percentil is not None:
+                total_wingman_score += boss_percentil
+                run_message += f"* **[{boss_name}]({boss_url})** **{boss_duration} ({boss_percentil:.1f}%{emote_wingman})**\n"
+            else:
+                run_message += f"* **[{boss_name}]({boss_url})** **{boss_duration}**\n"
             run_message = cut_text(run_message)
 
             if boss.mvp:

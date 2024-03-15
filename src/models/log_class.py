@@ -154,16 +154,19 @@ class Boss:
     def get_wingman_percentile(self):
         log_time_ms = self.duration_ms
         boss_name = self.name
-        if self.cm:
-            raids = wingman_data.get("RAIDS")
-            cms = raids.get("CM")
-            boss_data = cms.get(boss_name)
-            all_wingman_boss_times_ms = np.array(boss_data.get("Duration", []))*60000
-        else:
-            raids = wingman_data.get("RAIDS")
-            nms = raids.get("NM")
-            boss_data = nms.get(boss_name)
-            all_wingman_boss_times_ms = np.array(boss_data.get("Duration", []))*60000
+        try:
+            if self.cm:
+                raids = wingman_data.get("RAIDS")
+                cms = raids.get("CM")
+                boss_data = cms.get(boss_name)
+                all_wingman_boss_times_ms = np.array(boss_data.get("Duration", []))*60000
+            else:
+                raids = wingman_data.get("RAIDS")
+                nms = raids.get("NM")
+                boss_data = nms.get(boss_name)
+                all_wingman_boss_times_ms = np.array(boss_data.get("Duration", []))*60000
+        except:
+            return None
         all_wingman_boss_times_ms = np.sort(np.append(all_wingman_boss_times_ms, log_time_ms))[::-1]
         i = np.where(all_wingman_boss_times_ms == log_time_ms)[0][0]
         percentile = i / (len(all_wingman_boss_times_ms) - 1) * 100

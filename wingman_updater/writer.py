@@ -5,6 +5,7 @@ import pickle
 import numpy as np
 import concurrent.futures
 import json
+from datetime import date
 
 raid_names = {
     "vg" : "VG",
@@ -73,8 +74,8 @@ def update_log_times(name, mode, cm):
     url += "onlyMyRecords=AllRecords&"
     url += "noSpeedruns=includeGroupRuns&"
     url += "fromDate=2012-08-28&"
-    url += "untilDate=2024-02-03&"
-    url += "IncludeEra_24-01=on&"
+    url += f"untilDate={date.today()}&"
+    url += "IncludeEra_24-02=on&"
     url += "sampleSize=-1&"
     url += "onlyKills=OnlyKills&"
     url += "minimumPlayers=10&"
@@ -200,9 +201,10 @@ def test():
         if True:
             for CmNm, Bosses in Mode.items():
                 for Boss_name, Boss in Bosses.items():
-                    for i_val, val in enumerate(Boss[meca]):
-                        if val > Max:
-                            mode_name, cmnm, boss_name, i_max, Max = Mode_name, CmNm, Boss_name, i_val, val
+                    if Boss_name == "MATTHIAS":
+                        for i_val, val in enumerate(Boss[meca]):
+                            if val > Max:
+                                mode_name, cmnm, boss_name, i_max, Max = Mode_name, CmNm, Boss_name, i_val, val
 
     print(f"{meca} = {Max} : {data[mode_name][cmnm][boss_name]['links'][i_max]}")
         
