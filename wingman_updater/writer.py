@@ -52,18 +52,44 @@ strike_names = {
     "cerus": "FEBE"   
 }
 
-
 raids_nm = list(raid_names.keys())
 raids_cm = ["kc"]+list(raid_names.keys())[8:]
 
 strikes_nm = list(strike_names.keys())
 strikes_cm = list(strike_names.keys())[5:]
 
+n_boss_raid_nm = len(raids_nm)
+n_boss_raid_cm = len(raids_cm)
+n_boss_strike_nm = len(strikes_nm)
+n_boss_strike_cm = len(strikes_cm)
+
+boss_raid_nm_count = 0
+boss_raid_cm_count = 0
+boss_strike_nm_count = 0
+boss_strike_cm_count = 0
+
 modes = {}
 nm_raid_bosses = {}
 cm_raid_bosses = {}
 nm_strike_bosses = {}
 cm_strike_bosses = {}
+
+def get_patch_value():
+    with requests.Session() as session:
+        html = session.get("https://gw2wingman.nevermindcreations.de/vg").content.decode("utf-8")
+    patch_value = html.split('<option value="')[1].split('"')[0]
+    patch_name = html.split(f'<option value="{patch_value}">')[1].split("</option>")[0]
+    return patch_value, patch_name
+
+patch_value, patch_name = get_patch_value()
+
+def get_bar(p, length=40):
+    
+    plain = "█"
+    empty = "▒"
+    n_plain = round(p*length)
+    n_empty = length - n_plain
+    return plain*n_plain + empty*n_empty
 
 def update_log_times(name, mode, cm):
     if name == "qadim":
@@ -75,7 +101,7 @@ def update_log_times(name, mode, cm):
     url += "noSpeedruns=includeGroupRuns&"
     url += "fromDate=2012-08-28&"
     url += f"untilDate={date.today()}&"
-    url += "IncludeEra_24-02=on&"
+    url += f"IncludeEra_{patch_value}=on&"
     url += "sampleSize=-1&"
     url += "onlyKills=OnlyKills&"
     url += "minimumPlayers=10&"
@@ -107,42 +133,62 @@ def update_log_times(name, mode, cm):
     if mode == "RAID": 
         if cm:
             cm_raid_bosses[raid_names[name]] = data
+            global boss_raid_cm_count
+            boss_raid_cm_count += 1
+            print(f"{get_bar(boss_raid_cm_count/(n_boss_raid_cm))} {boss_raid_cm_count/n_boss_raid_cm*100:.2f}%",end="\r")
         else:
             nm_raid_bosses[raid_names[name]] = data
+            global boss_raid_nm_count
+            boss_raid_nm_count += 1
+            print(f"{get_bar(boss_raid_nm_count/(n_boss_raid_nm))} {boss_raid_nm_count/n_boss_raid_nm*100:.2f}%",end="\r")
     if mode == "STRIKE": 
         if cm:
             cm_strike_bosses[strike_names[name]] = data
+            global boss_strike_cm_count
+            boss_strike_cm_count += 1
+            print(f"{get_bar(boss_strike_cm_count/(n_boss_strike_cm))} {boss_strike_cm_count/n_boss_strike_cm*100:.2f}%",end="\r")
         else:
             nm_strike_bosses[strike_names[name]] = data
+            global boss_strike_nm_count
+            boss_strike_nm_count += 1
+            print(f"{get_bar(boss_strike_nm_count/(n_boss_strike_nm))} {boss_strike_nm_count/n_boss_strike_nm*100:.2f}%",end="\r")
     return
 
 def update_nm_raids():
     print("Updating NM RAIDS")
+    print(f"{get_bar(0)} 0.00%",end="\r")  
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [executor.submit(update_log_times, name, "RAID", False) for name in raids_nm]
-        concurrent.futures.wait(futures)  
-    print("parsing NM RAIDS done")
+        concurrent.futures.wait(futures)
+    print(f"{get_bar(1)} 100.00%",end="\r")    
+    print("\nparsing NM RAIDS done")
         
 def update_cm_raids():
     print("Updating CM RAIDS")
+    print(f"{get_bar(0)} 0.00%",end="\r") 
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [executor.submit(update_log_times, name, "RAID", True) for name in raids_cm]
-        concurrent.futures.wait(futures)  
-    print("parsing CM RAIDS done")
+        concurrent.futures.wait(futures)
+    print(f"{get_bar(1)}100.00%",end="\r")  
+    print("\nparsing CM RAIDS done")
     
 def update_nm_strikes():
     print("Updating NM STRIKES")
+    print(f"{get_bar(0)} 0.00%",end="\r") 
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [executor.submit(update_log_times, name, "STRIKE", False) for name in strikes_nm]
-        concurrent.futures.wait(futures)  
-    print("parsing NM STRIKES done")
+        concurrent.futures.wait(futures)
+    print(f"{get_bar(1)} 100.00%",end="\r")    
+    print("\nparsing NM STRIKES done")
     
 def update_cm_strikes():
     print("Updating CM STRIKES")
+    print(f"{get_bar(0)} 0.00%",end="\r") 
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [executor.submit(update_log_times, name, "STRIKE", True) for name in strikes_cm]
-        concurrent.futures.wait(futures)  
-    print("parsing CM STRIKES done")
+        concurrent.futures.wait(futures)
+    print(f"{get_bar(1)} 100.00%",end="\r")    
+    print("\nparsing CM STRIKES done")
     
 def find_links(html):
     links = html.split("links = ")[1]
@@ -180,6 +226,7 @@ def assemble_data(html):
         
 def update_all():
     start = perf_counter()
+    print(f"Updating for : {patch_name}\n")
     update_nm_raids()
     update_cm_raids()
     update_nm_strikes()
@@ -196,12 +243,12 @@ def test():
         data = json.load(final)
 
     mode_name, cmnm, boss_name, i_max, Max = None, None, None, None, 0
-    meca = "Downed"
+    meca = "Duration"
     for Mode_name, Mode in data.items():
         if True:
             for CmNm, Bosses in Mode.items():
                 for Boss_name, Boss in Bosses.items():
-                    if Boss_name == "MATTHIAS":
+                    if Boss_name not in ["KO","HT","OLC","QTP","ESCORT","ANKKA","QUOIDIMM"]:
                         for i_val, val in enumerate(Boss[meca]):
                             if val > Max:
                                 mode_name, cmnm, boss_name, i_max, Max = Mode_name, CmNm, Boss_name, i_val, val
@@ -212,4 +259,5 @@ def test():
     
 update_all()
 #test()
+
 

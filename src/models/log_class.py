@@ -713,6 +713,12 @@ class SABETHA(Boss):
         super().__init__(log)
         self.mvp = self.get_mvp()
         self.lvp = self.get_lvp()
+        list_dps = []
+        for i in self.player_list:
+            list_dps.append([self.get_player_name(i), (self.log.jcontent['phases'][0]['dpsStatsTargets'][i][0][0]+self.get_dmg_split(i))/self.duration_ms])
+        list_dps.sort(key=lambda x: x[1], reverse=True)
+        for name, dps in list_dps:
+            print(f"{name} : {dps:.3f}kdps")
         SABETHA.last = self
         
     def get_mvp(self):
@@ -844,7 +850,7 @@ class SLOTH(Boss):
         
         msg_cc = self.mvp_cc_sloth()
         if msg_cc:
-            return self.mvp_cc_sloth()
+            return msg_cc
         return    
         
     def get_lvp(self):
@@ -997,7 +1003,7 @@ class ESCORT(Boss):
         i_players, max_call, _ = Stats.get_max_value(self, self.get_glenna_call)
         self.add_lvps(i_players)
         lvp_names = self.players_to_string(i_players)
-        return langues["selected_language"]["ESCORT LVP GLENNA"].format(lvp_names=lvp_names)
+        return langues["selected_language"]["ESCORT LVP GLENNA"].format(lvp_names=lvp_names, max_call=max_call)
     
     def lvp_tower(self):
         towers = self.get_towers()
@@ -1077,7 +1083,7 @@ class KC(Boss):
         mvp_names = self.players_to_string(i_players)
         self.add_mvps(i_players)
         if min_orb == 0:
-            return langues["selected_language"]["KC MVP ORB 0"].format(mvp_names=mvp_names)
+            return langues["selected_language"]["KC MVP 0 ORB"].format(mvp_names=mvp_names)
         else:
             return langues["selected_language"]["KC MVP ORB"].format(mvp_names=mvp_names, min_orb=min_orb)
             
