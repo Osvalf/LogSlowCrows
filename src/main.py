@@ -2,11 +2,24 @@ import argparse
 import concurrent.futures
 import IPython
 from time import perf_counter
+import sys
+import traceback
 
 from models.log_class import *
 
 TITRE = "Run"
 
+class ThreadPoolExecutorStackTraced(concurrent.futures.ThreadPoolExecutor):
+
+    def submit(self, fn, *args, **kwargs):
+        return super(ThreadPoolExecutorStackTraced, self).submit(
+            self._function_wrapper, fn, *args, **kwargs)
+
+    def _function_wrapper(self, fn, *args, **kwargs):
+        try:
+            return fn(*args, **kwargs)
+        except Exception:
+            raise sys.exc_info()[0](traceback.format_exc())
 
 def main(args) -> None:
     input_lines = txt_file_to_lines("src/input logs.txt")
@@ -17,10 +30,14 @@ def main(args) -> None:
         print(input_urls)
     # Pour tester séparément
     # input_urls = ["https://dps.report/XXNc-20240117-232331_vg"]
-
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [executor.submit(Log, input_value) for input_value in input_urls]
-        concurrent.futures.wait(futures)
+    
+    with ThreadPoolExecutorStackTraced() as executor:
+        futures = [executor.submit(Log, url) for url in input_urls]
+        for future in futures:
+            try:
+                test = future.result()
+            except TypeError as e:
+                print(e)
 
     print("\n")
 

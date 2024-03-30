@@ -713,12 +713,6 @@ class SABETHA(Boss):
         super().__init__(log)
         self.mvp = self.get_mvp()
         self.lvp = self.get_lvp()
-        list_dps = []
-        for i in self.player_list:
-            list_dps.append([self.get_player_name(i), (self.log.jcontent['phases'][0]['dpsStatsTargets'][i][0][0]+self.get_dmg_split(i))/self.duration_ms])
-        list_dps.sort(key=lambda x: x[1], reverse=True)
-        for name, dps in list_dps:
-            print(f"{name} : {dps:.3f}kdps")
         SABETHA.last = self
         
     def get_mvp(self):
