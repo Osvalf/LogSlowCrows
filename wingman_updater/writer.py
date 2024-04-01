@@ -243,12 +243,12 @@ def test():
         data = json.load(final)
 
     mode_name, cmnm, boss_name, i_max, Max = None, None, None, None, 0
-    meca = "Duration"
+    meca = "Downed"
     for Mode_name, Mode in data.items():
         if True:
             for CmNm, Bosses in Mode.items():
                 for Boss_name, Boss in Bosses.items():
-                    if Boss_name not in ["KO","HT","OLC","QTP","ESCORT","ANKKA","QUOIDIMM"]:
+                    if Boss_name not in ["KO","HT","OLC"]:
                         for i_val, val in enumerate(Boss[meca]):
                             if val > Max:
                                 mode_name, cmnm, boss_name, i_max, Max = Mode_name, CmNm, Boss_name, i_val, val
