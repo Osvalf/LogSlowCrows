@@ -67,6 +67,7 @@ class Boss:
     name = None
     wing = 0
     boss_id = -1
+    real_phase = 0
 
     def __init__(self, log: Log):
         self.log = log
@@ -176,22 +177,14 @@ class Boss:
         
     def is_quick(self, i_player: int):
         min_quick_contrib = 30
-        phases = self.log.jcontent['phases']
-        for phase in phases:
-            player_quick_contrib = phase['boonGenGroupStats'][i_player]['data'][2]
-            if player_quick_contrib[0] >= min_quick_contrib or player_quick_contrib[1] >= min_quick_contrib:
-                return True
-        return False
+        player_quick_contrib = self.log.jcontent['phases'][self.real_phase]['boonGenGroupStats'][i_player]['data'][2]
+        return player_quick_contrib[0] >= min_quick_contrib or player_quick_contrib[1] >= min_quick_contrib
 
     def is_alac(self, i_player: int):
         min_alac_contrib = 30
-        phases = self.log.jcontent['phases']
-        for phase in phases:
-            player_alac_contrib = phase['boonGenGroupStats'][i_player]['data'][3]
-            if player_alac_contrib[0] >= min_alac_contrib or player_alac_contrib[1] >= min_alac_contrib:
-                return True
-        return False
-    
+        player_alac_contrib = self.log.jcontent['phases'][self.real_phase]['boonGenGroupStats'][i_player]['data'][3]
+        return player_alac_contrib[0] >= min_alac_contrib or player_alac_contrib[1] >= min_alac_contrib
+
     def is_support(self, i_player: int):
         return self.is_quick(i_player) or self.is_alac(i_player)
     
@@ -283,7 +276,7 @@ class Boss:
         return self.log.pjcontent['players'][i_player]['dpsTargets'][0][0]['breakbarDamage']
     
     def get_dmg_boss(self, i_player: int):
-        return self.log.pjcontent['players'][i_player]['dpsTargets'][0][0]['damage']
+        return self.log.pjcontent['players'][i_player]['dpsTargets'][0][self.real_phase]['damage']
     
     def get_cc_total(self, i_player: int):
         return self.log.pjcontent['players'][i_player]['dpsAll'][0]['breakbarDamage']
@@ -1108,6 +1101,7 @@ class XERA(Boss):
     name = "XERA"
     wing = 3
     boss_id = 16246
+    real_phase = 1
 
     def __init__(self, log: Log):
         super().__init__(log)
@@ -1424,6 +1418,7 @@ class DEIMOS(Boss):
     name = "DEIMOS"
     wing = 4
     boss_id = 17154
+    real_phase = 3
     
     def __init__(self, log: Log):
         super().__init__(log)
@@ -1605,6 +1600,7 @@ class DHUUM(Boss):
     name = "DHUUM"
     wing = 5
     boss_id = 19450
+    real_phase = 3
     
     def __init__(self, log: Log):
         super().__init__(log)
