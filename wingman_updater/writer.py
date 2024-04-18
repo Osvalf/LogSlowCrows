@@ -102,7 +102,7 @@ def update_log_times(name, mode, cm):
     url += "fromDate=2012-08-28&"
     url += f"untilDate={date.today()}&"
     url += f"IncludeEra_{patch_value}=on&"
-    url += "sampleSize=-1&"
+    url += "sampleSize=2000&"
     url += "onlyKills=OnlyKills&"
     url += "minimumPlayers=10&"
     url += "maximumPlayers=10&"
