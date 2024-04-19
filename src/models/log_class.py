@@ -1454,7 +1454,7 @@ class DEIMOS(Boss):
         if nb_players == 1:
             return langues["selected_language"]["DEIMOS MVP BLACK S"].format(mvp_names=mvp_names, max_black=max_black)
         if nb_players > 1:
-            return langues["selected_language"]["DEIMOS MVP BLACK P"].format(mvp_names=mvp_names, max_black=max_black)
+            return langues["selected_language"]["DEIMOS MVP BLACK P"].format(mvp_names=mvp_names, nb_players=nb_players, max_black=max_black)
         return
     
     def mvp_pizza(self):
