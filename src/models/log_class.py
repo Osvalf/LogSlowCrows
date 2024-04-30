@@ -457,7 +457,7 @@ class Boss:
                 return target['combatReplayData']['positions'][start:end]
         raise ValueError('No Boss in targets')
     
-    def get_phase_id(self, target_phase: str):
+    def get_phase_timers(self, target_phase: str):
         phases = self.log.pjcontent['phases']
         for phase in phases:
             if phase['name'] == target_phase:
@@ -486,7 +486,13 @@ class Boss:
             if mech['fullName'] == name:
                 return mech['mechanicsData']
         return
-        
+    
+    def get_phase_id(self, name: str):
+        phases = self.log.pjcontent["phases"]
+        for i, phase in enumerate(phases):
+            if phase["name"] == name:
+                return i
+        return 0        
             
     
 class Stats:
@@ -1600,10 +1606,10 @@ class DHUUM(Boss):
     name = "DHUUM"
     wing = 5
     boss_id = 19450
-    real_phase = 3
     
-    def __init__(self, log: Log):
+    def __init__(self, log: Log):    
         super().__init__(log)
+        self.real_phase = self.get_phase_id("Dhuum Fight")
         self.mvp = self.get_mvp()
         self.lvp = self.get_lvp()
         DHUUM.last = self
@@ -1795,8 +1801,8 @@ class Q1(Boss):
 
     def get_fdp(self):
         fdp = []
-        start_p1, end_p1 = self.get_phase_id("Qadim P1")
-        start_p2, end_p2 = self.get_phase_id("Qadim P2")
+        start_p1, end_p1 = self.get_phase_timers("Qadim P1")
+        start_p2, end_p2 = self.get_phase_timers("Qadim P2")
         for i in self.player_list:
             if not self.is_tank(i):
                 add_fdp = True

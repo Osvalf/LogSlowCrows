@@ -19,6 +19,7 @@ class ThreadPoolExecutorStackTraced(concurrent.futures.ThreadPoolExecutor):
         try:
             return fn(*args, **kwargs)
         except Exception:
+            print(f"Problematic log is : {args[0]}")
             raise sys.exc_info()[0](traceback.format_exc())
 
 def main(args) -> None:
@@ -37,7 +38,7 @@ def main(args) -> None:
             try:
                 test = future.result()
             except TypeError as e:
-                print(e)
+                pass
 
     print("\n")
 
@@ -63,7 +64,7 @@ if __name__ == "__main__":
     arg.add_argument('--debug', action='store_true')
     args = arg.parse_args()
     main(args)
-    """log = Log("https://dps.report/1yTu-20240317-021221_sab")
+    """log = Log("https://dps.report/xUpq-20240420-215417_dhuum")
     boss = all_bosses[0]
     print(boss.mvp,"\n",boss.lvp)"""
     end_time = perf_counter()

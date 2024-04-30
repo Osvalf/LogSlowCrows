@@ -1,11 +1,23 @@
 import requests
 from time import perf_counter
-import re
-import pickle
 import numpy as np
 import concurrent.futures
 import json
 from datetime import date
+import traceback
+import sys
+
+class ThreadPoolExecutorStackTraced(concurrent.futures.ThreadPoolExecutor):
+
+    def submit(self, fn, *args, **kwargs):
+        return super(ThreadPoolExecutorStackTraced, self).submit(
+            self._function_wrapper, fn, *args, **kwargs)
+
+    def _function_wrapper(self, fn, *args, **kwargs):
+        try:
+            return fn(*args, **kwargs)
+        except Exception:
+            raise sys.exc_info()[0](traceback.format_exc())
 
 raid_names = {
     "vg" : "VG",
@@ -102,7 +114,7 @@ def update_log_times(name, mode, cm):
     url += "fromDate=2012-08-28&"
     url += f"untilDate={date.today()}&"
     url += f"IncludeEra_{patch_value}=on&"
-    url += "sampleSize=1000&"
+    url += "sampleSize=1500&"
     url += "onlyKills=OnlyKills&"
     url += "minimumPlayers=10&"
     url += "maximumPlayers=10&"
@@ -119,6 +131,7 @@ def update_log_times(name, mode, cm):
     url += "IncludeGermanLogs=on&"
     url += "IncludeSpanishLogs=on&"
     url += "currentGraph=AllRoles"
+    print(url)
             
     with requests.Session() as session:
         html = session.get(url).content.decode("utf-8")
@@ -157,36 +170,67 @@ def update_log_times(name, mode, cm):
 def update_nm_raids():
     print("Updating NM RAIDS")
     print(f"{get_bar(0)} 0.00%",end="\r")  
-    with concurrent.futures.ThreadPoolExecutor() as executor:
+    """with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [executor.submit(update_log_times, name, "RAID", False) for name in raids_nm]
-        concurrent.futures.wait(futures)
+        concurrent.futures.wait(futures)"""       
+    with ThreadPoolExecutorStackTraced() as executor:
+        futures = [executor.submit(update_log_times, name, "RAID", False) for name in raids_nm]
+        for future in futures:
+            try:
+                test = future.result()
+            except TypeError as e:
+                print(e)
     print(f"{get_bar(1)} 100.00%",end="\r")    
     print("\nparsing NM RAIDS done")
         
 def update_cm_raids():
     print("Updating CM RAIDS")
     print(f"{get_bar(0)} 0.00%",end="\r") 
-    with concurrent.futures.ThreadPoolExecutor() as executor:
+    """with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [executor.submit(update_log_times, name, "RAID", True) for name in raids_cm]
-        concurrent.futures.wait(futures)
-    print(f"{get_bar(1)}100.00%",end="\r")  
+        concurrent.futures.wait(futures)"""
+        
+    with ThreadPoolExecutorStackTraced() as executor:
+        futures = [executor.submit(update_log_times, name, "RAID", True) for name in raids_cm]
+        for future in futures:
+            try:
+                test = future.result()
+            except TypeError as e:
+                print(e)
+    print(f"{get_bar(1)} 100.00%",end="\r")  
     print("\nparsing CM RAIDS done")
     
 def update_nm_strikes():
     print("Updating NM STRIKES")
     print(f"{get_bar(0)} 0.00%",end="\r") 
-    with concurrent.futures.ThreadPoolExecutor() as executor:
+    """with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [executor.submit(update_log_times, name, "STRIKE", False) for name in strikes_nm]
-        concurrent.futures.wait(futures)
+        concurrent.futures.wait(futures)"""
+        
+    with ThreadPoolExecutorStackTraced() as executor:
+        futures = [executor.submit(update_log_times, name, "STRIKE", False) for name in strikes_nm]
+        for future in futures:
+            try:
+                test = future.result()
+            except TypeError as e:
+                print(e)
     print(f"{get_bar(1)} 100.00%",end="\r")    
     print("\nparsing NM STRIKES done")
     
 def update_cm_strikes():
     print("Updating CM STRIKES")
     print(f"{get_bar(0)} 0.00%",end="\r") 
-    with concurrent.futures.ThreadPoolExecutor() as executor:
+    """with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [executor.submit(update_log_times, name, "STRIKE", True) for name in strikes_cm]
-        concurrent.futures.wait(futures)
+        concurrent.futures.wait(futures)"""
+        
+    with ThreadPoolExecutorStackTraced() as executor:
+        futures = [executor.submit(update_log_times, name, "STRIKE", True) for name in strikes_cm]
+        for future in futures:
+            try:
+                test = future.result()
+            except TypeError as e:
+                print(e)
     print(f"{get_bar(1)} 100.00%",end="\r")    
     print("\nparsing CM STRIKES done")
     
@@ -243,12 +287,12 @@ def test():
         data = json.load(final)
 
     mode_name, cmnm, boss_name, i_max, Max = None, None, None, None, 0
-    meca = "Downed"
+    meca = "Duration"
     for Mode_name, Mode in data.items():
         if True:
             for CmNm, Bosses in Mode.items():
                 for Boss_name, Boss in Bosses.items():
-                    if Boss_name not in ["KO","HT","OLC"]:
+                    if Boss_name not in ["KO","HT","OLC","QTP","ESCORT","ANKKA","QUOIDIMM"]:
                         for i_val, val in enumerate(Boss[meca]):
                             if val > Max:
                                 mode_name, cmnm, boss_name, i_max, Max = Mode_name, CmNm, Boss_name, i_val, val
@@ -259,5 +303,16 @@ def test():
     
 update_all()
 #test()
+"""start = perf_counter()
+
+update_log_times("vg","RAID",False)
+modes["RAIDS"] = {"NM": nm_raid_bosses, "CM": cm_raid_bosses}
+modes["STRIKES"] = {"NM": nm_strike_bosses, "CM": cm_strike_bosses}
+with open("WINGMAN_DATA.json", "w") as final:
+    json.dump(modes, final)
+    
+end = perf_counter()
+print(f"Done in {end - start:.3f}s")
+print()"""
 
 
