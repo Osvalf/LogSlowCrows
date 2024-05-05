@@ -463,7 +463,8 @@ class Boss:
                 return start, end
         raise ValueError(f'{target_phase} not found')
     
-    def get_mech_value(self, i_player: int, mech_name: str, phase: int=0):
+    def get_mech_value(self, i_player: int, mech_name: str, phase: str="Full Fight"):
+        phase = self.get_phase_id(phase)
         mechs_list = [mech['name'] for mech in self.mechanics]
         if mech_name in mechs_list:
             i_mech = mechs_list.index(mech_name)
@@ -1642,7 +1643,7 @@ class DHUUM(Boss):
     ################################ CONDITIONS ################################
     
     def is_green(self, i_player: int) -> bool:
-        return self.get_mech_value(i_player, "Green port", 2) > 0
+        return self.get_mech_value(i_player, "Green port", "Dhuum Fight") > 0
     
     ################################ DATA MECHAS ################################
 
