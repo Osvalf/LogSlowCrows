@@ -163,6 +163,9 @@ def get_message_reward(logs: list, players: dict, titre="Run"):
             if boss.lvp:
                 run_message += boss.lvp + "\n"
                 run_message = cut_text(run_message)
+            if boss.name != "ESCORT":
+                for player_account, dps_mark in boss.get_dps_ranking().items():
+                    all_players[player_account].add_mark(dps_mark)
 
         run_message += "\n"
 

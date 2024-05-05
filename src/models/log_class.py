@@ -80,6 +80,7 @@ class Boss:
         self.player_list = self.get_player_list()
         self.wingman_time = self.get_wingman_time()
         self.wingman_percentile = self.get_wingman_percentile()
+        self.real_phase_id = self.get_phase_id(self.real_phase)
         for i in self.player_list:
             account = self.get_player_account(i)
             player = all_players.get(account)
@@ -87,9 +88,7 @@ class Boss:
                 new_player = Player(self, account)
                 all_players[account] = new_player
             else:
-                player.add_boss(self)
-        for player_account, dps_mark in self.get_dps_ranking().items():
-            all_players[player_account].add_mark(dps_mark)
+                player.add_boss(self)   
         
     ################################ Fonction pour attribus Boss ################################
     
@@ -177,12 +176,12 @@ class Boss:
         
     def is_quick(self, i_player: int):
         min_quick_contrib = 30
-        player_quick_contrib = self.log.jcontent['phases'][self.real_phase]['boonGenGroupStats'][i_player]['data'][2]
+        player_quick_contrib = self.log.jcontent['phases'][self.real_phase_id]['boonGenGroupStats'][i_player]['data'][2]
         return player_quick_contrib[0] >= min_quick_contrib or player_quick_contrib[1] >= min_quick_contrib
 
     def is_alac(self, i_player: int):
         min_alac_contrib = 30
-        player_alac_contrib = self.log.jcontent['phases'][self.real_phase]['boonGenGroupStats'][i_player]['data'][3]
+        player_alac_contrib = self.log.jcontent['phases'][self.real_phase_id]['boonGenGroupStats'][i_player]['data'][3]
         return player_alac_contrib[0] >= min_alac_contrib or player_alac_contrib[1] >= min_alac_contrib
 
     def is_support(self, i_player: int):
@@ -276,7 +275,7 @@ class Boss:
         return self.log.pjcontent['players'][i_player]['dpsTargets'][0][0]['breakbarDamage']
     
     def get_dmg_boss(self, i_player: int):
-        return self.log.pjcontent['players'][i_player]['dpsTargets'][0][self.real_phase]['damage']
+        return self.log.pjcontent['players'][i_player]['dpsTargets'][0][self.real_phase_id]['damage']
     
     def get_cc_total(self, i_player: int):
         return self.log.pjcontent['players'][i_player]['dpsAll'][0]['breakbarDamage']
@@ -343,21 +342,19 @@ class Boss:
             account = self.get_player_account(i)
             all_players[account].lvps += 1
             
-    def _get_dps_contrib(self, exclude: list[classmethod]=[], phase: int=0):
+    def _get_dps_contrib(self, exclude: list[classmethod]=[]):
         dps_ranking = {}
         max_dps = 0
-        players = self.log.pjcontent['players']
         for i in self.player_list:
             if any(filter_func(i) for filter_func in exclude):
                 continue
-            player_dps = self.log.pjcontent['players'][i]['dpsTargets'][0][phase]['damage']
+            player_dps = self.log.pjcontent['players'][i]['dpsTargets'][0][self.real_phase_id]['damage']
             if player_dps > max_dps:
                 max_dps = player_dps
             dps_ranking[self.log.pjcontent['players'][i]['account']] = player_dps
         for player in dps_ranking:
             dps_ranking[player] = 20 * dps_ranking[player] / max_dps
         return dps_ranking
-
 
     def get_dps_ranking(self):
         return self._get_dps_contrib([self.is_support])
@@ -1107,7 +1104,7 @@ class XERA(Boss):
     name = "XERA"
     wing = 3
     boss_id = 16246
-    real_phase = 1
+    real_phase = "Phase 1"
 
     def __init__(self, log: Log):
         super().__init__(log)
@@ -1131,7 +1128,7 @@ class XERA(Boss):
         return self.get_lvp_cc_boss()    
         
     def get_dps_ranking(self):
-        return self._get_dps_contrib([self.is_support], 2)
+        return self._get_dps_contrib([self.is_support])
 
     ################################ MVP ################################
     
@@ -1424,7 +1421,7 @@ class DEIMOS(Boss):
     name = "DEIMOS"
     wing = 4
     boss_id = 17154
-    real_phase = 3
+    real_phase = "100% - 10%"
     
     def __init__(self, log: Log):
         super().__init__(log)
@@ -1606,10 +1603,10 @@ class DHUUM(Boss):
     name = "DHUUM"
     wing = 5
     boss_id = 19450
+    real_phase = "Dhuum Fight"
     
     def __init__(self, log: Log):    
         super().__init__(log)
-        self.real_phase = self.get_phase_id("Dhuum Fight")
         self.mvp = self.get_mvp()
         self.lvp = self.get_lvp()
         DHUUM.last = self
