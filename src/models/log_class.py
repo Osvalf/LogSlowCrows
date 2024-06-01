@@ -1222,13 +1222,12 @@ class CAIRN(Boss):
         CAIRN.last = self
         
     def get_mvp(self):
-        msg_bad_dps = self.get_bad_dps()
-        if msg_bad_dps:
-            return msg_bad_dps
-        
         msg_tp = self.mvp_tp()
         if msg_tp:
-            return msg_tp
+            return msg_tp  
+        msg_bad_dps = self.get_bad_dps()
+        if msg_bad_dps:
+            return msg_bad_dps    
         return          
     
     def get_lvp(self):
