@@ -152,7 +152,16 @@ class Boss:
         return real_players
     
     def get_wingman_percentile(self):
-        log_time_ms = self.duration_ms
+        """infos = requests.get(f"https://gw2wingman.nevermindcreations.de/api/checkLogQueuedOrDB?link={self.log.url}").json()
+        if infos.get("inDB"):
+            wingman_url = infos.get("targetURL")
+            if wingman_url:
+                end_url = wingman_url.split("log/")[1]
+                percentile_infos = requests.get(f"https://gw2wingman.nevermindcreations.de/api/getPercentileOfLog/{end_url}").json()
+                if percentile_infos:
+                    return percentile_infos.get("percentile")
+        return """                  
+        log_time_ms = self.duration_ms # OLD METHOD
         boss_name = self.name
         try:
             if self.cm:
@@ -177,12 +186,40 @@ class Boss:
     def is_quick(self, i_player: int):
         min_quick_contrib = 30
         player_quick_contrib = self.log.jcontent['phases'][self.real_phase_id]['boonGenGroupStats'][i_player]['data'][2]
-        return player_quick_contrib[0] >= min_quick_contrib or player_quick_contrib[1] >= min_quick_contrib
+        player_quick_contrib_0 = player_quick_contrib[0]
+        player_quick_contrib_1 = player_quick_contrib[1]
+        if self.name == "QTP":
+            player_quick_contrib = self.log.jcontent['phases'][1]['boonGenGroupStats'][i_player]['data'][2]
+            player_quick_contrib_0 = player_quick_contrib[0]
+            player_quick_contrib_1 = player_quick_contrib[1]
+            player_group = self.get_player_group(i_player)
+            pylon_count = 0
+            for i in self.player_list:
+                if self.get_player_group(i) == player_group and self.is_pylon(i):
+                    pylon_count += 1
+            if pylon_count:
+                player_quick_contrib_0 = player_quick_contrib_0*(pylon_count+1)
+                player_quick_contrib_1 = player_quick_contrib_1*(pylon_count+1)
+        return player_quick_contrib_0 >= min_quick_contrib or player_quick_contrib_1 >= min_quick_contrib
 
     def is_alac(self, i_player: int):
         min_alac_contrib = 30
         player_alac_contrib = self.log.jcontent['phases'][self.real_phase_id]['boonGenGroupStats'][i_player]['data'][3]
-        return player_alac_contrib[0] >= min_alac_contrib or player_alac_contrib[1] >= min_alac_contrib
+        player_alac_contrib_0 = player_alac_contrib[0]
+        player_alac_contrib_1 = player_alac_contrib[1]
+        if self.name == "QTP":
+            player_alac_contrib = self.log.jcontent['phases'][1]['boonGenGroupStats'][i_player]['data'][3]
+            player_alac_contrib_0 = player_alac_contrib[0]
+            player_alac_contrib_1 = player_alac_contrib[1]
+            player_group = self.get_player_group(i_player)
+            pylon_count = 0
+            for i in self.player_list:
+                if self.get_player_group(i) == player_group and self.is_pylon(i):
+                    pylon_count += 1
+            if pylon_count:
+                player_alac_contrib_0 = player_alac_contrib_0*(pylon_count+1)
+                player_alac_contrib_1 = player_alac_contrib_1*(pylon_count+1)
+        return player_alac_contrib_0 >= min_alac_contrib or player_alac_contrib_1 >= min_alac_contrib
 
     def is_support(self, i_player: int):
         return self.is_quick(i_player) or self.is_alac(i_player)
@@ -358,6 +395,9 @@ class Boss:
 
     def get_dps_ranking(self):
         return self._get_dps_contrib([self.is_support])
+    
+    def get_player_group(self, i_player: int):
+        return self.log.pjcontent["players"][i_player]["group"]
 
     ################################ MVP ################################
     

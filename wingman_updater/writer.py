@@ -114,7 +114,7 @@ def update_log_times(name, mode, cm):
     url += "fromDate=2012-08-28&"
     url += f"untilDate={date.today()}&"
     url += f"IncludeEra_{patch_value}=on&"
-    url += "sampleSize=1500&"
+    url += "sampleSize=-1&"
     url += "onlyKills=OnlyKills&"
     url += "minimumPlayers=10&"
     url += "maximumPlayers=10&"
@@ -131,8 +131,7 @@ def update_log_times(name, mode, cm):
     url += "IncludeGermanLogs=on&"
     url += "IncludeSpanishLogs=on&"
     url += "currentGraph=AllRoles"
-    print(url)
-            
+
     with requests.Session() as session:
         html = session.get(url).content.decode("utf-8")
         
@@ -169,68 +168,61 @@ def update_log_times(name, mode, cm):
 
 def update_nm_raids():
     print("Updating NM RAIDS")
-    print(f"{get_bar(0)} 0.00%",end="\r")  
-    """with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [executor.submit(update_log_times, name, "RAID", False) for name in raids_nm]
-        concurrent.futures.wait(futures)"""       
-    with ThreadPoolExecutorStackTraced() as executor:
+    print(f"{get_bar(0)} 0.00%",end="\r")       
+    """with ThreadPoolExecutorStackTraced() as executor:
         futures = [executor.submit(update_log_times, name, "RAID", False) for name in raids_nm]
         for future in futures:
             try:
                 test = future.result()
             except TypeError as e:
-                print(e)
+                print(e)"""
+    for name in raids_nm:
+        update_log_times(name, "RAID", False)
     print(f"{get_bar(1)} 100.00%",end="\r")    
     print("\nparsing NM RAIDS done")
         
 def update_cm_raids():
     print("Updating CM RAIDS")
     print(f"{get_bar(0)} 0.00%",end="\r") 
-    """with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [executor.submit(update_log_times, name, "RAID", True) for name in raids_cm]
-        concurrent.futures.wait(futures)"""
-        
-    with ThreadPoolExecutorStackTraced() as executor:
+    """with ThreadPoolExecutorStackTraced() as executor:
         futures = [executor.submit(update_log_times, name, "RAID", True) for name in raids_cm]
         for future in futures:
             try:
                 test = future.result()
             except TypeError as e:
-                print(e)
+                print(e)"""
+    for name in raids_cm:
+        update_log_times(name, "RAID", True)
     print(f"{get_bar(1)} 100.00%",end="\r")  
     print("\nparsing CM RAIDS done")
     
 def update_nm_strikes():
     print("Updating NM STRIKES")
-    print(f"{get_bar(0)} 0.00%",end="\r") 
-    """with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [executor.submit(update_log_times, name, "STRIKE", False) for name in strikes_nm]
-        concurrent.futures.wait(futures)"""
-        
-    with ThreadPoolExecutorStackTraced() as executor:
+    print(f"{get_bar(0)} 0.00%",end="\r")      
+    """with ThreadPoolExecutorStackTraced() as executor:
         futures = [executor.submit(update_log_times, name, "STRIKE", False) for name in strikes_nm]
         for future in futures:
             try:
                 test = future.result()
             except TypeError as e:
-                print(e)
+                print(e)"""
+    for name in strikes_nm:
+        update_log_times(name, "STRIKE", False)
     print(f"{get_bar(1)} 100.00%",end="\r")    
     print("\nparsing NM STRIKES done")
     
 def update_cm_strikes():
     print("Updating CM STRIKES")
     print(f"{get_bar(0)} 0.00%",end="\r") 
-    """with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [executor.submit(update_log_times, name, "STRIKE", True) for name in strikes_cm]
-        concurrent.futures.wait(futures)"""
-        
-    with ThreadPoolExecutorStackTraced() as executor:
+    """with ThreadPoolExecutorStackTraced() as executor:
         futures = [executor.submit(update_log_times, name, "STRIKE", True) for name in strikes_cm]
         for future in futures:
             try:
                 test = future.result()
             except TypeError as e:
-                print(e)
+                print(e)"""
+    for name in strikes_cm:
+        update_log_times(name, "STRIKE", True)
     print(f"{get_bar(1)} 100.00%",end="\r")    
     print("\nparsing CM STRIKES done")
     
@@ -292,7 +284,7 @@ def test():
         if True:
             for CmNm, Bosses in Mode.items():
                 for Boss_name, Boss in Bosses.items():
-                    if Boss_name not in ["KO","HT","OLC","QTP","ESCORT","ANKKA","QUOIDIMM"]:
+                    if Boss_name not in ["KO","HT","OLC","ESCORT","ANKKA","FEBE"]:
                         for i_val, val in enumerate(Boss[meca]):
                             if val > Max:
                                 mode_name, cmnm, boss_name, i_max, Max = Mode_name, CmNm, Boss_name, i_val, val

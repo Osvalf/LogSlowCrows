@@ -126,6 +126,7 @@ def get_message_reward(logs: list, players: dict, titre="Run"):
 
     split_message = []
     total_wingman_score = 0
+    notes_nb = 0
     for wing in wings:
         wing_number = wing[0].wing
         wing_first_log = wing[0]
@@ -151,6 +152,7 @@ def get_message_reward(logs: list, players: dict, titre="Run"):
             boss_url = boss.log.url
             boss_percentil = boss.wingman_percentile
             if boss_percentil is not None:
+                notes_nb += 1
                 total_wingman_score += boss_percentil
                 run_message += f"* **[{boss_name}]({boss_url})** **{boss_duration} ({boss_percentil:.1f}%{emote_wingman})**\n"
             else:
@@ -172,7 +174,7 @@ def get_message_reward(logs: list, players: dict, titre="Run"):
     if number_boss > 1 and len(wings) > 1:
         mvps = ', '.join(mvp_names)
         lvps = ', '.join(lvp_names)
-        note_wingman = total_wingman_score / number_boss
+        note_wingman = total_wingman_score / notes_nb
         run_message += langues["selected_language"]["MVP"].format(mvps=mvps, max_mvp_score=max_mvp_score)
         run_message += langues["selected_language"]["LVP"].format(lvps=lvps, max_lvp_score=max_lvp_score)
         run_message += langues["selected_language"]["TIME"].format(run_duration=run_duration)
