@@ -182,44 +182,18 @@ class Boss:
         return percentile
             
     ################################ CONDITIONS ################################
-        
+
     def is_quick(self, i_player: int):
         min_quick_contrib = 30
         player_quick_contrib = self.log.jcontent['phases'][self.real_phase_id]['boonGenGroupStats'][i_player]['data'][2]
-        player_quick_contrib_0 = player_quick_contrib[0]
-        player_quick_contrib_1 = player_quick_contrib[1]
-        if self.name == "QTP":
-            player_quick_contrib = self.log.jcontent['phases'][1]['boonGenGroupStats'][i_player]['data'][2]
-            player_quick_contrib_0 = player_quick_contrib[0]
-            player_quick_contrib_1 = player_quick_contrib[1]
-            player_group = self.get_player_group(i_player)
-            pylon_count = 0
-            for i in self.player_list:
-                if self.get_player_group(i) == player_group and self.is_pylon(i):
-                    pylon_count += 1
-            if pylon_count:
-                player_quick_contrib_0 = player_quick_contrib_0*(pylon_count+1)
-                player_quick_contrib_1 = player_quick_contrib_1*(pylon_count+1)
-        return player_quick_contrib_0 >= min_quick_contrib or player_quick_contrib_1 >= min_quick_contrib
+        player_quick_contrib = max(player_quick_contrib[0:2])
+        return player_quick_contrib >= min_quick_contrib
 
     def is_alac(self, i_player: int):
         min_alac_contrib = 30
         player_alac_contrib = self.log.jcontent['phases'][self.real_phase_id]['boonGenGroupStats'][i_player]['data'][3]
-        player_alac_contrib_0 = player_alac_contrib[0]
-        player_alac_contrib_1 = player_alac_contrib[1]
-        if self.name == "QTP":
-            player_alac_contrib = self.log.jcontent['phases'][1]['boonGenGroupStats'][i_player]['data'][3]
-            player_alac_contrib_0 = player_alac_contrib[0]
-            player_alac_contrib_1 = player_alac_contrib[1]
-            player_group = self.get_player_group(i_player)
-            pylon_count = 0
-            for i in self.player_list:
-                if self.get_player_group(i) == player_group and self.is_pylon(i):
-                    pylon_count += 1
-            if pylon_count:
-                player_alac_contrib_0 = player_alac_contrib_0*(pylon_count+1)
-                player_alac_contrib_1 = player_alac_contrib_1*(pylon_count+1)
-        return player_alac_contrib_0 >= min_alac_contrib or player_alac_contrib_1 >= min_alac_contrib
+        player_alac_contrib = max(player_alac_contrib[0:2])
+        return player_alac_contrib >= min_alac_contrib
 
     def is_support(self, i_player: int):
         return self.is_quick(i_player) or self.is_alac(i_player)
@@ -1980,7 +1954,22 @@ class QTP(Boss):
         if msg_cc:
             return msg_cc
         return self.get_lvp_dps() 
- 
+
+    def is_alac(self, i_player: int):
+        phase_id = self.get_phase_id('Full Fight')
+        player_boon_contribs = self.log.jcontent['phases'][phase_id]['boonGenActiveGroupStats'][i_player]['data'][3]
+        contrib = max(player_boon_contribs[0:2])
+        pylon_players_in_sub = [i for i in self.player_list if self.is_pylon(i) and self.get_player_group(i_player) == self.get_player_group(i)]
+        corrected_uptime = contrib * 5 / (5 - len(pylon_players_in_sub))
+        return corrected_uptime >= 30
+
+    def is_quick(self, i_player: int):
+        phase_id = self.get_phase_id('Full Fight')
+        player_boon_contribs = self.log.jcontent['phases'][phase_id]['boonGenActiveGroupStats'][i_player]['data'][2]
+        contrib = max(player_boon_contribs[0:2])
+        pylon_players_in_sub = [i for i in self.player_list if self.is_pylon(i) and self.get_player_group(i_player) == self.get_player_group(i)]
+        corrected_uptime = contrib * 5 / (5 - len(pylon_players_in_sub))
+        return corrected_uptime >= 30
 
     def get_dps_ranking(self):
         return self._get_dps_contrib([self.is_support, self.is_pylon])
