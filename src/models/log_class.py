@@ -176,6 +176,10 @@ class Boss:
                 all_wingman_boss_times_ms = np.array(boss_data.get("Duration", []))*60000
         except:
             return None
+        if log_time_ms in all_wingman_boss_times_ms:
+            all_wingman_boss_times_ms = all_wingman_boss_times_ms.tolist()
+            all_wingman_boss_times_ms.remove(log_time_ms)
+            all_wingman_boss_times_ms = np.array(all_wingman_boss_times_ms)
         all_wingman_boss_times_ms = np.sort(np.append(all_wingman_boss_times_ms, log_time_ms))[::-1]
         i = np.where(all_wingman_boss_times_ms == log_time_ms)[0][0]
         percentile = i / (len(all_wingman_boss_times_ms) - 1) * 100
