@@ -4,4 +4,5 @@
 /src/models/__pycache__
 *.swp
 env
-wingman_updater/WINGMAN_DATA.json
+/wingman_updater/WINGMAN_DATA.json
+/src/input logs.txt
