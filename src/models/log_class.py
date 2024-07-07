@@ -311,6 +311,9 @@ class Boss:
                 return i_player
         return None
     
+    def get_player_spe(self, i_player: int):
+        return self.log.pjcontent['players'][i_player]['profession']
+    
     def get_player_mech_history(self, i_player: int, mechs: list[str] = []):
         history = []
         player_name = self.get_player_name(i_player)
@@ -435,7 +438,8 @@ class Boss:
                 continue
             dps = self.get_dmg_boss(i)
             if dps < sup_max_dmg:
-                bad_dps.append(i)
+                if not(self.name == "QUOIDIMM" and self.get_player_spe(i) == "Spellbreaker"): 
+                    bad_dps.append(i)
         if bad_dps:
             self.add_mvps(bad_dps)
             bad_dps_name = self.players_to_string(bad_dps)
