@@ -1424,21 +1424,22 @@ class SAMAROG(Boss):
         traitors, victims = [], []
         big_greens = self.get_mechanic_history("Big Green")
         small_greens = self.get_mechanic_history("Small Green")
-        for s, b in zip(small_greens, big_greens):
-            i_s, i_b = self.get_player_id(s['actor']), self.get_player_id(b['actor'])
-            kiss_time = b['time']+6000
-            i_kiss = time_to_index(kiss_time)
-            try:
-                s_pos = self.get_player_pos(i_s)[i_kiss]
-                b_pos = self.get_player_pos(i_b)[i_kiss]
-            except:
+        failed_greens = self.get_mechanic_history("Failed Green")
+        last_fail_time = None
+        for fail_green in failed_greens:
+            if fail_green['time'] == last_fail_time:
                 continue
-            if get_dist(s_pos, b_pos)*samarog_scaler > 80:
-                if i_b not in victims:
-                    victims.append(i_b)
-                if i_s not in traitors:
-                    traitors.append(i_s)
-        return traitors, victims
+            last_fail_time = fail_green['time']
+            fail_actor = fail_green['actor']
+            fail_time = fail_green['time']
+            for small, big in zip(small_greens, big_greens):
+                small_actor = small['actor']
+                big_actor = big['actor']
+                green_time = small['time']
+                if fail_actor in [big_actor, small_actor] and np.abs(fail_time - green_time) < 7000:
+                    victims.append(self.get_player_id(big_actor))
+                    traitors.append(self.get_player_id(small_actor))
+        return traitors, victims 
 
 ################################ DEIMOS ################################
 
