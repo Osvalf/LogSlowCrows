@@ -153,16 +153,12 @@ class Boss:
         return real_players
     
     def get_wingman_percentile(self):
-        """infos = requests.get(f"https://gw2wingman.nevermindcreations.de/api/checkLogQueuedOrDB?link={self.log.url}").json()
-        if infos.get("inDB"):
-            wingman_url = infos.get("targetURL")
-            if wingman_url:
-                end_url = wingman_url.split("log/")[1]
-                percentile_infos = requests.get(f"https://gw2wingman.nevermindcreations.de/api/getPercentileOfLog/{end_url}").json()
-                if percentile_infos:
-                    return percentile_infos.get("percentile")
-        return """                  
-        log_time_ms = self.duration_ms # OLD METHOD
+        time_stamp = int(self.get_start_date().timestamp())
+        infos = requests.get(f"https://gw2wingman.nevermindcreations.de/api/getPercentileByMetadata?bossID={self.boss_id}&isCM={self.cm}&duration={self.duration_ms}&timestamp={time_stamp}").json()
+        if infos.get("percentile"):
+            return infos["percentile"]
+        return                  
+        """log_time_ms = self.duration_ms # OLD METHOD
         boss_name = self.name
         try:
             if self.cm:
@@ -184,7 +180,7 @@ class Boss:
         all_wingman_boss_times_ms = np.sort(np.append(all_wingman_boss_times_ms, log_time_ms))[::-1]
         i = np.where(all_wingman_boss_times_ms == log_time_ms)[0][0]
         percentile = i / (len(all_wingman_boss_times_ms) - 1) * 100
-        return percentile
+        return percentile"""
             
     ################################ CONDITIONS ################################
 
