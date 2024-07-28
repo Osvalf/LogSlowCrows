@@ -1426,19 +1426,20 @@ class SAMAROG(Boss):
         small_greens = self.get_mechanic_history("Small Green")
         failed_greens = self.get_mechanic_history("Failed Green")
         last_fail_time = None
-        for fail_green in failed_greens:
-            if fail_green['time'] == last_fail_time:
-                continue
-            last_fail_time = fail_green['time']
-            fail_actor = fail_green['actor']
-            fail_time = fail_green['time']
-            for small, big in zip(small_greens, big_greens):
-                small_actor = small['actor']
-                big_actor = big['actor']
-                green_time = small['time']
-                if fail_actor in [big_actor, small_actor] and np.abs(fail_time - green_time) < 7000:
-                    victims.append(self.get_player_id(big_actor))
-                    traitors.append(self.get_player_id(small_actor))
+        if failed_greens:
+            for fail_green in failed_greens:
+                if fail_green['time'] == last_fail_time:
+                    continue
+                last_fail_time = fail_green['time']
+                fail_actor = fail_green['actor']
+                fail_time = fail_green['time']
+                for small, big in zip(small_greens, big_greens):
+                    small_actor = small['actor']
+                    big_actor = big['actor']
+                    green_time = small['time']
+                    if fail_actor in [big_actor, small_actor] and np.abs(fail_time - green_time) < 7000:
+                        victims.append(self.get_player_id(big_actor))
+                        traitors.append(self.get_player_id(small_actor))
         return traitors, victims 
 
 ################################ DEIMOS ################################
