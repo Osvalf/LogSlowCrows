@@ -186,22 +186,24 @@ class Boss:
 
     def is_quick(self, i_player: int):
         min_quick_contrib = 30
-        boon_path = self.log.jcontent['phases'][self.real_phase_id]
-        if boon_path.get("buffsStatContainer"):
-            player_quick_contrib = boon_path["buffsStatContainer"]['boonGenGroupStats'][i_player]['data'][2]
-        else:
-            player_quick_contrib = boon_path['boonGenGroupStats'][i_player]['data'][2]
-        player_quick_contrib = max(player_quick_contrib[0:2])
+        quick_id = 1187
+        boon_path = self.log.pjcontent['players'][i_player].get("groupBuffsActive")
+        player_quick_contrib = 0
+        if boon_path:
+            for boon in boon_path:
+                if boon["id"] == quick_id:
+                    player_quick_contrib = boon["buffData"][self.real_phase_id]["generation"]
         return player_quick_contrib >= min_quick_contrib
 
     def is_alac(self, i_player: int):
         min_alac_contrib = 30
-        boon_path = self.log.jcontent['phases'][self.real_phase_id]
-        if boon_path.get("buffsStatContainer"):
-            player_alac_contrib = boon_path["buffsStatContainer"]['boonGenGroupStats'][i_player]['data'][3]
-        else:
-            player_alac_contrib = boon_path['boonGenGroupStats'][i_player]['data'][3]
-        player_alac_contrib = max(player_alac_contrib[0:2])
+        alac_id = 30328
+        boon_path = self.log.pjcontent['players'][i_player].get("groupBuffsActive")
+        player_alac_contrib = 0
+        if boon_path:
+            for boon in boon_path:
+                if boon["id"] == alac_id:
+                    player_alac_contrib = boon["buffData"][self.real_phase_id]["generation"]
         return player_alac_contrib >= min_alac_contrib
 
     def is_support(self, i_player: int):
@@ -1971,26 +1973,30 @@ class QTP(Boss):
         return self.get_lvp_dps() 
 
     def is_alac(self, i_player: int):
-        boon_path = self.log.jcontent['phases'][self.real_phase_id]
-        if boon_path.get("buffsStatContainer"):
-            player_alac_contrib = boon_path["buffsStatContainer"]['boonGenActiveGroupStats'][i_player]['data'][3]
-        else:
-            player_alac_contrib = boon_path['boonGenActiveGroupStats'][i_player]['data'][3]
-        contrib = max(player_alac_contrib[0:2])
-        pylon_players_in_sub = [i for i in self.player_list if self.is_pylon(i) and self.get_player_group(i_player) == self.get_player_group(i)]
-        corrected_uptime = contrib * 5 / (5 - len(pylon_players_in_sub))
-        return corrected_uptime >= 30
+        min_alac_contrib = 30
+        alac_id = 30328
+        boon_path = self.log.pjcontent['players'][i_player].get("groupBuffsActive")
+        player_alac_contrib = 0
+        if boon_path:
+            for boon in boon_path:
+                if boon["id"] == alac_id:
+                    player_alac_contrib = boon["buffData"][self.real_phase_id]["generation"]
+            pylon_players_in_sub = [i for i in self.player_list if self.is_pylon(i) and self.get_player_group(i_player) == self.get_player_group(i)]
+        corrected_uptime = player_alac_contrib * 5 / (4 - len(pylon_players_in_sub))
+        return corrected_uptime >= min_alac_contrib
 
     def is_quick(self, i_player: int):
-        boon_path = self.log.jcontent['phases'][self.real_phase_id]
-        if boon_path.get("buffsStatContainer"):
-            player_quick_contrib = boon_path["buffsStatContainer"]['boonGenActiveGroupStats'][i_player]['data'][3]
-        else:
-            player_quick_contrib = boon_path['boonGenActiveGroupStats'][i_player]['data'][3]
-        contrib = max(player_quick_contrib[0:2])
-        pylon_players_in_sub = [i for i in self.player_list if self.is_pylon(i) and self.get_player_group(i_player) == self.get_player_group(i)]
-        corrected_uptime = contrib * 5 / (5 - len(pylon_players_in_sub))
-        return corrected_uptime >= 30
+        min_quick_contrib = 30
+        quick_id = 1187
+        boon_path = self.log.pjcontent['players'][i_player].get("groupBuffsActive")
+        player_quick_contrib = 0
+        if boon_path:
+            for boon in boon_path:
+                if boon["id"] == quick_id:
+                    player_quick_contrib = boon["buffData"][self.real_phase_id]["generation"]
+            pylon_players_in_sub = [i for i in self.player_list if self.is_pylon(i) and self.get_player_group(i_player) == self.get_player_group(i)]
+        corrected_uptime = player_quick_contrib * 5 / (4 - len(pylon_players_in_sub))
+        return corrected_uptime >= min_quick_contrib
 
     def get_dps_ranking(self):
         return self._get_dps_contrib([self.is_support, self.is_pylon])
