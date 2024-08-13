@@ -126,6 +126,10 @@ french = {
     
     ################################ BONESKINNER ################################
     
+    ################################ AH ################################
+    "AH MVP EXPOSED S": "⬗ *[**MVP** : {mvp_names} a cummulé **{max_exposed}** effets **d'expose**]*",
+    "AH MVP EXPOSED P": "⬗ *[**MVP** : {mvp_names} ont cummulé **{max_exposed}** effets **d'expose**]*",
+    
     ################################ GENERAL ################################
     "MVP BOSS 0 CC S": "⬗ *[**MVP** : {mvp_names} n'a pas mis de **CC**]*",
     "MVP BOSS 0 CC P": "⬗ *[**MVP** : {mvp_names} n'ont pas mis de **CC**]*",

@@ -120,8 +120,11 @@ english = {
     "FRAENIR LVP SAK": "⬗ *[**LVP** : {lvp_name} who did **{dps:.1f}kdps** (**{dmg_ratio:.1f}%** of the squad) using **{sak_count} SAK** (**{sak_ratio:.1f}%** of its dps)]*",
     
     ################################ WOJ ################################
-    
     "WOJ MVP CHAINS": "⬗ *[**MVP** : {mvp_name} took **{max_dmg}** damage from **chains** (**{ratio:.1f}%** of the squad)]*",
+    
+    ################################ AH ################################
+    "AH MVP EXPOSED S": "⬗ *[**MVP** : {mvp_names} cummulated **{max_exposed}** **exposed** effects]*",
+    "AH MVP EXPOSED P": "⬗ *[**MVP** : {mvp_names} cummulated **{max_exposed}** **exposed** effects]*",
     
     ################################ GENERAL ################################
     "MVP BOSS 0 CC S": "⬗ *[**MVP** : {mvp_names} didn't do any **CC**]*",

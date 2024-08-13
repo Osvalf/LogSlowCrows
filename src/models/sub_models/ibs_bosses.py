@@ -10,7 +10,7 @@ class ICE(Boss):
     last = None
     name = "ICEBROOD"
     boss_id = 22154
-    wing = "ibs"
+    wing = "IBS"
     
     def __init__(self, log: Log):
         super().__init__(log)
@@ -34,7 +34,7 @@ class KODANS(Boss):
     last = None
     name = "KODANS"
     boss_id = 22343
-    wing = "ibs"
+    wing = "IBS"
     
     def __init__(self, log: Log):
         super().__init__(log)
@@ -58,7 +58,7 @@ class FRAENIR(Boss):
     last = None
     name = "FRAENIR"
     boss_id = 22492
-    wing = "ibs"
+    wing = "IBS"
     
     def __init__(self, log: Log):
         super().__init__(log)
@@ -138,7 +138,7 @@ class WOJ(Boss):
     last = None
     name = "WOJ"
     boss_id = 22711
-    wing = "ibs"
+    wing = "IBS"
     
     def __init__(self, log: Log):
         super().__init__(log)
@@ -185,7 +185,7 @@ class BONESKINNER(Boss):
     last = None
     name = "BONESKINNER"
     boss_id = 22521
-    wing = "ibs"
+    wing = "IBS"
     sak_id = 60501
     
     def __init__(self, log: Log):

@@ -140,7 +140,7 @@ def get_message_reward(logs: list, players: dict, titre="Run"):
     run_duration = disp_time(logs[-1].end_date - logs[0].start_date)
     number_boss = len(logs)
 
-    run_message = f"# {titre}\n" if len(wings.keys()) > 1 else ""
+    run_message = f"# {titre}\n" if number_boss > 2 else ""
     run_message += f"# {run_date}\n"
     
     split_message = []
@@ -151,21 +151,26 @@ def get_message_reward(logs: list, players: dict, titre="Run"):
         wing_last_log = wing[-1]
         wing_duration = disp_time(wing_last_log.end_date - wing_first_log.start_date)
 
-        if wingname == 1:
-            run_message += langues["selected_language"]["W1"].format(wing_duration=wing_duration)
-        elif wingname == 3:
-            escort_in_run = any(boss.name == "ESCORT" for boss in wing)
-            if escort_in_run:
-                run_message += f"## W3 - *{wing_duration}*\n"
+        if type(wingname) == int: 
+            if wingname == 1:
+                run_message += langues["selected_language"]["W1"].format(wing_duration=wing_duration)
+                
+            elif wingname == 3:
+                escort_in_run = any(boss.name == "ESCORT" for boss in wing)
+                if escort_in_run:
+                    run_message += f"## W3 - *{wing_duration}*\n"
+                else:
+                    run_message += langues["selected_language"]["W3"].format(wing_duration=wing_duration)
+                    
+            elif wingname == 7:
+                run_message += langues["selected_language"]["W7"].format(wing_duration=wing_duration)
+                
             else:
-                run_message += langues["selected_language"]["W3"].format(wing_duration=wing_duration)
-        elif wingname == 7:
-            run_message += langues["selected_language"]["W7"].format(wing_duration=wing_duration)
-        elif wingname == "ibs":
-            run_message += langues["selected_language"]["IBS"].format(wing_duration=wing_duration)
+                run_message += f"## W{wingname} - *{wing_duration}*\n"    
+                  
         else:
-            run_message += f"## W{wingname} - *{wing_duration}*\n"
-
+            run_message += langues["selected_language"][wingname].format(wing_duration=wing_duration)
+        
         for boss in wing:
             boss_name = boss.name + (" CM" if boss.cm else "")
             boss_duration = disp_time(timedelta(seconds=boss.duration_ms / 1000))
@@ -191,12 +196,14 @@ def get_message_reward(logs: list, players: dict, titre="Run"):
 
         run_message += "\n"
 
-    if number_boss > 1 and len(wings) > 1:
+    if number_boss > 2:
         mvps = ', '.join(mvp_names)
         lvps = ', '.join(lvp_names)
         note_wingman = total_wingman_score / notes_nb
-        run_message += langues["selected_language"]["MVP"].format(mvps=mvps, max_mvp_score=max_mvp_score)
-        run_message += langues["selected_language"]["LVP"].format(lvps=lvps, max_lvp_score=max_lvp_score)
+        if max_mvp_score > 1:
+            run_message += langues["selected_language"]["MVP"].format(mvps=mvps, max_mvp_score=max_mvp_score)
+        if max_lvp_score > 1:
+            run_message += langues["selected_language"]["LVP"].format(lvps=lvps, max_lvp_score=max_lvp_score)
         run_message += langues["selected_language"]["TIME"].format(run_duration=run_duration)
         run_message += langues["selected_language"]["WINGMAN"].format(note_wingman=note_wingman, emote_wingman=emote_wingman)
 
