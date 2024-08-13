@@ -7,28 +7,28 @@ import requests
 
 class Boss:  
 
-    name = None
-    wing = 0
-    boss_id = -1
+    name       = None
+    wing       = 0
+    boss_id    = -1
     real_phase = "Full Fight"
 
     def __init__(self, log: Log):
-        self.log = log
-        self.cm = self.is_cm()
-        self.logName = self.get_logName()
-        self.mechanics = self.get_mechanics()
-        self.duration_ms = self.get_duration_ms() 
-        self.start_date = self.get_start_date()
-        self.end_date = self.get_end_date()
-        self.player_list = self.get_player_list()
-        self.wingman_time = self.get_wingman_time()
+        self.log                = log
+        self.cm                 = self.is_cm()
+        self.logName            = self.get_logName()
+        self.mechanics          = self.get_mechanics()
+        self.duration_ms        = self.get_duration_ms() 
+        self.start_date         = self.get_start_date()
+        self.end_date           = self.get_end_date()
+        self.player_list        = self.get_player_list()
+        self.wingman_time       = self.get_wingman_time()
         self.wingman_percentile = self.get_wingman_percentile()
-        self.real_phase_id = self.get_phase_id(self.real_phase)
+        self.real_phase_id      = self.get_phase_id(self.real_phase)
         for i in self.player_list:
             account = self.get_player_account(i)
-            player = all_players.get(account)
+            player  = all_players.get(account)
             if not player:
-                new_player = Player(self, account)
+                new_player           = Player(self, account)
                 all_players[account] = new_player
             else:
                 player.add_boss(self)   
@@ -42,7 +42,7 @@ class Boss:
         return self.log.pjcontent['fightName']
     
     def get_mechanics(self):
-        mechs = []
+        mechs        = []
         mechanic_map = self.log.jcontent['mechanicMap']
         for mechanic in mechanic_map:
             is_player_mechanic = mechanic['playerMech']
@@ -56,23 +56,23 @@ class Boss:
     
     def get_start_date(self):
         start_date_text = self.log.pjcontent['timeStartStd']
-        date_format = "%Y-%m-%d %H:%M:%S %z"
-        start_date = datetime.strptime(start_date_text, date_format)
-        paris_timezone = timezone(timedelta(hours=1))
+        date_format     = "%Y-%m-%d %H:%M:%S %z"
+        start_date      = datetime.strptime(start_date_text, date_format)
+        paris_timezone  = timezone(timedelta(hours=1))
         return start_date.astimezone(paris_timezone)
     
     def get_end_date(self):
-        end_date_text = self.log.pjcontent['timeEndStd']
-        date_format = "%Y-%m-%d %H:%M:%S %z"
-        end_date = datetime.strptime(end_date_text, date_format)
+        end_date_text  = self.log.pjcontent['timeEndStd']
+        date_format    = "%Y-%m-%d %H:%M:%S %z"
+        end_date       = datetime.strptime(end_date_text, date_format)
         paris_timezone = timezone(timedelta(hours=1))
         return end_date.astimezone(paris_timezone)
 
     def get_wingman_time(self):
         # return None
         w_boss_id = self.boss_id * (-1) ** self.cm
-        url = f"https://gw2wingman.nevermindcreations.de/api/boss?era=latest&bossID={w_boss_id}"
-        r = requests.get(url)
+        url       = f"https://gw2wingman.nevermindcreations.de/api/boss?era=latest&bossID={w_boss_id}"
+        r         = requests.get(url)
         if not r.ok:
             print("wingman faled")
             print(r.status_code)
@@ -87,7 +87,7 @@ class Boss:
     
     def get_player_list(self):
         real_players = []
-        players = self.log.pjcontent['players']
+        players      = self.log.pjcontent['players']
         for i_player, player in enumerate(players):
             if player['group'] < 50 and not self.is_buyer(i_player):
                 real_players.append(i_player)
@@ -97,7 +97,7 @@ class Boss:
     def get_wingman_percentile(self):
         time_stamp = int(self.get_start_date().timestamp())
         requestUrl = f"https://gw2wingman.nevermindcreations.de/api/getPercentileByMetadata?bossID={self.boss_id}&isCM={self.cm}&duration={self.duration_ms}&timestamp={time_stamp}"
-        infos = requests.get(requestUrl).json()
+        infos      = requests.get(requestUrl).json()
         if infos.get("percentile"):
             return infos["percentile"]
         return                  
@@ -105,9 +105,9 @@ class Boss:
     ################################ CONDITIONS ################################
 
     def is_quick(self, i_player: int):
-        min_quick_contrib = 30
-        quick_id = 1187
-        boon_path = self.log.pjcontent['players'][i_player].get("groupBuffsActive")
+        min_quick_contrib    = 30
+        quick_id             = 1187
+        boon_path            = self.log.pjcontent['players'][i_player].get("groupBuffsActive")
         player_quick_contrib = 0
         if boon_path:
             for boon in boon_path:
@@ -116,9 +116,9 @@ class Boss:
         return player_quick_contrib >= min_quick_contrib
 
     def is_alac(self, i_player: int):
-        min_alac_contrib = 30
-        alac_id = 30328
-        boon_path = self.log.pjcontent['players'][i_player].get("groupBuffsActive")
+        min_alac_contrib    = 30
+        alac_id             = 30328
+        boon_path           = self.log.pjcontent['players'][i_player].get("groupBuffsActive")
         player_alac_contrib = 0
         if boon_path:
             for boon in boon_path:
@@ -143,7 +143,7 @@ class Boss:
     
     def is_buyer(self, i_player: int):
         player_name = self.get_player_name(i_player)
-        mechanics = self.log.pjcontent.get('mechanics')
+        mechanics   = self.log.pjcontent.get('mechanics')
         if mechanics:
             death_history = [death for mech in mechanics if mech['name'] == "Dead" for death in mech['mechanicsData']]
             for death in death_history:
@@ -233,8 +233,8 @@ class Boss:
         return self.log.pjcontent['players'][i_player]['profession']
     
     def get_player_mech_history(self, i_player: int, mechs: list[str] = []):
-        history = []
-        player_name = self.get_player_name(i_player)
+        history      = []
+        player_name  = self.get_player_name(i_player)
         mech_history = self.log.pjcontent['mechanics']
         for mech in mech_history:
             for data in mech['mechanicsData']:
@@ -279,7 +279,7 @@ class Boss:
         time_enter = self.time_entered_area(i_player, center, radius)
         if time_enter:
             i_enter = int(time_enter/150)
-            poses = self.get_player_pos(i_player)[i_enter:]
+            poses   = self.get_player_pos(i_player)[i_enter:]
             for i, pos in enumerate(poses):
                 if get_dist(pos, center) > radius:
                     return (i+i_enter) * 150
@@ -297,7 +297,7 @@ class Boss:
             
     def _get_dps_contrib(self, exclude: list[classmethod]=[]):
         dps_ranking = {}
-        max_dps = 0
+        max_dps     = 0
         for i in self.player_list:
             if any(filter_func(i) for filter_func in exclude):
                 continue
@@ -322,8 +322,8 @@ class Boss:
         if total_cc == 0:
             return
         self.add_mvps(i_players)  
-        mvp_names = self.players_to_string(i_players)
-        cc_ratio = min_cc / total_cc * 100
+        mvp_names  = self.players_to_string(i_players)
+        cc_ratio   = min_cc / total_cc * 100
         number_mvp = len(i_players)  
         if min_cc == 0:
             if number_mvp == 1:
@@ -341,8 +341,8 @@ class Boss:
         if total_cc == 0:
             return
         self.add_mvps(i_players)  
-        mvp_names = self.players_to_string(i_players)
-        cc_ratio = min_cc / total_cc * 100
+        mvp_names  = self.players_to_string(i_players)
+        cc_ratio   = min_cc / total_cc * 100
         number_mvp = len(i_players)  
         if min_cc == 0:
             if number_mvp == 1:
@@ -357,8 +357,8 @@ class Boss:
     
     def get_bad_dps(self, extra_exclude: list[classmethod]=[]):
         i_sup, sup_max_dmg, _ = Stats.get_max_value(self, self.get_dmg_boss, exclude=[self.is_dps])
-        sup_name = self.players_to_string(i_sup)
-        bad_dps = []
+        sup_name              = self.players_to_string(i_sup)
+        bad_dps               = []
         for i in self.player_list:   
             if any(filter_func(i) for filter_func in extra_exclude) or self.is_dead(i) or self.is_support(i):
                 continue
@@ -382,7 +382,7 @@ class Boss:
             return
         self.add_lvps(i_players)
         lvp_names = self.players_to_string(i_players)
-        cc_ratio = max_cc / total_cc * 100
+        cc_ratio  = max_cc / total_cc * 100
         return langues["selected_language"]["LVP BOSS CC"].format(lvp_names=lvp_names, max_cc=max_cc, cc_ratio=cc_ratio)
     
     def get_lvp_cc_total(self):
@@ -391,15 +391,15 @@ class Boss:
             return
         self.add_lvps(i_players)
         lvp_names = self.players_to_string(i_players)
-        cc_ratio = max_cc / total_cc * 100
+        cc_ratio  = max_cc / total_cc * 100
         return langues["selected_language"]["LVP TOTAL CC"].format(lvp_names=lvp_names, max_cc=max_cc, cc_ratio=cc_ratio)
     
     def get_lvp_dps(self):
         i_players, max_dmg, total_dmg = Stats.get_max_value(self, self.get_dmg_boss)
+        dmg_ratio                     = max_dmg / total_dmg * 100
+        lvp_dps_name                  = self.players_to_string(i_players)
+        dps                           = max_dmg / self.duration_ms
         self.add_lvps(i_players)
-        dmg_ratio = max_dmg / total_dmg * 100
-        lvp_dps_name = self.players_to_string(i_players)
-        dps = max_dmg / self.duration_ms
         return langues["selected_language"]["LVP DPS"].format(lvp_dps_name=lvp_dps_name, max_dmg=max_dmg, dmg_ratio=dmg_ratio, dps=dps)
     
     ################################ DATA BOSS ################################
@@ -416,12 +416,12 @@ class Boss:
         for phase in phases:
             if phase['name'] == target_phase:
                 start = time_to_index(phase['start'])
-                end = time_to_index(phase['end'])
+                end   = time_to_index(phase['end'])
                 return start, end
         raise ValueError(f'{target_phase} not found')
     
     def get_mech_value(self, i_player: int, mech_name: str, phase: str="Full Fight"):
-        phase = self.get_phase_id(phase)
+        phase      = self.get_phase_id(phase)
         mechs_list = [mech['name'] for mech in self.mechanics]
         if mech_name in mechs_list:
             i_mech = mechs_list.index(mech_name)
@@ -459,9 +459,9 @@ class Stats:
             exclude = []
         value_max = -1
         value_tot = 0
-        i_maxs = []
+        i_maxs    = []
         for i in boss.player_list:
-            value = fnc(i)
+            value      = fnc(i)
             value_tot += value
             if any(filter_func(i) for filter_func in exclude):
                 continue
@@ -483,9 +483,9 @@ class Stats:
             exclude = []
         value_min = BIG
         value_tot = 0
-        i_mins = []
+        i_mins    = []
         for i in boss.player_list:
-            value = fnc(i)
+            value      = fnc(i)
             value_tot += value
             if any(filter_func(i) for filter_func in exclude):
                 continue

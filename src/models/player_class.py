@@ -1,10 +1,10 @@
 class Player:
     def __init__(self, boss, account: str):
-        self.boss = [boss]
-        self.account = account
-        self.name = account[:-5]
-        self.mvps = 0
-        self.lvps = 0
+        self.boss                   = [boss]
+        self.account                = account
+        self.name                   = account[:-5]
+        self.mvps                   = 0
+        self.lvps                   = 0
         self.dps_marks: list[float] = []
         
     def add_boss(self, boss) -> None:

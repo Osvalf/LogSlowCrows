@@ -5,9 +5,9 @@ from models.player_class import *
 
 class Log:
     def __init__(self, url: str):
-        self.url = url
-        self.content = self.get_html()
-        self.jcontent = self.get_parsed_json()
+        self.url       = url
+        self.content   = self.get_html()
+        self.jcontent  = self.get_parsed_json()
         self.pjcontent = self.get_not_parsed_json()
         self.create_boss()
 
@@ -18,7 +18,7 @@ class Log:
 
     def get_parsed_json(self):     
         java_data_text = self.content.split('var _logData = ')[1].split('var logData = _logData;')[0].rsplit(';', 1)[0].strip()
-        json_content = json.loads(java_data_text)
+        json_content   = json.loads(java_data_text)
         return json_content
     
     def get_not_parsed_json(self):

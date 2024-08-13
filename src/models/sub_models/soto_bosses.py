@@ -7,15 +7,15 @@ import numpy as np
 
 class DAGDA(Boss):
     
-    last = None
-    name = "DAGDA"
+    last    = None
+    name    = "DAGDA"
     boss_id = 25705
-    wing = "soto"
+    wing    = "SOTO"
     
     def __init__(self, log: Log):
         super().__init__(log)
-        self.mvp = self.get_mvp()
-        self.lvp = self.get_lvp()
+        self.mvp   = self.get_mvp()
+        self.lvp   = self.get_lvp()
         DAGDA.last = self
         
     def get_mvp(self):
@@ -31,15 +31,15 @@ class DAGDA(Boss):
 
 class CERUS(Boss):
     
-    last = None
-    name = "CERUS"
+    last    = None
+    name    = "CERUS"
     boss_id = 25989
-    wing = "soto"
+    wing    = "SOTO"
     
     def __init__(self, log: Log):
         super().__init__(log)
-        self.mvp = self.get_mvp()
-        self.lvp = self.get_lvp()
+        self.mvp   = self.get_mvp()
+        self.lvp   = self.get_lvp()
         DAGDA.last = self
         
     def get_mvp(self):

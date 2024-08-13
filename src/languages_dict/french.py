@@ -130,35 +130,42 @@ french = {
     "AH MVP EXPOSED S": "⬗ *[**MVP** : {mvp_names} a cummulé **{max_exposed}** effets **d'expose**]*",
     "AH MVP EXPOSED P": "⬗ *[**MVP** : {mvp_names} ont cummulé **{max_exposed}** effets **d'expose**]*",
     
+    ################################ KO ################################
+    "KO MVP DEBIL S": "⬗ *[**MVP** : {mvp_names} a cummulé **{max_debil}** effets d'**affaiblissement**]*",
+    "KO MVP DEBIL P": "⬗ *[**MVP** : {mvp_names} ont cummulé **{max_debil}** effets d'**affaiblissement**]*",
+    
     ################################ GENERAL ################################
-    "MVP BOSS 0 CC S": "⬗ *[**MVP** : {mvp_names} n'a pas mis de **CC**]*",
-    "MVP BOSS 0 CC P": "⬗ *[**MVP** : {mvp_names} n'ont pas mis de **CC**]*",
-    "MVP BOSS CC S": "⬗ *[**MVP** : {mvp_names} n'a mis que **{min_cc:.0f}** de **CC** (**{cc_ratio:.1f}%** de la squad)]*",
-    "MVP BOSS CC P": "⬗ *[**MVP** : {mvp_names} n'ont mis que **{min_cc:.0f}** de **CC** (**{cc_ratio:.1f}%** de la squad)]*",
+    "MVP BOSS 0 CC S" : "⬗ *[**MVP** : {mvp_names} n'a pas mis de **CC**]*",
+    "MVP BOSS 0 CC P" : "⬗ *[**MVP** : {mvp_names} n'ont pas mis de **CC**]*",
+    "MVP BOSS CC S"   : "⬗ *[**MVP** : {mvp_names} n'a mis que **{min_cc:.0f}** de **CC** (**{cc_ratio:.1f}%** de la squad)]*",
+    "MVP BOSS CC P"   : "⬗ *[**MVP** : {mvp_names} n'ont mis que **{min_cc:.0f}** de **CC** (**{cc_ratio:.1f}%** de la squad)]*",
     
     "MVP TOTAL 0 CC S": "⬗ *[**MVP** : {mvp_names} n'a pas mis de **CC**]*",
     "MVP TOTAL 0 CC P": "⬗ *[**MVP** : {mvp_names} n'ont pas mis de **CC**]*",
-    "MVP TOTAL CC S": "⬗ *[**MVP** : {mvp_names} n'a mis que **{min_cc:.0f}** de **CC** (**{cc_ratio:.1f}%** de la squad)]*",
-    "MVP TOTAL CC P": "⬗ *[**MVP** : {mvp_names} n'ont mis que **{min_cc:.0f}** de **CC** (**{cc_ratio:.1f}%** de la squad)]*",
+    "MVP TOTAL CC S"  : "⬗ *[**MVP** : {mvp_names} n'a mis que **{min_cc:.0f}** de **CC** (**{cc_ratio:.1f}%** de la squad)]*",
+    "MVP TOTAL CC P"  : "⬗ *[**MVP** : {mvp_names} n'ont mis que **{min_cc:.0f}** de **CC** (**{cc_ratio:.1f}%** de la squad)]*",
     
-    "MVP BAD DPS S": "⬗ *[**MVP** : {bad_dps_name} qui en **DPS** a fait moins de **dégats** que {sup_name} qui joue **support** on le rappelle]*",
-    "MVP BAD DPS P": "⬗ *[**MVP** : {bad_dps_name} qui en **DPS** ont fait moins de **dégats** que {sup_name} qui joue **support** on le rappelle]*",
+    "MVP BAD DPS S"   : "⬗ *[**MVP** : {bad_dps_name} qui en **DPS** a fait moins de **dégats** que {sup_name} qui joue **support** on le rappelle]*",
+    "MVP BAD DPS P"   : "⬗ *[**MVP** : {bad_dps_name} qui en **DPS** ont fait moins de **dégats** que {sup_name} qui joue **support** on le rappelle]*",
     
-    "LVP BOSS CC": "⬗ *[**LVP** : {lvp_names} merci d'avoir fait **{max_cc:.0f}** de **CC** (**{cc_ratio:.1f}%** de la squad)]*",
-    "LVP TOTAL CC": "⬗ *[**LVP** : {lvp_names} merci d'avoir fait **{max_cc:.0f}** de **CC** (**{cc_ratio:.1f}%** de la squad)]*",
+    "LVP BOSS CC"     : "⬗ *[**LVP** : {lvp_names} merci d'avoir fait **{max_cc:.0f}** de **CC** (**{cc_ratio:.1f}%** de la squad)]*",
+    "LVP TOTAL CC"    : "⬗ *[**LVP** : {lvp_names} merci d'avoir fait **{max_cc:.0f}** de **CC** (**{cc_ratio:.1f}%** de la squad)]*",
     
-    "LVP DPS": "⬗ *[**LVP** : {lvp_dps_name} qui a fait **{dps:.1f}kdps** (**{dmg_ratio:.0f}%** de la squad)]*",
+    "LVP DPS"         : "⬗ *[**LVP** : {lvp_dps_name} qui a fait **{dps:.1f}kdps** (**{dmg_ratio:.0f}%** de la squad)]*",
     
     ################################ TITRES ################################
-    "W1": "## W1 - *{wing_duration}* (sans pre-VG)\n",
-    "W3": "## W3 - *{wing_duration}* (sans escort)\n",
-    "W7": "## W7 - *{wing_duration}* (sans gate)\n",
-    "IBS": "## Les ptiots pour l'or et la gloire - *{wing_duration}*\n",
-    "MVP": "# [GRAND MVP : {mvps} avec {max_mvp_score} titres]\n",
-    "LVP": "# [GRAND LVP : {lvps} avec {max_lvp_score} titres]\n",
-    "TIME": "# Temps total : {run_duration}\n",
-    "WINGMAN": "# Note Wingman moyenne : {note_wingman:.2f}%{emote_wingman}",
+    "W1"          : "## W1 - *{wing_duration}* (sans pre-VG)\n",
+    "W3"          : "## W3 - *{wing_duration}* (sans escort)\n",
+    "W7"          : "## W7 - *{wing_duration}* (sans gate)\n",
+    "IBS"         : "## Les ptiots pour l'or et la gloire - *{wing_duration}*\n",
+    "EOD"         : "## Strikes EoD - *{wing_duration}*\n",
+    "SOTO"        : "## Strikes SotO - *{wing_duration}*\n",
+    "FRAC"        : "## Fractales - *{wing_duration}*\n",
+    "MVP"         : "# [GRAND MVP : {mvps} avec {max_mvp_score} titres]\n",
+    "LVP"         : "# [GRAND LVP : {lvps} avec {max_lvp_score} titres]\n",
+    "TIME"        : "# Temps total : {run_duration}\n",
+    "WINGMAN"     : "# Note Wingman moyenne : {note_wingman:.2f}%{emote_wingman}",
     
     "MALVEILLANCE": "Malveillance en cours...",
-    "UPLOAD": "### *Upload par"
+    "UPLOAD"      : "### *Upload par"
 }

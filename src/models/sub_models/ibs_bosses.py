@@ -7,10 +7,10 @@ import numpy as np
 
 class ICE(Boss):
     
-    last = None
-    name = "ICEBROOD"
+    last    = None
+    name    = "ICEBROOD"
     boss_id = 22154
-    wing = "IBS"
+    wing    = "IBS"
     
     def __init__(self, log: Log):
         super().__init__(log)
@@ -31,15 +31,15 @@ class ICE(Boss):
 
 class KODANS(Boss):
     
-    last = None
-    name = "KODANS"
+    last    = None
+    name    = "KODANS"
     boss_id = 22343
-    wing = "IBS"
+    wing    = "IBS"
     
     def __init__(self, log: Log):
         super().__init__(log)
-        self.mvp = self.get_mvp()
-        self.lvp = self.get_lvp()
+        self.mvp    = self.get_mvp()
+        self.lvp    = self.get_lvp()
         KODANS.last = self
         
     def get_mvp(self):
@@ -55,15 +55,15 @@ class KODANS(Boss):
 
 class FRAENIR(Boss):
     
-    last = None
-    name = "FRAENIR"
+    last    = None
+    name    = "FRAENIR"
     boss_id = 22492
-    wing = "IBS"
+    wing    = "IBS"
     
     def __init__(self, log: Log):
         super().__init__(log)
-        self.mvp = self.get_mvp()
-        self.lvp = self.get_lvp()
+        self.mvp     = self.get_mvp()
+        self.lvp     = self.get_lvp()
         FRAENIR.last = self
         
     def get_mvp(self):
@@ -135,10 +135,10 @@ class FRAENIR(Boss):
 
 class WOJ(Boss):
     
-    last = None
-    name = "WOJ"
+    last    = None
+    name    = "WOJ"
     boss_id = 22711
-    wing = "IBS"
+    wing    = "IBS"
     
     def __init__(self, log: Log):
         super().__init__(log)
@@ -162,8 +162,8 @@ class WOJ(Boss):
     
     def get_chain_mvp(self):
         i_players, max_dmg, tot_dmg = Stats.get_max_value(self, self.get_chain_damage)
-        mvp_name = self.players_to_string(i_players)
-        ratio = max_dmg / tot_dmg * 100
+        mvp_name                    = self.players_to_string(i_players)
+        ratio                       = max_dmg / tot_dmg * 100
         if max_dmg > 10000:
             return langues["selected_language"]["WOJ MVP CHAINS"].format(mvp_name=mvp_name, max_dmg=max_dmg, ratio=ratio)
         return
@@ -182,16 +182,16 @@ class WOJ(Boss):
 
 class BONESKINNER(Boss):
     
-    last = None
-    name = "BONESKINNER"
+    last    = None
+    name    = "BONESKINNER"
     boss_id = 22521
-    wing = "IBS"
-    sak_id = 60501
+    wing    = "IBS"
+    sak_id  = 60501
     
     def __init__(self, log: Log):
         super().__init__(log)
-        self.mvp = self.get_mvp()
-        self.lvp = self.get_lvp()
+        self.mvp         = self.get_mvp()
+        self.lvp         = self.get_lvp()
         BONESKINNER.last = self
         
     def get_mvp(self):

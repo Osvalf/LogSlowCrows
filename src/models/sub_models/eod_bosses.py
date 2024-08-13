@@ -7,16 +7,16 @@ import numpy as np
 
 class AH(Boss):
     
-    last = None
-    name = "MAI TRIN"
+    last    = None
+    name    = "MAI TRIN"
     boss_id = 24033
-    wing = "EOD"
+    wing    = "EOD"
     
     def __init__(self, log: Log):
         super().__init__(log)
         self.mvp = self.get_mvp()
         self.lvp = self.get_lvp()
-        AH.last = self
+        AH.last  = self
         
     def get_mvp(self):
         msg_exposed = self.expose_mvp()
@@ -34,7 +34,7 @@ class AH(Boss):
     
     def expose_mvp(self):
         i_players, max_exposed, _ = Stats.get_max_value(self, self.get_max_exposed, exclude=[self.is_heal])
-        mvp_names = self.players_to_string(i_players)
+        mvp_names                 = self.players_to_string(i_players)
         if max_exposed > 2:
             if len(i_players) == 1:
                 return langues["selected_language"]["AH MVP EXPOSED S"].format(mvp_names=mvp_names, max_exposed=max_exposed)
@@ -49,14 +49,14 @@ class AH(Boss):
         ratio                       = max_dmg / tot_dmg * 100
         time                        = self.duration_ms
         dps                         = max_dmg / time
-        lvp_dps_name = self.players_to_string(i_players)
+        lvp_dps_name                = self.players_to_string(i_players)
         return langues["selected_language"]["LVP DPS"].format(lvp_dps_name=lvp_dps_name, dps=dps, dmg_ratio=ratio)
     
     ################################ DATA MECHAS ################################
     
     def get_max_exposed(self, i_player: int):
-        buffUptimes = self.log.pjcontent["players"][i_player]["buffUptimes"]
-        expose_id = 64936
+        buffUptimes   = self.log.pjcontent["players"][i_player]["buffUptimes"]
+        expose_id     = 64936
         expose_states = None
         for buff in buffUptimes:
             if buff["id"] == expose_id:
@@ -79,18 +79,21 @@ class AH(Boss):
 
 class XJ(Boss):
     
-    last = None
-    name = "ANKKA"
+    last    = None
+    name    = "ANKKA"
     boss_id = 23957
-    wing = "EOD"
+    wing    = "EOD"
     
     def __init__(self, log: Log):
         super().__init__(log)
         self.mvp = self.get_mvp()
         self.lvp = self.get_lvp()
-        XJ.last = self
+        XJ.last  = self
         
     def get_mvp(self):
+        msg_cc = self.get_mvp_cc_total()
+        if msg_cc:
+            return msg_cc
         msg_bad_dps = self.get_bad_dps()
         if msg_bad_dps:
             return msg_bad_dps
@@ -103,18 +106,21 @@ class XJ(Boss):
 
 class KO(Boss):
     
-    last = None
-    name = "KO"
+    last    = None
+    name    = "KO"
     boss_id = 24266
-    wing = "EOD"
+    wing    = "EOD"
     
     def __init__(self, log: Log):
         super().__init__(log)
         self.mvp = self.get_mvp()
         self.lvp = self.get_lvp()
-        KO.last = self
+        KO.last  = self
         
     def get_mvp(self):
+        msg_debil = self.mvp_debil()
+        if msg_debil:
+            return msg_debil
         msg_bad_dps = self.get_bad_dps()
         if msg_bad_dps:
             return msg_bad_dps
@@ -123,20 +129,48 @@ class KO(Boss):
     def get_lvp(self):
         return self.get_lvp_dps()
     
+    ################################ MVP ################################
+    
+    def mvp_debil(self):
+        i_players, max_debil, _ = Stats.get_max_value(self, self.get_max_debil, exclude=[self.is_heal])
+        mvp_names               = self.players_to_string(i_players)
+        if max_debil > 1:
+            if len(i_players) == 1:
+                return langues["selected_language"]["KO MVP DEBIL S"].format(mvp_names=mvp_names, max_debil=max_debil)
+            else:
+                return langues["selected_language"]["KO MVP DEBIL P"].format(mvp_names=mvp_names, max_debil=max_debil)
+        return
+    
+    ################################ DATA MECHAS ################################
+    
+    def get_max_debil(self, i_player: int):
+        buffUptimes = self.log.pjcontent["players"][i_player]["buffUptimes"]
+        debil_id    = 67972
+        states      = None
+        for buff in buffUptimes:
+            if buff["id"] == debil_id:
+                states = buff["states"]
+        debil = 0
+        if states:
+            for state in states:
+                if state[1] > debil:
+                    debil = state[1]
+        return debil
+    
 ################################ HT ################################
 
 class HT(Boss):
     
-    last = None
-    name = "HT"
+    last    = None
+    name    = "HT"
     boss_id = 43488
-    wing = "EOD"
+    wing    = "EOD"
     
     def __init__(self, log: Log):
         super().__init__(log)
         self.mvp = self.get_mvp()
         self.lvp = self.get_lvp()
-        HT.last = self
+        HT.last  = self
         
     def get_mvp(self):
         msg_bad_dps = self.get_bad_dps()
@@ -151,10 +185,10 @@ class HT(Boss):
 
 class OLC(Boss):
     
-    last = None
-    name = "OLC"
+    last    = None
+    name    = "OLC"
     boss_id = 25414
-    wing = "EOD"
+    wing    = "EOD"
     
     def __init__(self, log: Log):
         super().__init__(log)
