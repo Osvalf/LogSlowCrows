@@ -113,6 +113,16 @@ english = {
     
     ################################ QTP ################################
     
+    ################################ FRAENIR ################################
+    "FRAENIR MVP FROZEN S": "⬗ *[**MVP** : {mvp_names} got frozen **{max_frozen}** times]*",
+    "FRAENIR MVP FROZEN P": "⬗ *[**MVP** : {mvp_names} got frozen **{max_frozen}** times]*",
+    
+    "FRAENIR LVP SAK": "⬗ *[**LVP** : {lvp_name} who did **{dps:.1f}kdps** (**{dmg_ratio:.1f}%** of the squad) using **{sak_count} SAK** (**{sak_ratio:.1f}%** of its dps)]*",
+    
+    ################################ WOJ ################################
+    
+    "WOJ MVP CHAINS": "⬗ *[**MVP** : {mvp_name} took **{max_dmg}** damage from **chains** (**{ratio:.1f}%** of the squad)]*",
+    
     ################################ GENERAL ################################
     "MVP BOSS 0 CC S": "⬗ *[**MVP** : {mvp_names} didn't do any **CC**]*",
     "MVP BOSS 0 CC P": "⬗ *[**MVP** : {mvp_names} didn't do any **CC**]*",
@@ -133,10 +143,10 @@ english = {
     "LVP DPS": "⬗ *[**LVP** : {lvp_dps_name} who did **{dps:.1f}kdps** (**{dmg_ratio:.0f}%** of the squad)]*",
     
     ################################ TITRES ################################
-    "TITRE RUN": "# {titre} : {run_date}\n",
     "W1": "## W1 - *{wing_duration}* (without pre-VG)\n",
     "W3": "## W3 - *{wing_duration}* (without escort)\n",
     "W7": "## W7 - *{wing_duration}* (without gate)\n",
+    "IBS": "## IBS Strikes - *{wing_duration}*\n",
     "MVP": "# [GREAT MVP : {mvps} with {max_mvp_score} titles]\n",
     "LVP": "# [GREAT LVP : {lvps} with {max_lvp_score} titles]\n",
     "TIME": "# Total time : {run_duration}\n",

@@ -6,6 +6,7 @@ import sys
 import traceback
 
 from models.log_class import *
+from func import *
 
 TITRE = "Run"
 
@@ -41,8 +42,6 @@ def main(args) -> None:
                 pass
 
     print("\n")
-
-    all_bosses.sort(key=lambda boss: boss.start_date, reverse=False)
     if args.debug:
         IPython.embed()
     # Fonction reward si pas de test
@@ -53,9 +52,6 @@ def main(args) -> None:
 
     print("\n")
 
-    # print(f"\nListe de tous les objets boss instanciés : {all_bosses}\n") # Afficher toutes les instances
-
-
 if __name__ == "__main__":
     print("Starting\n")
     start_time = perf_counter()
@@ -64,8 +60,9 @@ if __name__ == "__main__":
     arg.add_argument('--debug', action='store_true')
     args = arg.parse_args()
     main(args)
-    """log = Log("https://dps.report/1ldK-20240804-213817_qpeer")
+    """log = Log("https://dps.report/o14b-20240727-210829_vg")
     boss = all_bosses[0]
-    print(boss.mvp,"\n",boss.lvp)"""
+    print(boss.mvp)
+    print(boss.lvp)"""
     end_time = perf_counter()
     print(f"--- {end_time - start_time:.3f} seconds ---\n")

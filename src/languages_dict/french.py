@@ -111,6 +111,21 @@ french = {
     
     ################################ QTP ################################
     
+    ################################ ICEBROOD ################################
+    
+    ################################ KODANS ################################
+    
+    ################################ FRAENIR ################################
+    "FRAENIR MVP FROZEN S": "⬗ *[**MVP** : {mvp_names} s'est fait geler **{max_frozen}** fois]*",
+    "FRAENIR MVP FROZEN P": "⬗ *[**MVP** : {mvp_names} se sont fait geler **{max_frozen}** fois]*",
+    
+    "FRAENIR LVP SAK": "⬗ *[**LVP** : {lvp_name} qui a fait **{dps:.1f}kdps** (**{dmg_ratio:.1f}%** de la squad) avec **{sak_count} SAK** (soit **{sak_ratio:.1f}%** de son dps)]*",
+    ################################ WOJ ################################
+    
+    "WOJ MVP CHAINS": "⬗ *[**MVP** : {mvp_name} a pris **{max_dmg}** dégâts de **chaines** (**{ratio:.1f}%** de la squad)]*",
+    
+    ################################ BONESKINNER ################################
+    
     ################################ GENERAL ################################
     "MVP BOSS 0 CC S": "⬗ *[**MVP** : {mvp_names} n'a pas mis de **CC**]*",
     "MVP BOSS 0 CC P": "⬗ *[**MVP** : {mvp_names} n'ont pas mis de **CC**]*",
@@ -131,10 +146,10 @@ french = {
     "LVP DPS": "⬗ *[**LVP** : {lvp_dps_name} qui a fait **{dps:.1f}kdps** (**{dmg_ratio:.0f}%** de la squad)]*",
     
     ################################ TITRES ################################
-    "TITRE RUN": "# {titre} : {run_date}\n",
     "W1": "## W1 - *{wing_duration}* (sans pre-VG)\n",
     "W3": "## W3 - *{wing_duration}* (sans escort)\n",
     "W7": "## W7 - *{wing_duration}* (sans gate)\n",
+    "IBS": "## Les ptiots pour l'or et la gloire - *{wing_duration}*\n",
     "MVP": "# [GRAND MVP : {mvps} avec {max_mvp_score} titres]\n",
     "LVP": "# [GRAND LVP : {lvps} avec {max_lvp_score} titres]\n",
     "TIME": "# Temps total : {run_duration}\n",
