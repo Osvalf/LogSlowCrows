@@ -669,7 +669,7 @@ class XERA(Boss):
             i_time = time_to_index(tp_time)
             pos_player = self.get_player_pos(i_player, i_time, i_time + i_delta)
             for p in pos_player:
-                if get_dist(p, XERA.xera_centre) <= XERA.xera_centre_radius:
+                if get_dist(p, XERA.centre) <= XERA.centre_radius:
                     fdp.append(i_player)
                     break
         return fdp
