@@ -156,6 +156,14 @@ class SABETHA(Boss):
     wing = 1
     boss_id = 15375
     
+    pos_sab = [376.7,364.4]
+    pos_canon1 = [346.9,706.7]
+    pos_canon2 = [35.9,336.8]
+    pos_canon3 = [403.3,36.0]
+    pos_canon4 = [713.9,403.1] 
+    canon_detect_radius = 45
+    scaler = 9.34179
+    
     def __init__(self, log: Log):
         super().__init__(log)
         self.mvp = self.get_mvp()
@@ -214,20 +222,20 @@ class SABETHA(Boss):
         pos_player = self.get_player_pos(i_player)
         match n:
             case 0: 
-                canon_pos = [pos_canon1, pos_canon2, pos_canon3, pos_canon4]
+                canon_pos = [SABETHA.pos_canon1, SABETHA.pos_canon2, SABETHA.pos_canon3, SABETHA.pos_canon4]
             case 1:
-                canon_pos = [pos_canon1]
+                canon_pos = [SABETHA.pos_canon1]
             case 2:
-                canon_pos = [pos_canon2]
+                canon_pos = [SABETHA.pos_canon2]
             case 3:
-                canon_pos = [pos_canon3]
+                canon_pos = [SABETHA.pos_canon3]
             case 4:
-                canon_pos = [pos_canon4]
+                canon_pos = [SABETHA.pos_canon4]
             case _:
                 canon_pos = []
         for pos in pos_player:
             for canon in canon_pos:
-                if get_dist(pos, canon) <= canon_detect_radius:
+                if get_dist(pos, canon) <= SABETHA.canon_detect_radius:
                     return True
         return False
     
@@ -248,7 +256,7 @@ class SABETHA(Boss):
                     if i == i_player or self.is_dead(i):
                         continue
                     i_pos = self.get_player_pos(i)[time_index]
-                    if get_dist(bomb_pos, i_pos)*sabetha_scaler <= 270:
+                    if get_dist(bomb_pos, i_pos)*SABETHA.scaler <= 270:
                         bombed_players += 1
                 if bombed_players > 1:
                     return True
@@ -407,6 +415,13 @@ class ESCORT(Boss):
     wing = 3
     boss_id = 16253
     
+    tower1 = [387,129.1]
+    tower2 = [304.1,115.7]
+    tower3 = [187.1,118.8]
+    tower4 = [226.1,252.3]
+    tower5 = [80.3,255.5]
+    tower_radius = 19
+    
     def __init__(self, log: Log):
         super().__init__(log)
         self.mvp = self.get_mvp()
@@ -467,7 +482,7 @@ class ESCORT(Boss):
         poses = self.get_player_pos(i_player)
         tower = globals()[f"escort_tower{n}"]
         for pos in poses:
-            if get_dist(pos, tower) < tower_radius:
+            if get_dist(pos, tower) < ESCORT.tower_radius:
                 return True
         return False
     
@@ -556,6 +571,16 @@ class XERA(Boss):
     wing = 3
     boss_id = 16246
     real_phase = "Phase 1"
+    
+    debut = [497.1,86.4]
+    l1 = [663.0,314.9]
+    l2 = [532.5,557.4]
+    fin = [268.3,586.4]
+    r1 = [208.2,103.4]
+    r2 = [87.0,346.8]
+    centre = [366.4,323.4]
+    debut_radius = 85
+    centre_radius = 140
 
     def __init__(self, log: Log):
         super().__init__(log)
@@ -644,7 +669,7 @@ class XERA(Boss):
             i_time = time_to_index(tp_time)
             pos_player = self.get_player_pos(i_player, i_time, i_time + i_delta)
             for p in pos_player:
-                if get_dist(p, xera_centre) <= xera_centre_radius:
+                if get_dist(p, XERA.xera_centre) <= XERA.xera_centre_radius:
                     fdp.append(i_player)
                     break
         return fdp
@@ -770,6 +795,12 @@ class SAMAROG(Boss):
     name = "SAMAROG"
     wing = 4
     boss_id = 17188
+    
+    top_left_corn = [278.0,645.2]
+    top_right_corn = [667.6,660.7]
+    bot_left_corn = [299.4,58.6]
+    bot_right_corn = [690.7,73.6]
+    scaler = 5.4621
     
     def __init__(self, log: Log):
         super().__init__(log)
@@ -972,6 +1003,13 @@ class SH(Boss):
     wing = 5
     boss_id = 19767
     
+    center_arena = [375,375]
+    radius1 = 345.5
+    radius2 = 304.2
+    radius3 = 256.2
+    radius4 = 208.5
+    radius5 = 163
+    
     def __init__(self, log: Log):
         super().__init__(log)
         self.mvp = self.get_mvp()
@@ -1023,10 +1061,10 @@ class SH(Boss):
         if self.is_dead_instant(i_player):
             last_pos = self.get_player_pos(i_player)[-1]
             death_time = self.get_player_death_timer(i_player)
-            fell_at_begin = get_dist(sh_center_arena, last_pos) > sh_radius2
-            fell_to_radius23 = death_time > self.bosshp_to_time(90)+2500 and death_time < self.bosshp_to_time(66)+2500 and get_dist(sh_center_arena, last_pos) > sh_radius3
-            fell_to_radius34 = death_time > self.bosshp_to_time(66)+2500 and death_time < self.bosshp_to_time(33)+2500 and get_dist(sh_center_arena, last_pos) > sh_radius4
-            fell_to_radius45 = death_time > self.bosshp_to_time(33)+2500 and get_dist(sh_center_arena, last_pos) > sh_radius5
+            fell_at_begin = get_dist(SH.center_arena, last_pos) > SH.radius2
+            fell_to_radius23 = death_time > self.bosshp_to_time(90)+2500 and death_time < self.bosshp_to_time(66)+2500 and get_dist(SH.center_arena, last_pos) > SH.radius3
+            fell_to_radius34 = death_time > self.bosshp_to_time(66)+2500 and death_time < self.bosshp_to_time(33)+2500 and get_dist(SH.center_arena, last_pos) > SH.radius4
+            fell_to_radius45 = death_time > self.bosshp_to_time(33)+2500 and get_dist(SH.center_arena, last_pos) > SH.radius5
             if fell_at_begin or fell_to_radius23 or fell_to_radius34 or (self.cm and fell_to_radius45):
                 return True
         return False
@@ -1192,9 +1230,12 @@ class LARGOS(Boss):
 class Q1(Boss):
     
     last = None
-    name = "QUOIDIMM"
+    name = "QADIM"
     wing = 6
     boss_id = 20934
+    
+    center = [411.5,431.1]
+    fdp_radius = 70
 
     def __init__(self, log: Log):
         super().__init__(log)
@@ -1258,13 +1299,13 @@ class Q1(Boss):
                 pos_p1 = self.get_player_pos(i, start=start_p1, end=end_p1)
                 pos_p2 = self.get_player_pos(i, start=start_p2, end=end_p2)
                 for pos in pos_p1:
-                    dist = get_dist(pos, qadim_center)
-                    if dist > qadim_fdp_radius:
+                    dist = get_dist(pos, Q1.center)
+                    if dist > Q1.fdp_radius:
                         add_fdp = False
                         break        
                 for pos in pos_p2:
-                    dist = get_dist(pos, qadim_center)
-                    if dist > qadim_fdp_radius:
+                    dist = get_dist(pos, Q1.center)
+                    if dist > Q1.fdp_radius:
                         add_fdp = False
                         break 
                 if add_fdp:
