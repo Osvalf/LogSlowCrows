@@ -59,10 +59,10 @@ if __name__ == "__main__":
     arg = argparse.ArgumentParser()
     arg.add_argument('--debug', action='store_true')
     args = arg.parse_args()
-    #main(args)
-    log = Log("https://dps.report/qBzB-20240806-224940_trin")
+    main(args)
+    """log = Log("https://dps.report/qBzB-20240806-224940_trin")
     boss = all_bosses[0]
     print(boss.mvp)
-    print(boss.lvp)
+    print(boss.lvp)"""
     end_time = perf_counter()
     print(f"--- {end_time - start_time:.3f} seconds ---\n")
