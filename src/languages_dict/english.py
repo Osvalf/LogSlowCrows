@@ -130,6 +130,9 @@ english = {
     "KO MVP DEBIL S": "⬗ *[**MVP** : {mvp_names} cummulated **{max_debil}** **debilitated** effects]*",
     "KO MVP DEBIL P": "⬗ *[**MVP** : {mvp_names} cummulated **{max_debil}** **debilitated** effects]*",
     
+    ################################ KANAXAI ################################
+    "KANAXAI LVP DPS": "⬗ *[**LVP** : {lvp_dps_name} who did **{dps:.1f}kdps** (**{dmg_ratio:.0f}%** of the squad) with **{linkCount} tether**]*",
+    
     ################################ GENERAL ################################
     "MVP BOSS 0 CC S" : "⬗ *[**MVP** : {mvp_names} didn't do any **CC**]*",
     "MVP BOSS 0 CC P" : "⬗ *[**MVP** : {mvp_names} didn't do any **CC**]*",
@@ -148,6 +151,7 @@ english = {
     "LVP TOTAL CC"    : "⬗ *[**LVP** : {lvp_names} thanks for doing **{max_cc:.0f}** **CC** (**{cc_ratio:.1f}%** of the squad)]*",
     
     "LVP DPS"         : "⬗ *[**LVP** : {lvp_dps_name} who did **{dps:.1f}kdps** (**{dmg_ratio:.0f}%** of the squad)]*",
+    "LVP DPS FOODSWAP": "⬗ *[**LVP** : {lvp_dps_name} who did **{dps:.1f}kdps** (**{dmg_ratio:.0f}%** of the squad) with **{foodSwapCount} foodswap**]*",
     
     ################################ TITRES ################################
     "W1"          : "## W1 - *{wing_duration}* (without pre-VG)\n",
@@ -155,6 +159,7 @@ english = {
     "W7"          : "## W7 - *{wing_duration}* (without gate)\n",
     "IBS"         : "## IBS Strikes - *{wing_duration}*\n",
     "EOD"         : "## EoD Strikes - *{wing_duration}*\n",
+    "SOTO"        : "## SotO Strikes - *{wing_duration}*\n",
     "FRAC"        : "## Fractals - *{wing_duration}*\n",
     "MVP"         : "# [GREAT MVP : {mvps} with {max_mvp_score} titles]\n",
     "LVP"         : "# [GREAT LVP : {lvps} with {max_lvp_score} titles]\n",

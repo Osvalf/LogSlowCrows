@@ -108,7 +108,8 @@ custom_names = {
     "Teh Aajian.9714"    : "Teh Asian",
     "Koeur.1235"         : "Koeur",
     "Huny.6124"          : "Huny",
-    "anko.5043"          : "Aiko"
+    "anko.5043"          : "Aiko",
+    "Tonnio.3256"        : "Tonnio"
 }
 
 with open('wingman_updater/WINGMAN_DATA.json') as f:

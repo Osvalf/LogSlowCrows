@@ -60,7 +60,7 @@ if __name__ == "__main__":
     arg.add_argument('--debug', action='store_true')
     args = arg.parse_args()
     main(args)
-    """log = Log("https://dps.report/LRJN-20240812-122846_mama")
+    """log = Log("https://dps.report/tEdT-20240825-232740_esc")
     boss = all_bosses[0]
     print(boss.wingman_percentile)
     print(boss.mvp)

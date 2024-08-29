@@ -153,7 +153,7 @@ class DARKAI(Boss):
     
     last    = None
     name    = "DARK AI"
-    boss_id = 23254
+    boss_id = 232542
     wing    = "FRAC"
     
     def __init__(self, log: Log):
@@ -195,6 +195,46 @@ class KANAXAI(Boss):
     def get_lvp(self):
         return self.get_lvp_dps()
     
+    ################################ LVP ################################
+    
+    def get_lvp_dps(self):
+        i_players, max_dmg, tot_dmg = Stats.get_max_value(self, self.get_dmg_boss)
+        lvp_dps_name                = self.players_to_string(i_players)
+        linkCount                   = self.get_links(i_players[0])
+        dmg_ratio                   = max_dmg / tot_dmg * 100
+        dps                         = max_dmg / self.duration_ms
+        if linkCount:
+            return langues["selected_language"]["KANAXAI LVP DPS"].format(lvp_dps_name=lvp_dps_name, dmg_ratio=dmg_ratio, dps=dps, linkCount=linkCount)
+        else:
+            return langues["selected_language"]["LVP DPS"].format(lvp_dps_name=lvp_dps_name, dmg_ratio=dmg_ratio, dps=dps)
+    
+    ################################ DATA MECHAS ################################
+    
+    def get_links(self, i_player: int):
+        link_id      = 69206
+        start1, end1 = self.get_phase_timers("Phase 1", inMilliSeconds=True)
+        start2, end2 = self.get_phase_timers("Phase 2", inMilliSeconds=True)
+        start3, end3 = self.get_phase_timers("Phase 3", inMilliSeconds=True)
+        buffUptimes  = self.log.pjcontent["players"][i_player]["buffUptimes"]
+        linkCount    = 0
+        start2      += 8000
+        start3      += 8000
+        end1        -= 8000
+        end2        -= 8000
+        for buff in buffUptimes:
+            if buff["id"] == link_id:
+                for state in buff["states"]:
+                    buffTime = state[0]
+                    if(
+                       state[1] == 1 and
+                       ((buffTime > start1 and buffTime < end1) or
+                        (buffTime > start2 and buffTime < end2) or
+                        (buffTime > start3 and buffTime < end3))
+                      ):
+                        linkCount += 1
+        return linkCount
+                
+        
 ################################ EPARCH ################################
 
 class EPARCH(Boss):

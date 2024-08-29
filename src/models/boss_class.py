@@ -314,6 +314,22 @@ class Boss:
     
     def get_player_group(self, i_player: int):
         return self.log.pjcontent["players"][i_player]["group"]
+    
+    def get_foodswap_count(self, i_player: int):
+        foodSwapIcon  = "https://wiki.guildwars2.com/images/d/d6/Champion_of_the_Crown.png"
+        foodSwapId    = []
+        buffMap       = self.log.pjcontent["buffMap"]
+        buffUptimes   = self.log.pjcontent["players"][i_player]["buffUptimes"]
+        foodSwapCount = 0
+        for buffName, data in buffMap.items():
+            if data["icon"] == foodSwapIcon:
+                foodSwapId.append(int(buffName[1:]))
+        for buff in buffUptimes:
+            if buff["id"] in foodSwapId:
+                for state in buff["states"]:
+                    if state[1] == 1:
+                        foodSwapCount += 1
+        return foodSwapCount
 
     ################################ MVP ################################
     
@@ -399,9 +415,11 @@ class Boss:
         dmg_ratio                     = max_dmg / total_dmg * 100
         lvp_dps_name                  = self.players_to_string(i_players)
         dps                           = max_dmg / self.duration_ms
-        self.add_lvps(i_players)
+        foodSwapCount                 = self.get_foodswap_count(i_players[0])
+        self.add_lvps(i_players)   
+        if foodSwapCount:
+            return langues["selected_language"]["LVP DPS FOODSWAP"].format(lvp_dps_name=lvp_dps_name, max_dmg=max_dmg, dmg_ratio=dmg_ratio, dps=dps, foodSwapCount=foodSwapCount)
         return langues["selected_language"]["LVP DPS"].format(lvp_dps_name=lvp_dps_name, max_dmg=max_dmg, dmg_ratio=dmg_ratio, dps=dps)
-    
     ################################ DATA BOSS ################################
     
     def get_pos_boss(self, start: int = 0, end: int = None):
@@ -411,13 +429,15 @@ class Boss:
                 return target['combatReplayData']['positions'][start:end]
         raise ValueError('No Boss in targets')
     
-    def get_phase_timers(self, target_phase: str):
+    def get_phase_timers(self, target_phase: str, inMilliSeconds=False):
         phases = self.log.pjcontent['phases']
         for phase in phases:
-            if phase['name'] == target_phase:
-                start = time_to_index(phase['start'])
-                end   = time_to_index(phase['end'])
-                return start, end
+            if phase['name'] == target_phase:  
+                start = phase['start']
+                end   = phase['end']
+                if inMilliSeconds:
+                    return start, end
+                return time_to_index(start), time_to_index(end)
         raise ValueError(f'{target_phase} not found')
     
     def get_mech_value(self, i_player: int, mech_name: str, phase: str="Full Fight"):

@@ -134,6 +134,9 @@ french = {
     "KO MVP DEBIL S": "⬗ *[**MVP** : {mvp_names} a cummulé **{max_debil}** effets d'**affaiblissement**]*",
     "KO MVP DEBIL P": "⬗ *[**MVP** : {mvp_names} ont cummulé **{max_debil}** effets d'**affaiblissement**]*",
     
+    ################################ KANAXAI ################################
+    "KANAXAI LVP DPS": "⬗ *[**LVP** : {lvp_dps_name} qui a fait **{dps:.1f}kdps** (**{dmg_ratio:.0f}%** de la squad) avec **{linkCount} tether**]*",
+    
     ################################ GENERAL ################################
     "MVP BOSS 0 CC S" : "⬗ *[**MVP** : {mvp_names} n'a pas mis de **CC**]*",
     "MVP BOSS 0 CC P" : "⬗ *[**MVP** : {mvp_names} n'ont pas mis de **CC**]*",
@@ -152,6 +155,7 @@ french = {
     "LVP TOTAL CC"    : "⬗ *[**LVP** : {lvp_names} merci d'avoir fait **{max_cc:.0f}** de **CC** (**{cc_ratio:.1f}%** de la squad)]*",
     
     "LVP DPS"         : "⬗ *[**LVP** : {lvp_dps_name} qui a fait **{dps:.1f}kdps** (**{dmg_ratio:.0f}%** de la squad)]*",
+    "LVP DPS FOODSWAP": "⬗ *[**LVP** : {lvp_dps_name} qui a fait **{dps:.1f}kdps** (**{dmg_ratio:.0f}%** de la squad) avec **{foodSwapCount} foodswap**]*",
     
     ################################ TITRES ################################
     "W1"          : "## W1 - *{wing_duration}* (sans pre-VG)\n",

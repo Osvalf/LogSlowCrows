@@ -108,7 +108,7 @@ class KO(Boss):
     
     last    = None
     name    = "KO"
-    boss_id = 24266
+    boss_id = 24485
     wing    = "EOD"
     
     def __init__(self, log: Log):
@@ -128,6 +128,15 @@ class KO(Boss):
     
     def get_lvp(self):
         return self.get_lvp_dps()
+    
+    ################################ LVP ################################
+    
+    def get_lvp_dps(self):
+        i_players, max_dmg, tot_dmg = Stats.get_max_value(self, self.get_dmg_boss)
+        lvp_dps_name                = self.players_to_string(i_players)
+        dmg_ratio                   = max_dmg / tot_dmg * 100
+        dps                         = max_dmg / self.duration_ms
+        return langues["selected_language"]["LVP DPS"].format(lvp_dps_name=lvp_dps_name, dmg_ratio=dmg_ratio, dps=dps)
     
     ################################ MVP ################################
     
@@ -157,13 +166,16 @@ class KO(Boss):
                     debil = state[1]
         return debil
     
+    def get_dmg_boss(self, i_player: int):
+        return self.log.pjcontent["players"][i_player]["dpsAll"][0]["damage"]
+    
 ################################ HT ################################
 
 class HT(Boss):
     
     last    = None
     name    = "HT"
-    boss_id = 43488
+    boss_id = 24375
     wing    = "EOD"
     
     def __init__(self, log: Log):
@@ -187,7 +199,7 @@ class OLC(Boss):
     
     last    = None
     name    = "OLC"
-    boss_id = 25414
+    boss_id = 25413
     wing    = "EOD"
     
     def __init__(self, log: Log):
@@ -204,3 +216,17 @@ class OLC(Boss):
     
     def get_lvp(self):
         return self.get_lvp_dps()
+    
+    ################################ LVP ################################
+    
+    def get_lvp_dps(self):
+        i_players, max_dmg, tot_dmg = Stats.get_max_value(self, self.get_dmg_boss)
+        lvp_dps_name                = self.players_to_string(i_players)
+        dmg_ratio                   = max_dmg / tot_dmg * 100
+        dps                         = max_dmg / self.duration_ms
+        return langues["selected_language"]["LVP DPS"].format(lvp_dps_name=lvp_dps_name, dmg_ratio=dmg_ratio, dps=dps)
+    
+    ################################ DATA MECHAS ################################
+    
+    def get_dmg_boss(self, i_player: int):
+        return self.log.pjcontent["players"][i_player]["dpsAll"][0]["damage"]

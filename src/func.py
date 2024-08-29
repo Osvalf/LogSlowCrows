@@ -6,7 +6,7 @@ from languages import *
 
 
 def time_to_index(time: int):  # time in millisecond
-    return int(time / 150)
+    return int(time / 300)
 
 
 def get_dist(pos1: list[float], pos2: list[float]):

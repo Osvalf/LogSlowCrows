@@ -162,7 +162,7 @@ class SABETHA(Boss):
     pos_canon3          = [403.3,36.0]
     pos_canon4          = [713.9,403.1] 
     canon_detect_radius = 45
-    scaler              = 9.34179
+    scaler              = 9.34179 
     
     def __init__(self, log: Log):
         super().__init__(log)
@@ -257,6 +257,8 @@ class SABETHA(Boss):
                         continue
                     i_pos = self.get_player_pos(i)[time_index]
                     if get_dist(bomb_pos, i_pos)*SABETHA.scaler <= 270:
+                        print(f"{self.get_player_name(i_player)} bombed {self.get_player_name(i)}")
+                        print(time_index)
                         bombed_players += 1
                 if bombed_players > 1:
                     return True
@@ -415,11 +417,13 @@ class ESCORT(Boss):
     wing    = 3
     boss_id = 16253
     
-    tower1       = [387,129.1]
-    tower2       = [304.1,115.7]
-    tower3       = [187.1,118.8]
-    tower4       = [226.1,252.3]
-    tower5       = [80.3,255.5]
+    towers  = [
+               [387,129.1],
+               [304.1,115.7],
+               [187.1,118.8],
+               [226.1,252.3],
+               [80.3,255.5]
+              ]
     tower_radius = 19
     
     def __init__(self, log: Log):
@@ -480,7 +484,7 @@ class ESCORT(Boss):
     
     def is_tower_n(self, i_player: int, n: int):
         poses = self.get_player_pos(i_player)
-        tower = globals()[f"escort_tower{n}"]
+        tower = ESCORT.towers[n-1]
         for pos in poses:
             if get_dist(pos, tower) < ESCORT.tower_radius:
                 return True
