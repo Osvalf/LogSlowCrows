@@ -36,6 +36,7 @@ class DAGDA(Boss):
         i_players, max_debil, _ = Stats.get_max_value(self, self.get_max_debil, exclude=[self.is_heal])
         mvp_names               = self.players_to_string(i_players)
         if max_debil > 1:
+            self.add_mvps(i_players)
             if len(i_players) == 1:
                 return langues["selected_language"]["KO MVP DEBIL S"].format(mvp_names=mvp_names, max_debil=max_debil)
             else:

@@ -51,6 +51,24 @@ class KODANS(Boss):
     def get_lvp(self):
         return self.get_lvp_dps()
     
+    ################################ LVP ################################
+    
+    def get_lvp_dps(self):
+        i_players, max_dmg, tot_dmg = Stats.get_max_value(self, self.get_dmg_boss)
+        lvp_dps_name                    = self.players_to_string(i_players)
+        dps                         = max_dmg / self.duration_ms 
+        dmg_ratio                   = max_dmg / tot_dmg * 100
+        self.add_lvps(i_players)
+        return langues["selected_language"]["LVP DPS"].format(lvp_dps_name=lvp_dps_name, dps=dps, dmg_ratio=dmg_ratio)
+    
+    ################################ DATA MECHAS ################################
+    
+    def get_dmg_boss(self, i_player: int):
+        boss1_dmg = self.log.pjcontent['players'][i_player]['dpsTargets'][0][self.real_phase_id]['damage']
+        boss2_dmg = self.log.pjcontent['players'][i_player]['dpsTargets'][1][self.real_phase_id]['damage']
+        return boss1_dmg + boss2_dmg
+        
+    
 ################################ FRAENIR ################################
 
 class FRAENIR(Boss):
@@ -99,12 +117,13 @@ class FRAENIR(Boss):
         i_players, max_dmg, tot_dmg = Stats.get_max_value(self, self.get_dmg_boss)
         sak_dmg                     = self.get_sak_dmg(i_players[0])
         sak_count                   = self.get_sak_count(i_players[0])
-        lvp_name                    = self.players_to_string(i_players)
+        lvp_dps_name                    = self.players_to_string(i_players)
         dps                         = max_dmg / self.duration_ms 
         dmg_ratio                   = max_dmg / tot_dmg * 100
+        self.add_lvps(i_players)
         if sak_count:
             sak_ratio = sak_dmg/max_dmg*100
-            return langues["selected_language"]["FRAENIR LVP SAK"].format(lvp_name=lvp_name, sak_count=sak_count, sak_ratio=sak_ratio, dps=dps, dmg_ratio=dmg_ratio)
+            return langues["selected_language"]["FRAENIR LVP SAK"].format(lvp_dps_name=lvp_dps_name, sak_count=sak_count, sak_ratio=sak_ratio, dps=dps, dmg_ratio=dmg_ratio)
         return
     
     ################################ DATA MECHAS ################################
@@ -164,6 +183,7 @@ class WOJ(Boss):
         i_players, max_dmg, tot_dmg = Stats.get_max_value(self, self.get_chain_damage)
         mvp_name                    = self.players_to_string(i_players)
         ratio                       = max_dmg / tot_dmg * 100
+        self.add_mvps(i_players) 
         if max_dmg > 10000:
             return langues["selected_language"]["WOJ MVP CHAINS"].format(mvp_name=mvp_name, max_dmg=max_dmg, ratio=ratio)
         return
@@ -212,12 +232,13 @@ class BONESKINNER(Boss):
         i_players, max_dmg, tot_dmg = Stats.get_max_value(self, self.get_dmg_boss)
         sak_dmg                     = self.get_sak_dmg(i_players[0])
         sak_count                   = self.get_sak_count(i_players[0])
-        lvp_name                    = self.players_to_string(i_players)
+        lvp_dps_name                    = self.players_to_string(i_players)
         dps                         = max_dmg / self.duration_ms 
         dmg_ratio                   = max_dmg / tot_dmg * 100
+        self.add_lvps(i_players)
         if sak_count:
             sak_ratio = sak_dmg/max_dmg*100
-            return langues["selected_language"]["FRAENIR LVP SAK"].format(lvp_name=lvp_name, sak_count=sak_count, sak_ratio=sak_ratio, dps=dps, dmg_ratio=dmg_ratio)
+            return langues["selected_language"]["FRAENIR LVP SAK"].format(lvp_dps_name=lvp_dps_name, sak_count=sak_count, sak_ratio=sak_ratio, dps=dps, dmg_ratio=dmg_ratio)
         return
     
     ################################ DATA MECHAS ################################

@@ -36,6 +36,7 @@ class AH(Boss):
         i_players, max_exposed, _ = Stats.get_max_value(self, self.get_max_exposed, exclude=[self.is_heal])
         mvp_names                 = self.players_to_string(i_players)
         if max_exposed > 2:
+            self.add_mvps(i_players)
             if len(i_players) == 1:
                 return langues["selected_language"]["AH MVP EXPOSED S"].format(mvp_names=mvp_names, max_exposed=max_exposed)
             else:
@@ -50,6 +51,7 @@ class AH(Boss):
         time                        = self.duration_ms
         dps                         = max_dmg / time
         lvp_dps_name                = self.players_to_string(i_players)
+        self.add_lvps(i_players)
         return langues["selected_language"]["LVP DPS"].format(lvp_dps_name=lvp_dps_name, dps=dps, dmg_ratio=ratio)
     
     ################################ DATA MECHAS ################################
@@ -136,6 +138,7 @@ class KO(Boss):
         lvp_dps_name                = self.players_to_string(i_players)
         dmg_ratio                   = max_dmg / tot_dmg * 100
         dps                         = max_dmg / self.duration_ms
+        self.add_lvps(i_players)
         return langues["selected_language"]["LVP DPS"].format(lvp_dps_name=lvp_dps_name, dmg_ratio=dmg_ratio, dps=dps)
     
     ################################ MVP ################################
@@ -144,6 +147,7 @@ class KO(Boss):
         i_players, max_debil, _ = Stats.get_max_value(self, self.get_max_debil, exclude=[self.is_heal])
         mvp_names               = self.players_to_string(i_players)
         if max_debil > 1:
+            self.add_lvps(i_players)
             if len(i_players) == 1:
                 return langues["selected_language"]["KO MVP DEBIL S"].format(mvp_names=mvp_names, max_debil=max_debil)
             else:
@@ -224,6 +228,7 @@ class OLC(Boss):
         lvp_dps_name                = self.players_to_string(i_players)
         dmg_ratio                   = max_dmg / tot_dmg * 100
         dps                         = max_dmg / self.duration_ms
+        self.add_lvps(i_players)
         return langues["selected_language"]["LVP DPS"].format(lvp_dps_name=lvp_dps_name, dmg_ratio=dmg_ratio, dps=dps)
     
     ################################ DATA MECHAS ################################

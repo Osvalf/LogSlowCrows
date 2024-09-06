@@ -31,7 +31,10 @@ class Boss:
                 new_player           = Player(self, account)
                 all_players[account] = new_player
             else:
-                player.add_boss(self)   
+                player.add_boss(self)
+                
+    def __repr__(self) -> str:
+        return self.log.url    
         
     ################################ Fonction pour attribus Boss ################################
     
@@ -416,7 +419,7 @@ class Boss:
         lvp_dps_name                  = self.players_to_string(i_players)
         dps                           = max_dmg / self.duration_ms
         foodSwapCount                 = self.get_foodswap_count(i_players[0])
-        self.add_lvps(i_players)   
+        self.add_lvps(i_players) 
         if foodSwapCount:
             return langues["selected_language"]["LVP DPS FOODSWAP"].format(lvp_dps_name=lvp_dps_name, max_dmg=max_dmg, dmg_ratio=dmg_ratio, dps=dps, foodSwapCount=foodSwapCount)
         return langues["selected_language"]["LVP DPS"].format(lvp_dps_name=lvp_dps_name, max_dmg=max_dmg, dmg_ratio=dmg_ratio, dps=dps)

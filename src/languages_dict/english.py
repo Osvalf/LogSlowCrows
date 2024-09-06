@@ -117,7 +117,7 @@ english = {
     "FRAENIR MVP FROZEN S": "⬗ *[**MVP** : {mvp_names} got frozen **{max_frozen}** times]*",
     "FRAENIR MVP FROZEN P": "⬗ *[**MVP** : {mvp_names} got frozen **{max_frozen}** times]*",
     
-    "FRAENIR LVP SAK"     : "⬗ *[**LVP** : {lvp_name} who did **{dps:.1f}kdps** (**{dmg_ratio:.1f}%** of the squad) using **{sak_count} SAK** (**{sak_ratio:.1f}%** of its dps)]*",
+    "FRAENIR LVP SAK"     : "⬗ *[**LVP** : {lvp_dps_name} who did **{dps:.1f}kdps** (**{dmg_ratio:.1f}%** of the squad) using **{sak_count} SAK** (**{sak_ratio:.1f}%** of its dps)]*",
     
     ################################ WOJ ################################
     "WOJ MVP CHAINS": "⬗ *[**MVP** : {mvp_name} took **{max_dmg}** damage from **chains** (**{ratio:.1f}%** of the squad)]*",
