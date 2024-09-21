@@ -55,15 +55,16 @@ def main(args) -> None:
 if __name__ == "__main__":
     print("Starting\n")
     start_time = perf_counter()
-    langues["selected_language"] = langues["EN"]
+    langues["selected_language"] = langues["FR"]
     arg = argparse.ArgumentParser()
     arg.add_argument('--debug', action='store_true')
     args = arg.parse_args()
     main(args)
-    """log = Log("https://dps.report/GlBX-20240904-213704_sam")
+    """log = Log("https://dps.report/GOkR-20240921-012125_xera")
     boss = all_bosses[0]
-    print(boss.wingman_percentile)
     print(boss.mvp)
-    print(boss.lvp)"""
+    print(boss.lvp)
+    for player in all_players.values():
+        print(f"{player.name} : MVP{player.mvps} LVP{player.lvps}")"""
     end_time = perf_counter()
     print(f"--- {end_time - start_time:.3f} seconds ---\n")

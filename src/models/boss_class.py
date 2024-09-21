@@ -325,7 +325,7 @@ class Boss:
         buffUptimes   = self.log.pjcontent["players"][i_player]["buffUptimes"]
         foodSwapCount = 0
         for buffName, data in buffMap.items():
-            if data["icon"] == foodSwapIcon:
+            if data.get("icon") == foodSwapIcon:
                 foodSwapId.append(int(buffName[1:]))
         for buff in buffUptimes:
             if buff["id"] in foodSwapId:

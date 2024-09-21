@@ -257,8 +257,6 @@ class SABETHA(Boss):
                         continue
                     i_pos = self.get_player_pos(i)[time_index]
                     if get_dist(bomb_pos, i_pos)*SABETHA.scaler <= 270:
-                        print(f"{self.get_player_name(i_player)} bombed {self.get_player_name(i)}")
-                        print(time_index)
                         bombed_players += 1
                 if bombed_players > 1:
                     return True

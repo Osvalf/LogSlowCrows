@@ -46,7 +46,7 @@ boss_dict = {
     23957: "ankka",
     24266: "li",
     43488: "void",
-    25413: "olc",
+    25414: "olc",
     
     #  SOTO BOSSES
     25705: "dagda",
@@ -110,7 +110,8 @@ custom_names = {
     "Huny.6124"          : "Huny",
     "anko.5043"          : "Aiko",
     "Tonnio.3256"        : "Tonnio",
-    "Henroo.9314"        : "Henroo"
+    "Henroo.9314"        : "Henroo",
+    "Ambroid.7156"       : "Ambroid"
 }
 
 with open('wingman_updater/WINGMAN_DATA.json') as f:
