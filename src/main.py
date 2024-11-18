@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, wait
 import IPython
 from time import perf_counter
 import sys
@@ -42,12 +42,8 @@ def main(input_file, **kwargs) -> None:
     
     with ThreadPoolExecutorStackTraced() as executor:
         futures = [executor.submit(Log, url) for url in input_urls]
-        for future in futures:
-            try:
-                test = future.result()
-            except TypeError as e:
-                pass
-
+        wait(futures)
+        
     print("\n")
     if kwargs.get("debug", False):
         IPython.embed()
