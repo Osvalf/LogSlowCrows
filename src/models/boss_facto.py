@@ -74,9 +74,9 @@ class BossFactory:
                    #  YES
                    
                    "golem": GOLEM}
-        boss_name = boss_dict.get(log.jcontent['triggerID']) or extra_boss_dict.get(log.jcontent['triggerID'])
+        boss_name = BOSS_DICT.get(log.jcontent['triggerID']) or EXTRA_BOSS_DICT.get(log.jcontent['triggerID'])
         if boss_name:
-            all_bosses.append(factory[boss_name](log))
+            ALL_BOSSES.append(factory[boss_name](log))
                  
     
     

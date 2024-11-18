@@ -39,10 +39,10 @@ def txt_file_to_lines(filepath: str):
         return []
 
 
-def lines_to_urls(lines: list[str], reward_mode=False):
-
+def lines_to_urls(lines: list[str], **kwargs):
+    reward_mode = kwargs.get("reward_mode", False)
     input_urls = []
-    boss_names = list(boss_dict.values())
+    boss_names = list(BOSS_DICT.values())
     escort_url = None
 
     for line in lines:
@@ -72,7 +72,7 @@ def lines_to_urls(lines: list[str], reward_mode=False):
 
 def is_valid_url(line):
     parts = line.split("_")
-    if "https://dps.report/" in line and parts[1] in boss_dict.values() and parts[0].split("-")[1].isdigit() and parts[0].split("-")[2].isdigit():
+    if "https://dps.report/" in line and parts[1] in BOSS_DICT.values() and parts[0].split("-")[1].isdigit() and parts[0].split("-")[2].isdigit():
         return True
     return False
 
@@ -113,7 +113,7 @@ def get_message_reward(logs: list, players: dict, titre="Run"):
     
     for player in mvp:
         account = player.account
-        custom_name = custom_names.get(account)
+        custom_name = CUSTOM_NAMES.get(account)
         if custom_name:
             mvp_names.append(custom_name)
         else:
@@ -121,7 +121,7 @@ def get_message_reward(logs: list, players: dict, titre="Run"):
             
     for player in lvp:
         account = player.account
-        custom_name = custom_names.get(account)
+        custom_name = CUSTOM_NAMES.get(account)
         if custom_name:
             lvp_names.append(custom_name)
         else:
@@ -179,7 +179,7 @@ def get_message_reward(logs: list, players: dict, titre="Run"):
             if boss_percentil is not None:
                 notes_nb += 1
                 total_wingman_score += boss_percentil
-                run_message += f"* **[{boss_name}]({boss_url})** **{boss_duration} ({boss_percentil}%{emote_wingman})**\n"
+                run_message += f"* **[{boss_name}]({boss_url})** **{boss_duration} ({boss_percentil}%{EMOTE_WINGMAN})**\n"
             else:
                 run_message += f"* **[{boss_name}]({boss_url})** **{boss_duration}**\n"
             run_message = cut_text(run_message)
@@ -192,7 +192,7 @@ def get_message_reward(logs: list, players: dict, titre="Run"):
                 run_message = cut_text(run_message)
             if boss.name != "ESCORT":
                 for player_account, dps_mark in boss.get_dps_ranking().items():
-                    all_players[player_account].add_mark(dps_mark)
+                    ALL_PLAYERS[player_account].add_mark(dps_mark)
 
         run_message += "\n"
 
@@ -205,7 +205,7 @@ def get_message_reward(logs: list, players: dict, titre="Run"):
         if max_lvp_score > 1:
             run_message += langues["selected_language"]["LVP"].format(lvps=lvps, max_lvp_score=max_lvp_score)
         run_message += langues["selected_language"]["TIME"].format(run_duration=run_duration)
-        run_message += langues["selected_language"]["WINGMAN"].format(note_wingman=note_wingman, emote_wingman=emote_wingman)
+        run_message += langues["selected_language"]["WINGMAN"].format(note_wingman=note_wingman, emote_wingman=EMOTE_WINGMAN)
 
     
     player_rankings = list(filter(

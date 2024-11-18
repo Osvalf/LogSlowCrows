@@ -26,10 +26,10 @@ class Boss:
         self.real_phase_id      = self.get_phase_id(self.real_phase)
         for i in self.player_list:
             account = self.get_player_account(i)
-            player  = all_players.get(account)
+            player  = ALL_PLAYERS.get(account)
             if not player:
                 new_player           = Player(self, account)
-                all_players[account] = new_player
+                ALL_PLAYERS[account] = new_player
             else:
                 player.add_boss(self)
                 
@@ -254,7 +254,7 @@ class Boss:
         name_list = []
         for i in i_players:
             account = self.get_player_account(i)
-            custom_name = custom_names.get(account)
+            custom_name = CUSTOM_NAMES.get(account)
             if custom_name:
                 name_list.append(custom_name)
             else:
@@ -291,12 +291,12 @@ class Boss:
     def add_mvps(self, players: int):
         for i in players:
             account = self.get_player_account(i)
-            all_players[account].mvps += 1
+            ALL_PLAYERS[account].mvps += 1
                 
     def add_lvps(self, players: int):
         for i in players:
             account = self.get_player_account(i)
-            all_players[account].lvps += 1
+            ALL_PLAYERS[account].lvps += 1
             
     def _get_dps_contrib(self, exclude: list[classmethod]=[]):
         dps_ranking = {}
@@ -428,7 +428,7 @@ class Boss:
     def get_pos_boss(self, start: int = 0, end: int = None):
         targets = self.log.pjcontent['targets']
         for target in targets:
-            if target['id'] in boss_dict.keys():
+            if target['id'] in BOSS_DICT.keys():
                 return target['combatReplayData']['positions'][start:end]
         raise ValueError('No Boss in targets')
     
