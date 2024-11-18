@@ -5,10 +5,11 @@ from time import perf_counter
 import sys
 import traceback
 
-from const import DEFAULT_LANGUAGE, DEFAULT_TITLE
+from const import DEFAULT_LANGUAGE, DEFAULT_TITLE, DEFAULT_INPUT_FILE, ALL_BOSSES, ALL_PLAYERS
 
-from models.log_class import *
-from func import *
+from models.log_class import Log
+import func
+from languages import LANGUES
 
 def _make_parser() -> ArgumentParser:
     parser = ArgumentParser()
@@ -32,8 +33,8 @@ class ThreadPoolExecutorStackTraced(ThreadPoolExecutor):
             raise sys.exc_info()[0](traceback.format_exc())
 
 def main(input_file, **kwargs) -> None:
-    input_lines = txt_file_to_lines(input_file)
-    input_urls, error = lines_to_urls(input_lines, **kwargs)
+    input_lines = func.txt_file_to_lines(input_file)
+    input_urls, error = func.lines_to_urls(input_lines, **kwargs)
     if error:
         print(input_urls)
     # Pour tester séparément
@@ -52,7 +53,7 @@ def main(input_file, **kwargs) -> None:
         IPython.embed()
     # Fonction reward si pas de test
     if not error:
-        split_run_message = get_message_reward(ALL_BOSSES, ALL_PLAYERS, titre=DEFAULT_TITLE)
+        split_run_message = func.get_message_reward(ALL_BOSSES, ALL_PLAYERS, titre=DEFAULT_TITLE)
         for message in split_run_message:
             print(message)
 
@@ -61,7 +62,7 @@ def main(input_file, **kwargs) -> None:
 if __name__ == "__main__":
     print("Starting\n")
     start_time = perf_counter()
-    langues["selected_language"] = langues["FR"]
+    LANGUES["selected_language"] = LANGUES["FR"]
     args = _make_parser().parse_args()
     main(args.input, reward_mode=args.reward, debug=args.debug, language=args.language)
     end_time = perf_counter()

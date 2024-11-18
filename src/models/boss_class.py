@@ -1,9 +1,11 @@
-from models.player_class import *
-from const import *
-from models.log_class import Log
-from func import *
-
+from datetime import datetime, timedelta, timezone
 import requests
+
+from models.player_class import *
+from const import ALL_PLAYERS, BOSS_DICT, CUSTOM_NAMES, BIG
+from models.log_class import Log
+import func
+from languages import LANGUES
 
 class Boss:  
 
@@ -274,7 +276,7 @@ class Boss:
     def time_entered_area(self, i_player: int, center: list[float], radius: float):
         poses = self.get_player_pos(i_player)
         for i, pos in enumerate(poses):
-            if get_dist(pos, center) < radius:
+            if func.get_dist(pos, center) < radius:
                 return i*150
         return
     
@@ -284,7 +286,7 @@ class Boss:
             i_enter = int(time_enter/150)
             poses   = self.get_player_pos(i_player)[i_enter:]
             for i, pos in enumerate(poses):
-                if get_dist(pos, center) > radius:
+                if func.get_dist(pos, center) > radius:
                     return (i+i_enter) * 150
         return
     
@@ -346,14 +348,14 @@ class Boss:
         number_mvp = len(i_players)  
         if min_cc == 0:
             if number_mvp == 1:
-                return langues["selected_language"]["MVP BOSS 0 CC S"].format(mvp_names=mvp_names)
+                return LANGUES["selected_language"]["MVP BOSS 0 CC S"].format(mvp_names=mvp_names)
             else:
-                return langues["selected_language"]["MVP BOSS 0 CC P"].format(mvp_names=mvp_names)
+                return LANGUES["selected_language"]["MVP BOSS 0 CC P"].format(mvp_names=mvp_names)
         else:
             if number_mvp == 1:
-                return langues["selected_language"]["MVP BOSS CC S"].format(mvp_names=mvp_names, min_cc=min_cc, cc_ratio=cc_ratio)
+                return LANGUES["selected_language"]["MVP BOSS CC S"].format(mvp_names=mvp_names, min_cc=min_cc, cc_ratio=cc_ratio)
             else:
-                return langues["selected_language"]["MVP BOSS CC P"].format(mvp_names=mvp_names, min_cc=min_cc, cc_ratio=cc_ratio)
+                return LANGUES["selected_language"]["MVP BOSS CC P"].format(mvp_names=mvp_names, min_cc=min_cc, cc_ratio=cc_ratio)
     
     def get_mvp_cc_total(self,extra_exclude: list[classmethod]=[]):
         i_players, min_cc, total_cc = Stats.get_min_value(self, self.get_cc_total, exclude=[*extra_exclude])
@@ -365,14 +367,14 @@ class Boss:
         number_mvp = len(i_players)  
         if min_cc == 0:
             if number_mvp == 1:
-                return langues["selected_language"]["MVP TOTAL 0 CC S"].format(mvp_names=mvp_names)
+                return LANGUES["selected_language"]["MVP TOTAL 0 CC S"].format(mvp_names=mvp_names)
             else:
-                return langues["selected_language"]["MVP TOTAL 0 CC P"].format(mvp_names=mvp_names)
+                return LANGUES["selected_language"]["MVP TOTAL 0 CC P"].format(mvp_names=mvp_names)
         else:
             if number_mvp == 1:
-                return langues["selected_language"]["MVP TOTAL CC S"].format(mvp_names=mvp_names, min_cc=min_cc, cc_ratio=cc_ratio)
+                return LANGUES["selected_language"]["MVP TOTAL CC S"].format(mvp_names=mvp_names, min_cc=min_cc, cc_ratio=cc_ratio)
             else:
-                return langues["selected_language"]["MVP TOTAL CC P"].format(mvp_names=mvp_names, min_cc=min_cc, cc_ratio=cc_ratio)
+                return LANGUES["selected_language"]["MVP TOTAL CC P"].format(mvp_names=mvp_names, min_cc=min_cc, cc_ratio=cc_ratio)
     
     def get_bad_dps(self, extra_exclude: list[classmethod]=[]):
         i_sup, sup_max_dmg, _ = Stats.get_max_value(self, self.get_dmg_boss, exclude=[self.is_dps])
@@ -389,9 +391,9 @@ class Boss:
             self.add_mvps(bad_dps)
             bad_dps_name = self.players_to_string(bad_dps)
             if len(bad_dps) == 1:
-                return langues["selected_language"]["MVP BAD DPS S"].format(bad_dps_name=bad_dps_name, sup_name=sup_name)
+                return LANGUES["selected_language"]["MVP BAD DPS S"].format(bad_dps_name=bad_dps_name, sup_name=sup_name)
             else:
-                return langues["selected_language"]["MVP BAD DPS P"].format(bad_dps_name=bad_dps_name, sup_name=sup_name)
+                return LANGUES["selected_language"]["MVP BAD DPS P"].format(bad_dps_name=bad_dps_name, sup_name=sup_name)
     
     ################################ LVP ################################
     
@@ -402,7 +404,7 @@ class Boss:
         self.add_lvps(i_players)
         lvp_names = self.players_to_string(i_players)
         cc_ratio  = max_cc / total_cc * 100
-        return langues["selected_language"]["LVP BOSS CC"].format(lvp_names=lvp_names, max_cc=max_cc, cc_ratio=cc_ratio)
+        return LANGUES["selected_language"]["LVP BOSS CC"].format(lvp_names=lvp_names, max_cc=max_cc, cc_ratio=cc_ratio)
     
     def get_lvp_cc_total(self):
         i_players, max_cc, total_cc = Stats.get_max_value(self, self.get_cc_total)
@@ -411,7 +413,7 @@ class Boss:
         self.add_lvps(i_players)
         lvp_names = self.players_to_string(i_players)
         cc_ratio  = max_cc / total_cc * 100
-        return langues["selected_language"]["LVP TOTAL CC"].format(lvp_names=lvp_names, max_cc=max_cc, cc_ratio=cc_ratio)
+        return LANGUES["selected_language"]["LVP TOTAL CC"].format(lvp_names=lvp_names, max_cc=max_cc, cc_ratio=cc_ratio)
     
     def get_lvp_dps(self):
         i_players, max_dmg, total_dmg = Stats.get_max_value(self, self.get_dmg_boss)
@@ -421,8 +423,8 @@ class Boss:
         foodSwapCount                 = self.get_foodswap_count(i_players[0])
         self.add_lvps(i_players) 
         if foodSwapCount:
-            return langues["selected_language"]["LVP DPS FOODSWAP"].format(lvp_dps_name=lvp_dps_name, max_dmg=max_dmg, dmg_ratio=dmg_ratio, dps=dps, foodSwapCount=foodSwapCount)
-        return langues["selected_language"]["LVP DPS"].format(lvp_dps_name=lvp_dps_name, max_dmg=max_dmg, dmg_ratio=dmg_ratio, dps=dps)
+            return LANGUES["selected_language"]["LVP DPS FOODSWAP"].format(lvp_dps_name=lvp_dps_name, max_dmg=max_dmg, dmg_ratio=dmg_ratio, dps=dps, foodSwapCount=foodSwapCount)
+        return LANGUES["selected_language"]["LVP DPS"].format(lvp_dps_name=lvp_dps_name, max_dmg=max_dmg, dmg_ratio=dmg_ratio, dps=dps)
     ################################ DATA BOSS ################################
     
     def get_pos_boss(self, start: int = 0, end: int = None):
@@ -440,7 +442,7 @@ class Boss:
                 end   = phase['end']
                 if inMilliSeconds:
                     return start, end
-                return time_to_index(start), time_to_index(end)
+                return func.time_to_index(start), func.time_to_index(end)
         raise ValueError(f'{target_phase} not found')
     
     def get_mech_value(self, i_player: int, mech_name: str, phase: str="Full Fight"):

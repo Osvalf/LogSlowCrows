@@ -1,9 +1,8 @@
 import math
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta
 
-from const import *
-from languages import *
-
+from const import BOSS_DICT, CUSTOM_NAMES, EMOTE_WINGMAN, ALL_PLAYERS
+from languages import LANGUES
 
 def time_to_index(time: int):  # time in millisecond
     return int(time / 300)
@@ -153,23 +152,23 @@ def get_message_reward(logs: list, players: dict, titre="Run"):
 
         if type(wingname) == int: 
             if wingname == 1:
-                run_message += langues["selected_language"]["W1"].format(wing_duration=wing_duration)
+                run_message += LANGUES["selected_language"]["W1"].format(wing_duration=wing_duration)
                 
             elif wingname == 3:
                 escort_in_run = any(boss.name == "ESCORT" for boss in wing)
                 if escort_in_run:
                     run_message += f"## W3 - *{wing_duration}*\n"
                 else:
-                    run_message += langues["selected_language"]["W3"].format(wing_duration=wing_duration)
+                    run_message += LANGUES["selected_language"]["W3"].format(wing_duration=wing_duration)
                     
             elif wingname == 7:
-                run_message += langues["selected_language"]["W7"].format(wing_duration=wing_duration)
+                run_message += LANGUES["selected_language"]["W7"].format(wing_duration=wing_duration)
                 
             else:
                 run_message += f"## W{wingname} - *{wing_duration}*\n"    
                   
         else:
-            run_message += langues["selected_language"][wingname].format(wing_duration=wing_duration)
+            run_message += LANGUES["selected_language"][wingname].format(wing_duration=wing_duration)
         
         for boss in wing:
             boss_name = boss.name + (" CM" if boss.cm else "")
@@ -201,11 +200,11 @@ def get_message_reward(logs: list, players: dict, titre="Run"):
         lvps = ', '.join(lvp_names)
         note_wingman = total_wingman_score / notes_nb
         if max_mvp_score > 1:
-            run_message += langues["selected_language"]["MVP"].format(mvps=mvps, max_mvp_score=max_mvp_score)
+            run_message += LANGUES["selected_language"]["MVP"].format(mvps=mvps, max_mvp_score=max_mvp_score)
         if max_lvp_score > 1:
-            run_message += langues["selected_language"]["LVP"].format(lvps=lvps, max_lvp_score=max_lvp_score)
-        run_message += langues["selected_language"]["TIME"].format(run_duration=run_duration)
-        run_message += langues["selected_language"]["WINGMAN"].format(note_wingman=note_wingman, emote_wingman=EMOTE_WINGMAN)
+            run_message += LANGUES["selected_language"]["LVP"].format(lvps=lvps, max_lvp_score=max_lvp_score)
+        run_message += LANGUES["selected_language"]["TIME"].format(run_duration=run_duration)
+        run_message += LANGUES["selected_language"]["WINGMAN"].format(note_wingman=note_wingman, emote_wingman=EMOTE_WINGMAN)
 
     
     player_rankings = list(filter(
