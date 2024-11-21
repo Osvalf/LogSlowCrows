@@ -22,6 +22,15 @@ class ThreadPoolExecutorStackTraced(concurrent.futures.ThreadPoolExecutor):
         except Exception:
             print(f"Problematic log is : {args[0]}")
             raise sys.exc_info()[0](traceback.format_exc())
+        
+def debuglog(url):
+    log = Log(url)
+    boss = all_bosses[0]
+    print(boss.start_date)
+    print(boss.lvp)
+    print(boss.mvp)
+    for player in all_players.values():
+        print(f"{player.name} : MVP{player.mvps} LVP{player.lvps}")
 
 def main(args) -> None:
     input_lines = txt_file_to_lines("src/input logs.txt")
@@ -33,14 +42,18 @@ def main(args) -> None:
     # Pour tester séparément
     # input_urls = ["https://dps.report/XXNc-20240117-232331_vg"]
     
-    with ThreadPoolExecutorStackTraced() as executor:
+    """with ThreadPoolExecutorStackTraced() as executor:
         futures = [executor.submit(Log, url) for url in input_urls]
         for future in futures:
             try:
                 test = future.result()
             except TypeError as e:
-                pass
-
+                pass"""
+    for i in range(len(input_urls)):
+        url = input_urls[i]
+        Log(url)
+        print(f"{i+1}/{len(input_urls)}")
+    
     print("\n")
     if args.debug:
         IPython.embed()
@@ -60,11 +73,6 @@ if __name__ == "__main__":
     arg.add_argument('--debug', action='store_true')
     args = arg.parse_args()
     main(args)
-    """log = Log("https://dps.report/GOkR-20240921-012125_xera")
-    boss = all_bosses[0]
-    print(boss.mvp)
-    print(boss.lvp)
-    for player in all_players.values():
-        print(f"{player.name} : MVP{player.mvps} LVP{player.lvps}")"""
+    #debuglog("https://dps.report/lMKf-20221022-211104_sh")
     end_time = perf_counter()
     print(f"--- {end_time - start_time:.3f} seconds ---\n")

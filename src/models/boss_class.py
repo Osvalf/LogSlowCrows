@@ -24,6 +24,8 @@ class Boss:
         self.wingman_time       = self.get_wingman_time()
         self.wingman_percentile = self.get_wingman_percentile()
         self.real_phase_id      = self.get_phase_id(self.real_phase)
+        self.mvp_accounts       = []
+        self.lvp_accounts       = []
         for i in self.player_list:
             account = self.get_player_account(i)
             player  = all_players.get(account)
@@ -288,12 +290,14 @@ class Boss:
                     return (i+i_enter) * 150
         return
     
-    def add_mvps(self, players: int):
+    def add_mvps(self, players: list[int]):
+        self.mvp_accounts = [self.get_player_account(i) for i in players]
         for i in players:
             account = self.get_player_account(i)
             all_players[account].mvps += 1
                 
-    def add_lvps(self, players: int):
+    def add_lvps(self, players: list[int]):
+        self.lvp_accounts = [self.get_player_account(i) for i in players]
         for i in players:
             account = self.get_player_account(i)
             all_players[account].lvps += 1
