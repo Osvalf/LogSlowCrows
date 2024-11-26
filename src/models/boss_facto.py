@@ -1,16 +1,12 @@
 from models.log_class import Log
-from const import *
+from const import BOSS_DICT, EXTRA_BOSS_DICT, ALL_BOSSES
 from .sub_models.raid_bosses import *
 from .sub_models.ibs_bosses import *
 from .sub_models.eod_bosses import *
 from .sub_models.soto_bosses import *
 from .sub_models.frac_bosses import *
 
-class BossFactory:
-    @staticmethod
-    def create_boss(log : Log):
-        boss = None
-        factory = {#  RAID BOSSES
+_BOSS_FACTORY = {        #  RAID BOSSES
                    "vg"   : VG,
                    "gors" : GORS,
                    "sab"  : SABETHA,   
@@ -37,6 +33,10 @@ class BossFactory:
                    "adina": ADINA,
                    "sabir": SABIR,
                    "qpeer": QTP,
+                   
+                   "greer": GREER,
+                   "decima": DECIMA,
+                   "ura"  : URA,
                    
                    #  IBS BOSSES
                    "ice"  : ICE,
@@ -74,9 +74,14 @@ class BossFactory:
                    #  YES
                    
                    "golem": GOLEM}
-        boss_name = boss_dict.get(log.jcontent['triggerID']) or extra_boss_dict.get(log.jcontent['triggerID'])
+
+class BossFactory:
+    @staticmethod
+    def create_boss(log : Log):   
+        boss_name = BOSS_DICT.get(log.jcontent['triggerID']) or EXTRA_BOSS_DICT.get(log.jcontent['triggerID'])
         if boss_name:
-            all_bosses.append(factory[boss_name](log))
+            if boss_name != "boss":
+                ALL_BOSSES.append(_BOSS_FACTORY[boss_name](log))
                  
     
     

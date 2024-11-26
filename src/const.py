@@ -1,11 +1,15 @@
 import json
 
+DEFAULT_LANGUAGE = "FR"
+DEFAULT_TITLE = "Run"
+DEFAULT_INPUT_FILE = "src/input_logs.txt"
+
 BIG = float('inf')
 
-all_bosses = []
-all_players = {}
+ALL_BOSSES = []
+ALL_PLAYERS = {}
 
-boss_dict = {
+BOSS_DICT = {
     #  RAID BOSSES
     15438: "vg",
     15429: "gors",
@@ -33,6 +37,10 @@ boss_dict = {
     22006: "adina",
     21964: "sabir",
     22000: "qpeer",
+    
+    26725: "greer",
+    26774: "decima",
+    26712: "ura",
     
     #  IBS BOSSES
     22154: "ice",
@@ -68,12 +76,12 @@ boss_dict = {
     26231: "eparc"
     }
 
-extra_boss_dict = {
+EXTRA_BOSS_DICT = {
     16199: "golem",
     19645: "golem"
 }
 
-custom_names = {
+CUSTOM_NAMES = {
     "James Heal.5467"    : "Ravi",
     "Ravi.5812"          : "Ravi",
     "hidrozig.5201"      : "Hidrozig",
@@ -119,4 +127,4 @@ custom_names = {
 with open('wingman_updater/WINGMAN_DATA.json') as f:
     wingman_data = json.load(f)
     
-emote_wingman = ":wing:"
+EMOTE_WINGMAN = ":wing:"

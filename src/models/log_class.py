@@ -1,7 +1,5 @@
 import requests
 import json
- 
-from models.player_class import *
 
 class Log:
     def __init__(self, url: str):
