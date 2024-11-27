@@ -41,10 +41,7 @@ def debuglog(url):
         print(f"{player.name} : MVP{player.mvps} LVP{player.lvps}")
 
 def main(input_file, **kwargs) -> None:
-    input_lines = func.txt_file_to_lines(input_file)
-    input_urls, error = func.lines_to_urls(input_lines, **kwargs)
-    if error:
-        print(input_urls)
+    input_urls = func.txt_file_to_urls(input_file)
     # Pour tester séparément
     # input_urls = ["https://dps.report/XXNc-20240117-232331_vg"]
     
@@ -56,10 +53,9 @@ def main(input_file, **kwargs) -> None:
     if kwargs.get("debug", False):
         IPython.embed()
     # Fonction reward si pas de test
-    if not error:
-        split_run_message = func.get_message_reward(ALL_BOSSES, ALL_PLAYERS, titre=DEFAULT_TITLE)
-        for message in split_run_message:
-            print(message)
+    split_run_message = func.get_message_reward(ALL_BOSSES, ALL_PLAYERS, titre=DEFAULT_TITLE)
+    for message in split_run_message:
+        print(message)
 
     print("\n")
 
