@@ -43,8 +43,9 @@ french = {
     "ESCORT LVP TOWER P": "⬗ *[**LVP** : {lvp_names} qui ont **réussit** tous leurs **duo cap**]*",
     
     ################################ KC ################################
+    "KC MVP ORB": "⬗ *[**MVP** : {mvp_names} qui ont donné **{min_orb} orbes** au **Boss**]*",
     "KC MVP 0 ORB": "⬗ *[**MVP** : {mvp_names} avec aucune **orbe** collectée sur tout le fight]*",
-    "KC MVP ORB": "⬗ *[**MVP** : {mvp_names} avec seulement **{min_orb}** orbes collectées sur tout le fight]*",
+    "KC MVP ORB": "⬗ *[**MVP** : {mvp_names} avec seulement **{min_orb} orbes** collectées sur tout le fight]*",
     
     "KC LVP ORB": "⬗ *[**LVP** : {lvp_names} avec **{max_orb}** orbes collectées]*",
     

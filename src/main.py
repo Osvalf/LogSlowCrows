@@ -64,7 +64,7 @@ if __name__ == "__main__":
     start_time = perf_counter()
     LANGUES["selected_language"] = LANGUES["FR"]
     args = _make_parser().parse_args()
-    main(args.input, reward_mode=args.reward, debug=args.debug, language=args.language)
-    #debuglog("https://dps.report/o5P2-20241124-231538_boss")
+    #main(args.input, reward_mode=args.reward, debug=args.debug, language=args.language)
+    debuglog("https://dps.report/g4dR-20241130-220500_kc")
     end_time = perf_counter()
     print(f"--- {end_time - start_time:.3f} seconds ---\n")
