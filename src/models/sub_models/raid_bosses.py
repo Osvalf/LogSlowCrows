@@ -1149,6 +1149,7 @@ class DHUUM(Boss):
         if len(i_players) > 1:
             return LANGUES["selected_language"]["DHUUM MVP CRACKS P"].format(mvp_names=mvp_names, max_cracks=max_cracks)
         return
+
     
     ################################ LVP ################################
     

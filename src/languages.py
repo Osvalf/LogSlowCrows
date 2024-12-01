@@ -6,5 +6,3 @@ LANGUES = {
     "FR": french,
     "EN": english
 }
-
-
