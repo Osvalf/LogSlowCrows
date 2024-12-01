@@ -1,11 +1,11 @@
 from argparse import ArgumentParser
 from time import perf_counter
 import grequests
+import func
 
 from const import REQUEST_HEADERS, DPS_REPORT_JSON_URL, DEFAULT_LANGUAGE, DEFAULT_TITLE, DEFAULT_INPUT_FILE, ALL_BOSSES, ALL_PLAYERS
 from models.log_class import Log
 from models.boss_facto import BossFactory
-import func
 from languages import LANGUES
 from input import InputParser
 

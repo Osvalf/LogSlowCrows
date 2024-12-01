@@ -19,12 +19,9 @@ class VG(Boss):
         VG.last  = self
         
     def get_mvp(self):
-        msg_bleu = self.mvp_bleu()
+        msg_bleu= self.mvp_bleu()
         if msg_bleu:
             return msg_bleu
-        msg_bad_dps = self.get_bad_dps(extra_exclude=[self.is_condi])
-        if msg_bad_dps:
-            return msg_bad_dps
         return    
     
     def get_lvp(self):
@@ -38,6 +35,8 @@ class VG(Boss):
     def mvp_bleu(self):
         i_players, max_bleu, _ = Stats.get_max_value(self, self.get_bleu)
         mvp_names              = self.players_to_string(i_players)
+        if max_bleu < 3:
+            return self.get_bad_dps(extra_exclude=[self.is_condi])
         if max_bleu > 1:
             self.add_mvps(i_players)
             nb_players = len(i_players)
@@ -179,6 +178,10 @@ class SABETHA(Boss):
         msg_dmg_split = self.mvp_dmg_split()
         if msg_dmg_split:
             return self.mvp_dmg_split()
+        
+        msg_bad_dps = self.get_bad_dps(extra_exclude=[self.is_cannon])
+        if msg_bad_dps:
+            return msg_bad_dps
         return
     
     def get_lvp(self):
@@ -300,6 +303,11 @@ class SLOTH(Boss):
         msg_cc = self.mvp_cc_sloth()
         if msg_cc:
             return msg_cc
+        
+        msg_bad_dps = self.get_bad_dps(extra_exclude=[self.is_shroom])
+        if msg_bad_dps:
+            return msg_bad_dps
+        
         return    
         
     def get_lvp(self):
@@ -529,7 +537,12 @@ class KC(Boss):
         KC.last  = self  
         
     def get_mvp(self):
-        return self.mvp_orb_kc()
+        msg_orb = self.mvp_orb_kc()
+        if msg_orb:
+            return msg_orb
+        msg_bad_dps = self.get_bad_dps()
+        if msg_bad_dps:
+            return msg_bad_dps
     
     def get_lvp(self):
         return self.lvp_orb_kc()
@@ -539,11 +552,12 @@ class KC(Boss):
     def mvp_orb_kc(self):
         i_players, min_orb, _ = Stats.get_min_value(self, self.get_good_orb)
         mvp_names             = self.players_to_string(i_players)
-        self.add_mvps(i_players)
-        if min_orb == 0:
-            return LANGUES["selected_language"]["KC MVP 0 ORB"].format(mvp_names=mvp_names)
-        else:
-            return LANGUES["selected_language"]["KC MVP ORB"].format(mvp_names=mvp_names, min_orb=min_orb)
+        if min_orb < 7:
+            self.add_mvps(i_players)
+            if min_orb == 0:
+                return LANGUES["selected_language"]["KC MVP 0 ORB"].format(mvp_names=mvp_names)
+            else:
+                return LANGUES["selected_language"]["KC MVP ORB"].format(mvp_names=mvp_names, min_orb=min_orb)
             
     ################################ LVP ################################
     
@@ -678,9 +692,11 @@ class XERA(Boss):
     
     def get_gliding_death(self):
         dead = []
-        for i in self.player_list:
-            if self.log.pjcontent['players'][i]['defenses'][5]['deadCount'] > 0:
-                dead.append(i)
+        glide_phase = self.get_phase_id("Gliding")
+        if glide_phase != 0:
+            for i in self.player_list:
+                if self.log.pjcontent['players'][i]['defenses'][glide_phase]['deadCount'] > 0:
+                    dead.append(i)
         return dead     
 
 ################################ CAIRN ################################
@@ -715,7 +731,7 @@ class CAIRN(Boss):
     def mvp_tp(self):
         i_players, max_tp, _ = Stats.get_max_value(self, self.get_tp)
         mvp_names            = self.players_to_string(i_players)
-        if max_tp > 1:
+        if max_tp > 2:
             self.add_mvps(i_players)
             if len(i_players) == 1:
                 return LANGUES["selected_language"]["CAIRN MVP TP S"].format(mvp_names=mvp_names, max_tp=max_tp)
@@ -1107,6 +1123,9 @@ class DHUUM(Boss):
         msg_cracks = self.mvp_cracks()
         if msg_cracks:
             return msg_cracks
+        msg_bad_dps = self.get_bad_dps(extra_exclude=[self.is_green])
+        if msg_bad_dps:
+            return msg_bad_dps
         return
     
     def get_lvp(self):
@@ -1125,7 +1144,8 @@ class DHUUM(Boss):
             return LANGUES["selected_language"]["DHUUM MVP CRACKS S"].format(mvp_names=mvp_names, max_cracks=max_cracks)
         if len(i_players) > 1:
             return LANGUES["selected_language"]["DHUUM MVP CRACKS P"].format(mvp_names=mvp_names, max_cracks=max_cracks)
-        return 
+        return
+
     
     ################################ LVP ################################
     
@@ -1207,12 +1227,34 @@ class LARGOS(Boss):
     def mvp_dash(self):
         i_players, max_dash, _ = Stats.get_max_value(self, self.get_dash, exclude=[self.is_heal, self.is_tank])
         mvp_names              = self.players_to_string(i_players)
-        self.add_mvps(i_players)
-        if len(i_players) == 1:
-            return LANGUES["selected_language"]["LARGOS MVP DASH S"].format(mvp_names=mvp_names, max_dash=max_dash)
-        if len(i_players) > 1:
-            return LANGUES["selected_language"]["LARGOS MVP DASH P"].format(mvp_names=mvp_names, max_dash=max_dash)
+        if max_dash < 7:
+            return self.get_bad_dps()
+        else:
+            self.add_mvps(i_players)
+            if len(i_players) == 1:
+                return LANGUES["selected_language"]["LARGOS MVP DASH S"].format(mvp_names=mvp_names, max_dash=max_dash)
+            if len(i_players) > 1:
+                return LANGUES["selected_language"]["LARGOS MVP DASH P"].format(mvp_names=mvp_names, max_dash=max_dash)
         return
+    
+    def get_bad_dps(self, extra_exclude: list[classmethod]=[]):
+        i_sup, sup_max_dmg, _ = Stats.get_max_value(self, self.get_dmg_boss, exclude=[self.is_dps])
+        sup_name              = self.players_to_string(i_sup)
+        bad_dps               = []
+        for i in self.player_list:   
+            if any(filter_func(i) for filter_func in extra_exclude) or self.is_dead(i) or self.is_support(i):
+                continue
+            dps = self.get_dmg_boss(i)
+            if dps < sup_max_dmg:
+                if not(self.name == "QUOIDIMM" and self.get_player_spe(i) == "Spellbreaker"): 
+                    bad_dps.append(i)
+        if bad_dps:
+            self.add_mvps(bad_dps)
+            bad_dps_name = self.players_to_string(bad_dps)
+            if len(bad_dps) == 1:
+                return LANGUES["selected_language"]["MVP BAD DPS S"].format(bad_dps_name=bad_dps_name, sup_name=sup_name)
+            else:
+                return LANGUES["selected_language"]["MVP BAD DPS P"].format(bad_dps_name=bad_dps_name, sup_name=sup_name)
     
     ################################ LVP ################################ 
     
@@ -1225,7 +1267,12 @@ class LARGOS(Boss):
     ################################ DATA MECHAS ################################
 
     def get_dash(self, i_player: int):
-        return self.get_mech_value(i_player, "Vapor Rush Charge") 
+        return self.get_mech_value(i_player, "Vapor Rush Charge")
+    
+    def get_dmg_boss(self, i_player: int):
+        dmg = self.log.pjcontent['players'][i_player]['dpsTargets'][0][self.real_phase_id]['damage']
+        dmg += self.log.pjcontent['players'][i_player]['dpsTargets'][1][self.real_phase_id]['damage']
+        return dmg
 
 ################################ QADIM ################################
 
@@ -1333,6 +1380,9 @@ class ADINA(Boss):
         ADINA.last = self
         
     def get_mvp(self):
+        msg_bad_dps = self.get_bad_dps()
+        if msg_bad_dps:
+            return msg_bad_dps
         return self.mvp_dmg_split()
     
     def get_lvp(self):
@@ -1437,10 +1487,11 @@ class QTP(Boss):
         return self.get_lvp_dps() 
 
     def is_alac(self, i_player: int):
-        min_alac_contrib    = 30
-        alac_id             = 30328
-        boon_path           = self.log.pjcontent['players'][i_player].get("groupBuffsActive")
-        player_alac_contrib = 0
+        min_alac_contrib     = 30
+        alac_id              = 30328
+        boon_path            = self.log.pjcontent['players'][i_player].get("groupBuffsActive")
+        player_alac_contrib  = 0
+        pylon_players_in_sub = []
         if boon_path:
             for boon in boon_path:
                 if boon["id"] == alac_id:
@@ -1454,6 +1505,7 @@ class QTP(Boss):
         quick_id             = 1187
         boon_path            = self.log.pjcontent['players'][i_player].get("groupBuffsActive")
         player_quick_contrib = 0
+        pylon_players_in_sub = []
         if boon_path:
             for boon in boon_path:
                 if boon["id"] == quick_id:
@@ -1482,6 +1534,112 @@ class QTP(Boss):
 
     def get_orb_caught(self, i_player: int):
         return self.get_mech_value(i_player, "Critical Mass")
+    
+################################ GREER ################################
+
+class GREER(Boss):
+    
+    last    = None
+    name    = "GREG"
+    wing    = 8
+    boss_id = 26725
+
+    def __init__(self, log: Log):
+        super().__init__(log)
+        self.mvp = self.get_mvp()
+        self.lvp = self.get_lvp()
+        GREER.last = self
+        
+    def get_mvp(self):
+        pass
+    
+    def get_lvp(self):
+        pass
+
+    ################################ MVP ################################
+    
+    
+    
+    ################################ LVP ################################
+    
+    
+    
+    ################################ CONDITIONS ################################
+    
+    
+    
+    ################################ DATA MECHAS ################################
+    
+################################ GREER ################################
+
+class DECIMA(Boss):
+    
+    last    = None
+    name    = "DECIMA"
+    wing    = 8
+    boss_id = 26774
+
+    def __init__(self, log: Log):
+        super().__init__(log)
+        self.mvp = self.get_mvp()
+        self.lvp = self.get_lvp()
+        DECIMA.last = self
+        
+    def get_mvp(self):
+        pass
+    
+    def get_lvp(self):
+        pass
+
+    ################################ MVP ################################
+    
+    
+    
+    ################################ LVP ################################
+    
+    
+    
+    ################################ CONDITIONS ################################
+    
+    
+    
+    ################################ DATA MECHAS ################################
+    
+################################ GREER ################################
+
+class URA(Boss):
+    
+    last    = None
+    name    = "URA"
+    wing    = 8
+    boss_id = 26712
+
+    def __init__(self, log: Log):
+        super().__init__(log)
+        self.mvp = self.get_mvp()
+        self.lvp = self.get_lvp()
+        GREER.last = self
+        
+    def get_mvp(self):
+        pass
+    
+    def get_lvp(self):
+        pass
+
+    ################################ MVP ################################
+    
+    
+    
+    ################################ LVP ################################
+    
+    
+    
+    ################################ CONDITIONS ################################
+    
+    
+    
+    ################################ DATA MECHAS ################################
+
     
 ################################ GOLEM CHAT STANDARD ################################
 

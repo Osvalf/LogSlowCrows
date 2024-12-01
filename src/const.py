@@ -40,6 +40,10 @@ BOSS_DICT = {
     21964: "sabir",
     22000: "qpeer",
     
+    26725: "greer",
+    26774: "decima",
+    26712: "ura",
+    
     #  IBS BOSSES
     22154: "ice",
     22343: "falln",
@@ -97,8 +101,10 @@ REQUEST_HEADERS = {
 
 CUSTOM_NAMES = {
     "James Heal.5467"    : "Ravi",
+    "Ravi.5812"          : "Ravi",
     "hidrozig.5201"      : "Hidrozig",
     "histoRy.6401"       : "HistoRy",
+    "Brizeh.5014"        : "Brizeh",
     "Twiyaka.9738"       : "Brizeh",
     "Ava.7895"           : "Ava",
     "Rhonk.4283"         : "Rhonk",
@@ -124,7 +130,7 @@ CUSTOM_NAMES = {
     "BobbyFrasier.8450"  : "BobbyFrasier",
     "ich.7086"           : "Ich",
     "Yoomi.8251"         : "Yoomi",
-    "Jaydens.9812"       : "Jadam",
+    "Jayden.9812"       : "Jadam",
     "PonGX.7832"         : "Pongi",
     "Rayden.3145"        : "Rayden",
     "Teh Aajian.9714"    : "Teh Asian",

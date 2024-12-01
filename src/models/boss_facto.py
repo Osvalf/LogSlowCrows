@@ -6,7 +6,8 @@ from .sub_models.eod_bosses import *
 from .sub_models.soto_bosses import *
 from .sub_models.frac_bosses import *
 
-_BOSS_FACTORY = {#  RAID BOSSES
+_BOSS_FACTORY = {
+    #  RAID BOSSES
     "vg"   : VG,
     "gors" : GORS,
     "sab"  : SABETHA,   
@@ -68,7 +69,6 @@ _BOSS_FACTORY = {#  RAID BOSSES
     "eparc": EPARCH,
 
     #  YES
-
     "golem": GOLEM
 }
 class BossFactory:
