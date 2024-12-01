@@ -554,6 +554,8 @@ class KC(Boss):
         mvp_names             = self.players_to_string(i_players)
         if min_orb < 7:
             self.add_mvps(i_players)
+            if min_orb < 0:
+                return LANGUES["selected_language"]["KC MVP BAD ORBS"].format(mvp_names=mvp_names, min_orb=-min_orb)
             if min_orb == 0:
                 return LANGUES["selected_language"]["KC MVP 0 ORB"].format(mvp_names=mvp_names)
             else:
@@ -574,9 +576,11 @@ class KC(Boss):
     ################################ DATA MECHAS ################################
 
     def get_good_orb(self, i_player: int):
-        red_orbs   = self.get_mech_value(i_player, 'Good Red Orb')
-        white_orbs = self.get_mech_value(i_player, 'Good White Orb')
-        return red_orbs + white_orbs
+        good_red_orbs   = self.get_mech_value(i_player, 'Good Red Orb')
+        good_white_orbs = self.get_mech_value(i_player, 'Good White Orb')
+        bad_red_orbs    = self.get_mech_value(i_player, 'Bad Red Orb')
+        bad_white_orbs  = self.get_mech_value(i_player, 'Bad White Orb')
+        return good_red_orbs + good_white_orbs - bad_red_orbs - bad_white_orbs
 
 ################################ XERA ################################
 
