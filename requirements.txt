@@ -1,4 +1,3 @@
 requests
 numpy
-ipython
-
+grequests

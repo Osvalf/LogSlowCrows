@@ -6,6 +6,8 @@ DEFAULT_INPUT_FILE = "src/input_logs.txt"
 
 BIG = float('inf')
 
+DPS_REPORT_JSON_URL = "https://dps.report/getJson"
+
 ALL_BOSSES = []
 ALL_PLAYERS = {}
 
@@ -75,6 +77,22 @@ BOSS_DICT = {
 EXTRA_BOSS_DICT = {
     16199: "golem",
     19645: "golem"
+}
+
+REQUEST_HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:132.0) Gecko/20100101 Firefox/132.0',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+    'Accept-Language': 'fr,fr-FR;q=0.8,en-US;q=0.5,en;q=0.3',
+    'Alt-Used': 'dps.report',
+    'Connection': 'keep-alive',
+    'Upgrade-Insecure-Requests': '1',
+    'Sec-Fetch-Dest': 'document',
+    'Sec-Fetch-Mode': 'navigate',
+    'Sec-Fetch-Site': 'none',
+    'Sec-Fetch-User': '?1',
+    'Priority': 'u=0, i',
+    'Pragma': 'no-cache',
+    'Cache-Control': 'no-cache',
 }
 
 CUSTOM_NAMES = {

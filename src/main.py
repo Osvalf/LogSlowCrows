@@ -1,15 +1,13 @@
 from argparse import ArgumentParser
-from concurrent.futures import ThreadPoolExecutor, wait
-import IPython
 from time import perf_counter
-import sys
-import traceback
+import grequests
 
-from const import DEFAULT_LANGUAGE, DEFAULT_TITLE, DEFAULT_INPUT_FILE, ALL_BOSSES, ALL_PLAYERS
-
+from const import REQUEST_HEADERS, DPS_REPORT_JSON_URL, DEFAULT_LANGUAGE, DEFAULT_TITLE, DEFAULT_INPUT_FILE, ALL_BOSSES, ALL_PLAYERS
 from models.log_class import Log
+from models.boss_facto import BossFactory
 import func
 from languages import LANGUES
+from input import InputParser
 
 def _make_parser() -> ArgumentParser:
     parser = ArgumentParser()
@@ -19,39 +17,23 @@ def _make_parser() -> ArgumentParser:
     parser.add_argument('-i', '--input', required=False, default=DEFAULT_INPUT_FILE)
     return parser
 
-class ThreadPoolExecutorStackTraced(ThreadPoolExecutor):
-
-    def submit(self, fn, *args, **kwargs):
-        return super(ThreadPoolExecutorStackTraced, self).submit(
-            self._function_wrapper, fn, *args, **kwargs)
-
-    def _function_wrapper(self, fn, *args, **kwargs):
-        try:
-            return fn(*args, **kwargs)
-        except Exception:
-            print(f"Problematic log is : {args[0]}")
-            raise sys.exc_info()[0](traceback.format_exc())
-
 def main(input_file, **kwargs) -> None:
-    input_lines = func.txt_file_to_lines(input_file)
-    input_urls, error = func.lines_to_urls(input_lines, **kwargs)
-    if error:
-        print(input_urls)
-    # Pour tester séparément
-    # input_urls = ["https://dps.report/XXNc-20240117-232331_vg"]
-    
-    with ThreadPoolExecutorStackTraced() as executor:
-        futures = [executor.submit(Log, url) for url in input_urls]
-        wait(futures)
-        
+    urls = InputParser(input_file).validate().urls
+    requests = []
+    for url in urls:
+        requests.append(grequests.get(url))
+        requests.append(grequests.get(DPS_REPORT_JSON_URL, params=InputParser.api_params(url), headers=REQUEST_HEADERS))
+    responses = grequests.map(requests, size=2*len(urls))
+    logs = [Log(url) for url in urls]
+    for i in range(len(urls)):
+        logs[i].set_jcontent(responses[2*i])
+        logs[i].set_pjcontent(responses[2*i+1])
+    for log in logs:
+        BossFactory.create_boss(log)
     print("\n")
-    if kwargs.get("debug", False):
-        IPython.embed()
-    # Fonction reward si pas de test
-    if not error:
-        split_run_message = func.get_message_reward(ALL_BOSSES, ALL_PLAYERS, titre=DEFAULT_TITLE)
-        for message in split_run_message:
-            print(message)
+    split_run_message = func.get_message_reward(ALL_BOSSES, ALL_PLAYERS, titre=DEFAULT_TITLE)
+    for message in split_run_message:
+        print(message)
 
     print("\n")
 
