@@ -22,7 +22,7 @@ def main(input_file, **kwargs) -> None:
     requests = []
     for url in urls:
         requests.append(grequests.get(url))
-        requests.append(grequests.get(DPS_REPORT_JSON_URL, params=InputParser.api_params(url), headers=REQUEST_HEADERS))
+        requests.append(grequests.get(DPS_REPORT_JSON_URL, params={"permalink": url}, headers=REQUEST_HEADERS))
     responses = grequests.map(requests, size=2*len(urls))
     logs = [Log(url) for url in urls]
     for i in range(len(urls)):
