@@ -20,7 +20,7 @@ def _make_parser() -> ArgumentParser:
 def debugLog(url):
     log = Log(url)
     jcontent = grequests.get(url)
-    pjcontent = grequests.get(DPS_REPORT_JSON_URL, params=InputParser.api_params(url), headers=REQUEST_HEADERS)
+    pjcontent = grequests.get(DPS_REPORT_JSON_URL, params={"permalink": url}, headers=REQUEST_HEADERS)
     responses = grequests.map([jcontent, pjcontent], size=2)
     log.set_jcontent(responses[0])
     log.set_pjcontent(responses[1])
