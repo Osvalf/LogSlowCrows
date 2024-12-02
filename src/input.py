@@ -23,7 +23,3 @@ class InputParser:
         if problems:
             sys.exit(print(f"Invalid urls: {problems}"))
         return self
-    
-    @staticmethod
-    def api_params(url):
-        return {"permalink": url.split("report/")[1]}
