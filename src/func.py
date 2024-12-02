@@ -1,5 +1,6 @@
 import math
-from datetime import timedelta
+from datetime import timedelta, datetime
+import re
 
 from const import BOSS_DICT, CUSTOM_NAMES, EMOTE_WINGMAN, ALL_PLAYERS
 from languages import LANGUES
@@ -7,12 +8,10 @@ from languages import LANGUES
 def time_to_index(time: int):  # time in millisecond
     return int(time / 300)
 
-
 def get_dist(pos1: list[float], pos2: list[float]):
     x1, y1 = pos1[0], pos1[1]
     x2, y2 = pos2[0], pos2[1]
     return math.hypot(x1 - x2, y1 - y2)
-
 
 def disp_time(td: timedelta):
     days, seconds = td.days, td.seconds
@@ -28,53 +27,37 @@ def disp_time(td: timedelta):
     else:
         return f"{seconds}s"
 
-
-def txt_file_to_lines(filepath: str):
+def txt_file_to_urls(filepath: str):
     try:
         with open(filepath, 'r') as file:
-            return file.readlines()
+            text = file.read()
     except FileNotFoundError:
         print(f"Error: File not found at {filepath}")
-        return []
+        return ""
+    # Liste des mots autorisés pour le dernier segment
+    valid_terms = list(BOSS_DICT.values())
+    valid_terms.sort(key=lambda x: (len(x), x), reverse=True)
+    # RegEx pour capturer chaque lien valide, même s'ils sont collés
+    regex_full = rf"https://dps\.report/[a-zA-Z0-9]{{4}}-\d{{8}}-\d{{6}}_({'|'.join(valid_terms)})"
 
+    # Utilisation de re.finditer pour identifier toutes les correspondances
+    matches = [match.group(0) for match in re.finditer(regex_full, text)]
 
-def lines_to_urls(lines: list[str], **kwargs):
-    reward_mode = kwargs.get("reward_mode", False)
-    input_urls = []
-    boss_names = list(BOSS_DICT.values())
-    escort_url = None
-
-    for line in lines:
-        line = line.strip()
-        if is_valid_url(line):
-            if line.endswith("esc"):
-                escort_url = line
-            else:
-                input_urls.append(line)
-            boss_names.remove(line.split("_")[1])
-
-    number_urls = len(input_urls)
-
-    if reward_mode and number_urls < 19:
-        error_message = ""
-        error_message += f"Tu as mis seulement **{len(input_urls)}** logs valides sur les **19**\n"
-        error_message += "Voici ceux qu'il manque pour compléter la reward :saluting_face:\n"
-        for e in boss_names:
-            error_message += f"- {e.upper()}\n"
-        return error_message, True
-
-    if escort_url:
-        input_urls.append(escort_url)
-
-    return input_urls, False
-
-
-def is_valid_url(line):
-    parts = line.split("_")
-    if "https://dps.report/" in line and parts[1] in BOSS_DICT.values() and parts[0].split("-")[1].isdigit() and parts[0].split("-")[2].isdigit():
-        return True
-    return False
-
+    # Affichage des résultats
+    dupsChecker = {}
+    for match in matches:
+        end = match.split("_")[-1]
+        if dupsChecker.get(end):
+            dupsChecker[end].append(match)
+        else:
+            dupsChecker[end] = [match]
+    
+    def extract_timestamp(url):
+        timestamp_str = url.split('_')[0] # Extract the timestamp part (e.g., '20241124-205115')
+        date = timestamp_str.split('-')[1]+"-"+timestamp_str.split('-')[2]
+        return datetime.strptime(date, "%Y%m%d-%H%M%S")
+    
+    return [max(urlz, key=extract_timestamp) for urlz in dupsChecker.values()]
 
 def get_message_reward(logs: list, players: dict, titre="Run"):
     if not logs:
@@ -207,12 +190,12 @@ def get_message_reward(logs: list, players: dict, titre="Run"):
         run_message += LANGUES["selected_language"]["WINGMAN"].format(note_wingman=note_wingman, emote_wingman=EMOTE_WINGMAN)
 
     
-    player_rankings = list(filter(
+    """player_rankings = list(filter(
         lambda x: x[1] is not None,
         [(player.account, player.get_mark()) for player in players.values()]
     ))
     player_rankings.sort(key=lambda r: r[1], reverse=True)
-    """for r in player_rankings:
+    for r in player_rankings:
         run_message += f"\n{r[0]} a la note moyenne de {r[1]:0.2f}/20 en dps"
     """
     

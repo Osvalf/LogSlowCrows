@@ -45,8 +45,9 @@ english = {
     "ESCORT LVP TOWER P": "⬗ *[**LVP** : {lvp_names} who **succeded** all of their **solo cap**]*",
     
     ################################ KC ################################
+    "KC MVP ORB"  : "⬗ *[**MVP** : {mvp_names} gived **{min_orb} orbs** to the **boss**]*",
     "KC MVP 0 ORB": "⬗ *[**MVP** : {mvp_names} who dodged every **orbs** in the fight]*",
-    "KC MVP ORB"  : "⬗ *[**MVP** : {mvp_names} only with **{min_orb}** orbs collected in the fight]*",
+    "KC MVP ORB"  : "⬗ *[**MVP** : {mvp_names} only with **{min_orb} orbs** collected in the fight]*",
     
     "KC LVP ORB"  : "⬗ *[**LVP** : {lvp_names} with **{max_orb}** orbs collected, what a team player]*",
     
