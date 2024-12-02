@@ -17,6 +17,21 @@ def _make_parser() -> ArgumentParser:
     parser.add_argument('-i', '--input', required=False, default=DEFAULT_INPUT_FILE)
     return parser
 
+def debugLog(url):
+    log = Log(url)
+    jcontent = grequests.get(url)
+    pjcontent = grequests.get(DPS_REPORT_JSON_URL, params=InputParser.api_params(url), headers=REQUEST_HEADERS)
+    responses = grequests.map([jcontent, pjcontent], size=2)
+    log.set_jcontent(responses[0])
+    log.set_pjcontent(responses[1])
+    BossFactory.create_boss(log)
+    boss = ALL_BOSSES[0]
+    print(boss.start_date)
+    print(boss.mvp)
+    print(boss.lvp)
+    ALL_BOSSES.clear()
+    ALL_PLAYERS.clear()
+
 def main(input_file, **kwargs) -> None:
     urls = InputParser(input_file).validate().urls
     requests = []
@@ -43,5 +58,6 @@ if __name__ == "__main__":
     LANGUES["selected_language"] = LANGUES["FR"]
     args = _make_parser().parse_args()
     main(args.input, reward_mode=args.reward, debug=args.debug, language=args.language)
+    #debugLog("https://dps.report/qlAE-20231229-232739_gors")
     end_time = perf_counter()
     print(f"--- {end_time - start_time:.3f} seconds ---\n")

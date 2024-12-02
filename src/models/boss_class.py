@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta, timezone
 import requests
+import pytz
 
 from models.player_class import *
 from const import ALL_PLAYERS, BOSS_DICT, CUSTOM_NAMES, BIG
@@ -134,7 +135,12 @@ class Boss:
         return player_alac_contrib >= min_alac_contrib
 
     def is_support(self, i_player: int):
-        return self.is_quick(i_player) or self.is_alac(i_player)
+        prof = self.log.pjcontent['players'][i_player]['profession']
+        is_druid_supp = False
+        delta = self.start_date - datetime(2022,7,17,23,0,0,tzinfo=pytz.FixedOffset(60))
+        if prof == "Druid" and delta.total_seconds() < 0:
+            is_druid_supp = True
+        return self.is_quick(i_player) or self.is_alac(i_player) or is_druid_supp or self.is_bannerslave(i_player)
     
     def is_dps(self, i_player: int):
         return not self.is_support(i_player)
@@ -208,6 +214,19 @@ class Boss:
     
     def is_power(self, i_player: int):
         return not self.is_condi(i_player)
+
+    def is_bannerslave(self, i_player):
+        delta = self.start_date - datetime(2022,7,17,23,0,0,tzinfo=pytz.FixedOffset(60))
+        prof = self.log.pjcontent['players'][i_player]['profession']
+        if prof == "Warrior" or prof == "Berserker" and delta.total_seconds() < 0:
+            banner1 = 14449
+            banner2 = 14417
+            if self.log.pjcontent['players'][i_player].get('groupBuffs'):
+                groupBuff = self.log.pjcontent['players'][i_player]['groupBuffs']
+                for buff in groupBuff:
+                    if buff['id'] == banner1 or buff['id'] == banner2:
+                        return True
+        return False
     
     ################################ DATA JOUEUR ################################
     
@@ -381,11 +400,11 @@ class Boss:
                 return LANGUES["selected_language"]["MVP TOTAL CC P"].format(mvp_names=mvp_names, min_cc=min_cc, cc_ratio=cc_ratio)
     
     def get_bad_dps(self, extra_exclude: list[classmethod]=[]):
-        i_sup, sup_max_dmg, _ = Stats.get_max_value(self, self.get_dmg_boss, exclude=[self.is_dps])
+        i_sup, sup_max_dmg, _ = Stats.get_max_value(self, self.get_dmg_boss, exclude=[self.is_dps, self.is_bannerslave])
         sup_name              = self.players_to_string(i_sup)
         bad_dps               = []
         for i in self.player_list:   
-            if any(filter_func(i) for filter_func in extra_exclude) or self.is_dead(i) or self.is_support(i):
+            if any(filter_func(i) for filter_func in extra_exclude) or self.is_dead(i) or self.is_support(i) or self.is_bannerslave(i):
                 continue
             dps = self.get_dmg_boss(i)
             if dps < sup_max_dmg:
