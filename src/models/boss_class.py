@@ -27,6 +27,7 @@ class Boss:
         self.wingman_time       = self.get_wingman_time()
         self.wingman_percentile = self.get_wingman_percentile()
         self.real_phase_id      = self.get_phase_id(self.real_phase)
+        self.time_base          = self.get_time_base()
         self.mvp_accounts       = []
         self.lvp_accounts       = []
         for i in self.player_list:
@@ -465,7 +466,7 @@ class Boss:
                 end   = phase['end']
                 if inMilliSeconds:
                     return start, end
-                return func.time_to_index(start), func.time_to_index(end)
+                return func.time_to_index(start, self.time_base), func.time_to_index(end, self.time_base)
         raise ValueError(f'{target_phase} not found')
     
     def get_mech_value(self, i_player: int, mech_name: str, phase: str="Full Fight"):
@@ -495,7 +496,12 @@ class Boss:
         for i, phase in enumerate(phases):
             if phase["name"] == name:
                 return i
-        return 0        
+        return 0  
+    
+    def get_time_base(self):
+        delta = self.log.pjcontent["players"][0]["combatReplayData"]["end"]-self.log.pjcontent["players"][0]["combatReplayData"]["start"]
+        lpos  = len(self.log.pjcontent["players"][0]["combatReplayData"]["positions"])
+        return int(delta/lpos) 
             
     
 class Stats:

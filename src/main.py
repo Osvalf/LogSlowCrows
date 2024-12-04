@@ -29,15 +29,15 @@ def debugLog(url):
     print(boss.start_date)
     print(boss.mvp)
     print(boss.lvp)
-    ALL_BOSSES.clear()
-    ALL_PLAYERS.clear()
+    #ALL_BOSSES.clear()
+    #ALL_PLAYERS.clear()
 
 def main(input_file, **kwargs) -> None:
     urls = InputParser(input_file).validate().urls
     requests = []
     for url in urls:
         requests.append(grequests.get(url))
-        requests.append(grequests.get(DPS_REPORT_JSON_URL, params={"permalink": url}, headers=REQUEST_HEADERS))
+        requests.append(grequests.get(DPS_REPORT_JSON_URL+url, headers=REQUEST_HEADERS))
     responses = grequests.map(requests, size=2*len(urls))
     logs = [Log(url) for url in urls]
     for i in range(len(urls)):
@@ -58,6 +58,6 @@ if __name__ == "__main__":
     LANGUES["selected_language"] = LANGUES["FR"]
     args = _make_parser().parse_args()
     main(args.input, reward_mode=args.reward, debug=args.debug, language=args.language)
-    #debugLog("https://dps.report/qlAE-20231229-232739_gors")
+    #debugLog("https://dps.report/l70j-20240705-221724_xera")
     end_time = perf_counter()
     print(f"--- {end_time - start_time:.3f} seconds ---\n")

@@ -249,7 +249,7 @@ class SABETHA(Boss):
             players = self.player_list
             for bomb in bomb_history:
                 bomb_time  = bomb['time'] + 3000
-                time_index = time_to_index(bomb_time)
+                time_index = time_to_index(bomb_time, self.time_base)
                 try:
                     bomb_pos = poses[time_index]
                 except:
@@ -679,14 +679,15 @@ class XERA(Boss):
                 tp_data = e['mechanicsData']
                 break
         fdp     = []
-        delta   = 10000
-        i_delta = time_to_index(delta)
+        delta   = 6000
+        i_delta = time_to_index(delta, self.time_base)
         for e in tp_data:
             tp_time     = e['time']
+            
             player_name = e['actor']
             i_player    = self.get_player_id(player_name)
-            tp_time    += 1000  # 1s de delais pour etre sur
-            i_time      = time_to_index(tp_time)
+            tp_time    += 2000  # 1s de delais pour etre sur
+            i_time      = time_to_index(tp_time, self.time_base)
             pos_player  = self.get_player_pos(i_player, i_time, i_time + i_delta)
             for p in pos_player:
                 if get_dist(p, XERA.centre) <= XERA.centre_radius:

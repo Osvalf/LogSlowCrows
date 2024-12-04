@@ -5,8 +5,8 @@ import re
 from const import BOSS_DICT, CUSTOM_NAMES, EMOTE_WINGMAN, ALL_PLAYERS
 from languages import LANGUES
 
-def time_to_index(time: int):  # time in millisecond
-    return int(time / 300)
+def time_to_index(time: int, base):  # time in millisecond
+    return int(time / base)
 
 def get_dist(pos1: list[float], pos2: list[float]):
     x1, y1 = pos1[0], pos1[1]

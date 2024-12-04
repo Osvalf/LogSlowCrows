@@ -6,7 +6,7 @@ DEFAULT_INPUT_FILE = "src/input_logs.txt"
 
 BIG = float('inf')
 
-DPS_REPORT_JSON_URL = "https://dps.report/getJson"
+DPS_REPORT_JSON_URL = "https://dps.report/getJson?permalink="
 
 ALL_BOSSES = []
 ALL_PLAYERS = {}
