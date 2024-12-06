@@ -1545,7 +1545,7 @@ class QTP(Boss):
 class GREER(Boss):
     
     last    = None
-    name    = "GREG"
+    name    = "GREER"
     wing    = 8
     boss_id = 26725
 
@@ -1556,10 +1556,10 @@ class GREER(Boss):
         GREER.last = self
         
     def get_mvp(self):
-        pass
+        return self.get_bad_dps()
     
     def get_lvp(self):
-        pass
+        return self.get_lvp_dps()
 
     ################################ MVP ################################
     
@@ -1591,10 +1591,10 @@ class DECIMA(Boss):
         DECIMA.last = self
         
     def get_mvp(self):
-        pass
+        return self.get_bad_dps()
     
     def get_lvp(self):
-        pass
+        return self.get_lvp_dps()
 
     ################################ MVP ################################
     
@@ -1626,10 +1626,10 @@ class URA(Boss):
         GREER.last = self
         
     def get_mvp(self):
-        pass
+        return self.get_bad_dps()
     
     def get_lvp(self):
-        pass
+        return self.get_lvp_dps()
 
     ################################ MVP ################################
     

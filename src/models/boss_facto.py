@@ -34,6 +34,10 @@ _BOSS_FACTORY = {
     "adina": ADINA,
     "sabir": SABIR,
     "qpeer": QTP,
+    
+    "greer": GREER,
+    "deci" : DECIMA,
+    "ura"  : URA,
 
     #  IBS BOSSES
     "ice"  : ICE,

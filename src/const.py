@@ -41,7 +41,7 @@ BOSS_DICT = {
     22000: "qpeer",
     
     26725: "greer",
-    26774: "decima",
+    26774: "deci",
     26712: "ura",
     
     #  IBS BOSSES
