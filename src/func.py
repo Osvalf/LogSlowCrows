@@ -1,8 +1,7 @@
 import math
-from datetime import timedelta, datetime
-import re
+from datetime import timedelta
 
-from const import BOSS_DICT, CUSTOM_NAMES, EMOTE_WINGMAN, ALL_PLAYERS
+from const import CUSTOM_NAMES, EMOTE_WINGMAN, ALL_PLAYERS
 from languages import LANGUES
 
 def time_to_index(time: int, base):  # time in millisecond
@@ -26,38 +25,6 @@ def disp_time(td: timedelta):
         return f"{minutes}m{seconds:02}s"
     else:
         return f"{seconds}s"
-
-def txt_file_to_urls(filepath: str):
-    try:
-        with open(filepath, 'r') as file:
-            text = file.read()
-    except FileNotFoundError:
-        print(f"Error: File not found at {filepath}")
-        return ""
-    # Liste des mots autorisés pour le dernier segment
-    valid_terms = list(BOSS_DICT.values())
-    valid_terms.sort(key=lambda x: (len(x), x), reverse=True)
-    # RegEx pour capturer chaque lien valide, même s'ils sont collés
-    regex_full = rf"https://dps\.report/[a-zA-Z0-9]{{4}}-\d{{8}}-\d{{6}}_({'|'.join(valid_terms)})"
-
-    # Utilisation de re.finditer pour identifier toutes les correspondances
-    matches = [match.group(0) for match in re.finditer(regex_full, text)]
-
-    # Affichage des résultats
-    dupsChecker = {}
-    for match in matches:
-        end = match.split("_")[-1]
-        if dupsChecker.get(end):
-            dupsChecker[end].append(match)
-        else:
-            dupsChecker[end] = [match]
-    
-    def extract_timestamp(url):
-        timestamp_str = url.split('_')[0] # Extract the timestamp part (e.g., '20241124-205115')
-        date = timestamp_str.split('-')[1]+"-"+timestamp_str.split('-')[2]
-        return datetime.strptime(date, "%Y%m%d-%H%M%S")
-    
-    return [max(urlz, key=extract_timestamp) for urlz in dupsChecker.values()]
 
 def get_message_reward(logs: list, players: dict, titre="Run"):
     if not logs:

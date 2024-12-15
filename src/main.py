@@ -10,11 +10,13 @@ from languages import LANGUES
 from input import InputParser
 
 def _make_parser() -> ArgumentParser:
+    with open(DEFAULT_INPUT_FILE, "r") as file:
+        default_input = file.read()
     parser = ArgumentParser()
     parser.add_argument('-d', '--debug', action='store_true', required=False)
     parser.add_argument('-l', '--language', required=False, default=DEFAULT_LANGUAGE)
     parser.add_argument('-r', '--reward', action='store_true', required=False)
-    parser.add_argument('-i', '--input', required=False, default=DEFAULT_INPUT_FILE)
+    parser.add_argument('-i', '--input', required=False, default=default_input)
     return parser
 
 def debugLog(url):
@@ -32,8 +34,10 @@ def debugLog(url):
     #ALL_BOSSES.clear()
     #ALL_PLAYERS.clear()
 
-def main(input_file, **kwargs) -> None:
-    urls = InputParser(input_file).validate().urls
+def main(input_string, **kwargs) -> None:
+    input = InputParser(input_string)
+    print(input)
+    urls = input.urls
     requests = []
     for url in urls:
         requests.append(grequests.get(url))
@@ -55,9 +59,9 @@ def main(input_file, **kwargs) -> None:
 if __name__ == "__main__":
     print("Starting\n")
     start_time = perf_counter()
-    LANGUES["selected_language"] = LANGUES["EN"]
+    LANGUES["selected_language"] = LANGUES["FR"]
     args = _make_parser().parse_args()
     main(args.input, reward_mode=args.reward, debug=args.debug, language=args.language)
-    #debugLog("https://dps.report/olXX-20241201-222132_greer")
+    #debugLog("https://dps.report/i7N1-20241214-142308_frae")
     end_time = perf_counter()
     print(f"--- {end_time - start_time:.3f} seconds ---\n")
