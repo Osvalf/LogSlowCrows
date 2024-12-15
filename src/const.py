@@ -251,8 +251,5 @@ CUSTOM_NAMES = {
     "KTR.1407"              : "Zenhorr",
     "oscaro.3079"           : "Zheuja"
 }
-
-with open('wingman_updater/WINGMAN_DATA.json') as f:
-    wingman_data = json.load(f)
     
 EMOTE_WINGMAN = ":wing:"
