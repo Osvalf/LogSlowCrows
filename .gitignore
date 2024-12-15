@@ -3,4 +3,4 @@
 *.swp
 env
 /src/input logs.txt
-/src/custom_names.json
+src/custom_names.json
