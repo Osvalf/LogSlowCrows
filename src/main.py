@@ -31,6 +31,7 @@ def debugLog(url):
     print(boss.start_date)
     print(boss.mvp)
     print(boss.lvp)
+    # YES
 
 def main(input_string, **kwargs) -> None:
     input = InputParser(input_string)
@@ -51,7 +52,6 @@ def main(input_string, **kwargs) -> None:
     split_run_message = func.get_message_reward(ALL_BOSSES, ALL_PLAYERS, titre=DEFAULT_TITLE)
     for message in split_run_message:
         print(message)
-
     print("\n")
 
 if __name__ == "__main__":
