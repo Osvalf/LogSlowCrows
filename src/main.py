@@ -31,8 +31,6 @@ def debugLog(url):
     print(boss.start_date)
     print(boss.mvp)
     print(boss.lvp)
-    #ALL_BOSSES.clear()
-    #ALL_PLAYERS.clear()
 
 def main(input_string, **kwargs) -> None:
     input = InputParser(input_string)
