@@ -59,7 +59,7 @@ def main(input_string, **kwargs) -> None:
 if __name__ == "__main__":
     print("Starting\n")
     start_time = perf_counter()
-    LANGUES["selected_language"] = LANGUES["FR"]
+    LANGUES["selected_language"] = LANGUES["EN"]
     args = _make_parser().parse_args()
     main(args.input, reward_mode=args.reward, debug=args.debug, language=args.language)
     #debugLog("https://dps.report/i7N1-20241214-142308_frae")
